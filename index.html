@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clienti Fermi — Database Nazionale OSM</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --fucsia: #b3468d;
+    --fucsia-dark: #8a3570;
+    --fucsia-light: #f8ecf4;
+    --fucsia-border: rgba(179,70,141,0.25);
+    --bg: #ffffff;
+    --bg-soft: #fdf8fc;
+    --testo: #2a1122;
+    --testo-muted: #7a6b76;
+    --card-border: #eee0ea;
+    --card-shadow: 0 2px 16px rgba(179,70,141,0.08);
+    --grigio: #8a8a8a;
+    --grigio-bg: #f0f0f0;
+    --arancio: #c97a1e;
+    --arancio-bg: #fbeddb;
+    --verde: #2f9e63;
+    --verde-bg: #e3f5ec;
+    --fucsia-badge-bg: #f3d9ea;
+    --rosso: #c0392b;
+    --rosso-bg: #fdecea;
+    --blu: #3a6fb3;
+    --blu-bg: #e6eefb;
+  }
+
+  html { height: 100%; }
+  body {
+    height: 100%;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-soft);
+    color: var(--testo);
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-soft); }
+  ::-webkit-scrollbar-thumb { background: var(--fucsia-border); border-radius: 4px; }
+
+  /* ===== NAVBAR ===== */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: #fff;
+    border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: center; padding: 0 28px;
+    z-index: 1000; gap: 10px;
+    box-shadow: 0 2px 12px rgba(179,70,141,0.06);
+  }
+  .navbar-brand {
+    font-size: 1.05rem; font-weight: 800; color: var(--fucsia);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-right: auto; cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .navbar-brand span {
+    display: inline-block; width: 9px; height: 9px;
+    background: var(--fucsia); border-radius: 50%;
+    box-shadow: 0 0 8px var(--fucsia-border);
+  }
+  .navbar-logo { height: 26px; width: auto; display: block; }
+  .nav-btn {
+    background: transparent; border: 1px solid transparent;
+    color: var(--testo-muted); padding: 7px 15px; border-radius: 7px;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.03em; font-weight: 600;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--fucsia-light); border-color: var(--fucsia-border); color: var(--fucsia-dark);
+  }
+
+  .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ===== MAPPA ===== */
+  .map-wrap {
+    max-width: 1300px; margin: 0 auto; padding: 40px 24px 60px; position: relative;
+  }
+  .map-header { text-align: center; margin-bottom: 30px; }
+  .map-eyebrow {
+    font-size: 0.72rem; font-weight: 700; color: var(--fucsia);
+    letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .map-eyebrow::before, .map-eyebrow::after {
+    content: ''; display: inline-block; width: 30px; height: 1px; background: var(--fucsia-border);
+  }
+  .map-title {
+    font-size: clamp(1.7rem, 3.8vw, 2.5rem); font-weight: 800;
+    color: var(--testo); letter-spacing: 0.01em; margin-bottom: 8px; line-height: 1.15;
+  }
+  .map-title em { color: var(--fucsia-dark); font-style: normal; }
+  .map-subtitle { font-size: 0.92rem; color: var(--testo-muted); max-width: 460px; margin: 0 auto; line-height: 1.6; }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 18px;
+    font-size: 0.83rem; color: var(--testo-muted); flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
+    padding: 10px 16px; box-shadow: var(--card-shadow); width: fit-content;
+  }
+  .breadcrumb .crumb-btn {
+    background: none; border: none; color: var(--fucsia); cursor: pointer;
+    font-weight: 700; font-size: 0.83rem; padding: 2px 4px; border-radius: 5px; transition: background 0.15s;
+  }
+  .breadcrumb .crumb-btn:hover { background: var(--fucsia-light); text-decoration: none; }
+  .breadcrumb .crumb-sep { color: #d8c7d3; }
+  .breadcrumb .crumb-current { color: var(--testo); font-weight: 700; }
+
+  .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; justify-content: center; }
+  .stat-pill {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 16px 26px; text-align: center; min-width: 130px; box-shadow: var(--card-shadow);
+    transition: transform 0.22s ease, box-shadow 0.22s ease; position: relative; overflow: hidden;
+  }
+  .stat-pill::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--fucsia), var(--fucsia-dark));
+  }
+  .stat-pill:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(179,70,141,0.16); }
+  .stat-pill-value {
+    font-size: 1.7rem; font-weight: 800; line-height: 1; margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--fucsia), var(--fucsia-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .stat-pill-label { font-size: 0.68rem; color: var(--testo-muted); letter-spacing: 0.07em; text-transform: uppercase; font-weight: 700; }
+
+  .search-box-wrap { display: flex; justify-content: center; margin-bottom: 26px; }
+  .search-box { position: relative; width: 100%; max-width: 460px; }
+  .search-box::before {
+    content: '🔍'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 0.85rem; opacity: 0.55; pointer-events: none;
+  }
+  .search-input {
+    width: 100%; padding: 13px 18px 13px 42px; border-radius: 30px;
+    border: 1px solid var(--card-border); font-size: 0.9rem; outline: none;
+    background: #fff; color: var(--testo); box-shadow: var(--card-shadow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus { border-color: var(--fucsia); box-shadow: 0 4px 20px rgba(179,70,141,0.18); }
+  .search-results {
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+    background: #fff; border: 1px solid var(--card-border); border-radius: 14px;
+    box-shadow: 0 10px 32px rgba(179,70,141,0.16); max-height: 260px; overflow-y: auto; z-index: 50; display: none;
+  }
+  .search-results.show { display: block; }
+  .search-result-item { padding: 10px 18px; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; }
+  .search-result-item:hover { background: var(--fucsia-light); }
+  .search-result-item b { color: var(--fucsia-dark); }
+  .search-group-label {
+    padding: 8px 18px 5px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--testo-muted); background: var(--bg-soft);
+  }
+
+  .map-toolbar { display: flex; justify-content: center; margin-bottom: 16px; }
+
+  #mapContainerWrap {
+    position: relative; border-radius: 22px; padding: 4px;
+    background: linear-gradient(135deg, var(--fucsia-border), transparent 40%, var(--fucsia-border));
+    box-shadow: 0 16px 44px rgba(179,70,141,0.14);
+  }
+  #map {
+    width: 100%; height: 640px; border-radius: 19px; border: none;
+    background: #fff;
+  }
+  .map-loading {
+    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    background: var(--testo); color: #fff; padding: 8px 18px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; z-index: 500; box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  .leaflet-container { background: #fdf8fc; font-family: inherit; }
+  .region-tooltip, .province-tooltip {
+    background: var(--testo); color: #fff; border: none; border-radius: 6px;
+    padding: 4px 10px; font-size: 0.78rem; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .region-tooltip::before, .province-tooltip::before { display: none; }
+
+  /* Etichette permanenti dei comuni: sempre leggibili, niente riquadro, per non creare confusione visiva */
+  .comune-label {
+    background: transparent !important; border: none !important; box-shadow: none !important;
+    padding: 0 !important; color: #3a1030; font-size: 0.66rem; font-weight: 700;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 4px #fff;
+    pointer-events: none; white-space: nowrap;
+  }
+  .comune-label::before { display: none; }
+
+  .map-empty-state {
+    text-align: center; padding: 60px 24px; color: var(--testo-muted);
+    background: #fff; border-radius: 18px; border: 1px dashed var(--fucsia-border);
+  }
+  .map-empty-state-icon { font-size: 2.6rem; margin-bottom: 14px; }
+  .map-empty-state a.btn-primary { text-decoration: none; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px;
+    border-radius: 9px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    border: none; transition: all 0.2s; letter-spacing: 0.02em;
+  }
+  .btn-primary { background: var(--fucsia); color: #fff; }
+  .btn-primary:hover { background: var(--fucsia-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(179,70,141,0.3); }
+  .btn-outline { background: transparent; color: var(--fucsia); border: 1px solid var(--fucsia-border); }
+  .btn-outline:hover { background: var(--fucsia-light); border-color: var(--fucsia); }
+
+  /* ===== SEZIONE GENERICA ===== */
+  .section-wrap { max-width: 1300px; margin: 0 auto; padding: 40px 24px 60px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .section-title {
+    font-size: 1.5rem; font-weight: 800; color: var(--testo); display: flex; align-items: center; gap: 12px;
+    position: relative; padding-left: 16px;
+  }
+  .section-title::before {
+    content: ''; position: absolute; left: 0; top: 2px; bottom: 2px; width: 4px;
+    border-radius: 3px; background: linear-gradient(180deg, var(--fucsia), var(--fucsia-dark));
+  }
+  .section-title span { color: var(--fucsia-dark); }
+  .section-subtitle { font-size: 0.83rem; color: var(--testo-muted); margin-top: 5px; }
+
+  .card {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 24px 26px; box-shadow: var(--card-shadow); margin-bottom: 20px;
+    transition: box-shadow 0.2s;
+  }
+
+  /* ===== CRUSCOTTO DI CONTROLLO ===== */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 18px 20px; box-shadow: var(--card-shadow); position: relative; overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--fucsia), var(--fucsia-dark));
+  }
+  .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(179,70,141,0.16); }
+  .kpi-value {
+    font-size: 1.9rem; font-weight: 800; line-height: 1; margin-bottom: 7px;
+    background: linear-gradient(135deg, var(--fucsia), var(--fucsia-dark));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .kpi-label { font-size: 0.7rem; color: var(--testo-muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+  .kpi-card.kpi-alert .kpi-value { background: linear-gradient(135deg, var(--rosso), #a52f22); -webkit-background-clip: text; background-clip: text; }
+  .kpi-card.kpi-neutral .kpi-value { background: linear-gradient(135deg, var(--grigio), #6a6a6a); -webkit-background-clip: text; background-clip: text; }
+
+  .cruscotto-subtable-title { font-size: 1.02rem; font-weight: 800; color: var(--testo); margin: 30px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .num-cell { font-weight: 800; color: var(--fucsia-dark); }
+  .num-cell.zero { color: var(--testo-muted); font-weight: 600; }
+  .num-cell.alert { color: var(--rosso); }
+
+  /* ===== GRAFICI CRUSCOTTO ===== */
+  .chart-card { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; padding: 24px 26px; box-shadow: var(--card-shadow); margin-bottom: 10px; }
+  .chart-card-pie { max-width: 480px; margin: 0 auto; }
+  .chart-canvas-wrap { position: relative; height: 340px; }
+  .chart-canvas-wrap.short { height: 300px; }
+  .chart-hint { font-size: 0.78rem; color: var(--testo-muted); margin-top: 14px; line-height: 1.55; }
+  .chart-empty { text-align: center; padding: 40px 20px; color: var(--testo-muted); font-size: 0.85rem; }
+
+  .stato-legend-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 22px; }
+
+  .mini-pie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .mini-pie-card { background: #fff; border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; box-shadow: var(--card-shadow); text-align: center; }
+  .mini-pie-name { font-size: 0.82rem; font-weight: 700; color: var(--testo); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini-pie-count { font-size: 0.7rem; color: var(--testo-muted); margin-bottom: 10px; }
+  .mini-pie-canvas-wrap { position: relative; height: 140px; }
+  .mini-pie-dual { display: flex; gap: 12px; }
+  .mini-pie-col { flex: 1; min-width: 0; }
+  .mini-pie-col-label { font-size: 0.62rem; color: var(--testo-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px; }
+  .mini-pie-canvas-wrap.small { height: 96px; }
+
+  /* ===== TUTORIAL ===== */
+  .tutorial-intro {
+    background: linear-gradient(135deg, var(--fucsia), var(--fucsia-dark)); color: #fff;
+    border-radius: 18px; padding: 28px 30px; margin-bottom: 28px;
+    box-shadow: 0 10px 30px rgba(179,70,141,0.22);
+  }
+  .tutorial-intro-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; }
+  .tutorial-intro-text { font-size: 0.88rem; line-height: 1.6; opacity: 0.95; max-width: 720px; }
+
+  .tutorial-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; }
+  .tutorial-step {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 20px 24px; box-shadow: var(--card-shadow); display: flex; gap: 18px; align-items: flex-start;
+  }
+  .tutorial-step-num {
+    flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%;
+    background: var(--fucsia-light); color: var(--fucsia-dark); font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; border: 1px solid var(--fucsia-border);
+  }
+  .tutorial-step-title { font-size: 0.96rem; font-weight: 800; color: var(--testo); margin-bottom: 5px; }
+  .tutorial-step-text { font-size: 0.85rem; color: var(--testo-muted); line-height: 1.65; }
+  .tutorial-step-text b { color: var(--testo); }
+  .tutorial-step-text code {
+    background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 5px;
+    padding: 1px 7px; font-size: 0.82em; color: var(--fucsia-dark); font-family: Consolas, monospace;
+  }
+
+  .tutorial-legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 10px; }
+  .tutorial-legend-item {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .tutorial-legend-item .badge { align-self: flex-start; }
+  .tutorial-legend-item span.desc { font-size: 0.8rem; color: var(--testo-muted); line-height: 1.5; }
+
+  .tutorial-tip {
+    display: flex; gap: 12px; align-items: flex-start; background: var(--fucsia-light);
+    border: 1px solid var(--fucsia-border); border-radius: 14px; padding: 16px 20px; margin-top: 10px;
+  }
+  .tutorial-tip-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .tutorial-tip-text { font-size: 0.84rem; color: var(--testo); line-height: 1.6; }
+
+  /* ===== TABELLA CONTATTI ===== */
+  .filters-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; align-items: flex-end; }
+  .filter-group { display: flex; flex-direction: column; gap: 5px; }
+  .filter-label { font-size: 0.68rem; color: var(--testo-muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+  .filter-select, .filter-input {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 8px 12px; border-radius: 8px; font-size: 0.83rem; outline: none; min-width: 170px;
+  }
+  .filter-select:focus, .filter-input:focus { border-color: var(--fucsia); }
+
+  .table-wrap { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 1180px; }
+  thead tr { background: var(--fucsia-light); border-bottom: 1px solid var(--fucsia-border); }
+  th { padding: 13px 14px; text-align: left; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--fucsia-dark); white-space: nowrap; }
+  td { padding: 12px 14px; font-size: 0.85rem; border-bottom: 1px solid #f3ecf1; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover td { background: #fdf6fb; }
+  td.ragione-sociale { font-weight: 700; color: var(--testo); }
+  td a { color: var(--fucsia); text-decoration: none; }
+  td a:hover { text-decoration: underline; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+  .badge-stato-daassegnare { background: var(--grigio-bg); color: var(--grigio); }
+  .badge-stato-assegnato { background: var(--fucsia-badge-bg); color: var(--fucsia-dark); }
+  .badge-stato-intrattativa { background: var(--arancio-bg); color: var(--arancio); }
+  .badge-stato-riattivato { background: var(--verde-bg); color: var(--verde); }
+  .badge-stato-incontattoconaltroconsulente { background: var(--blu-bg); color: var(--blu); }
+  .badge-warning { background: #fdecea; color: #c0392b; font-size: 0.68rem; padding: 2px 8px; }
+
+  .badge-fase-attivo { background: var(--verde-bg); color: var(--verde); }
+  .badge-fase-fermo { background: var(--grigio-bg); color: var(--grigio); }
+  .badge-fase-bloccato { background: var(--rosso-bg); color: var(--rosso); }
+  .badge-fase-ingestione { background: var(--arancio-bg); color: var(--arancio); }
+  .badge-fase-imprenditorenonseisolo { background: var(--blu-bg); color: var(--blu); }
+
+  .td-select {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 6px 9px; border-radius: 8px; font-size: 0.8rem; outline: none;
+    cursor: pointer; min-width: 150px; font-family: inherit;
+  }
+  .td-select:focus { border-color: var(--fucsia); }
+  .td-select.sel-stato-daassegnare { color: var(--grigio); }
+  .td-select.sel-stato-assegnato { color: var(--fucsia-dark); }
+  .td-select.sel-stato-intrattativa { color: var(--arancio); }
+  .td-select.sel-stato-riattivato { color: var(--verde); }
+  .td-select.sel-stato-incontattoconaltroconsulente { color: var(--blu); }
+  .td-select.sel-fase-attivo { color: var(--verde); }
+  .td-select.sel-fase-fermo { color: var(--grigio); }
+  .td-select.sel-fase-bloccato { color: var(--rosso); }
+  .td-select.sel-fase-ingestione { color: var(--arancio); }
+  .td-select.sel-fase-imprenditorenonseisolo { color: var(--blu); }
+  .td-vecchio-consulente { color: var(--testo-muted); font-size: 0.82rem; }
+  .td-date-input {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 6px 9px; border-radius: 8px; font-size: 0.78rem; outline: none;
+    font-family: inherit; min-width: 128px;
+  }
+  .td-date-input:focus { border-color: var(--fucsia); }
+  .td-date-empty { color: var(--testo-muted); font-size: 0.7rem; font-style: italic; }
+
+  .file-import-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .file-import-label {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  }
+  .file-import-name { font-size: 0.8rem; color: var(--testo-muted); }
+
+  details.alt-method { margin-top: 4px; }
+  details.alt-method summary {
+    cursor: pointer; font-size: 0.82rem; font-weight: 700; color: var(--fucsia); list-style: none;
+    display: flex; align-items: center; gap: 6px; user-select: none;
+  }
+  details.alt-method summary::-webkit-details-marker { display: none; }
+  details.alt-method[open] summary { margin-bottom: 14px; }
+
+  .empty-state { text-align: center; padding: 50px 24px; color: var(--testo-muted); }
+  .empty-state-icon { font-size: 2.4rem; margin-bottom: 12px; opacity: 0.5; }
+
+  /* ===== CONSULENTI ===== */
+  .consulenti-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .consulente-tag {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border); color: var(--fucsia-dark);
+    padding: 7px 14px; border-radius: 20px; font-size: 0.83rem; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .consulente-tag-remove { cursor: pointer; opacity: 0.6; font-weight: 800; }
+  .consulente-tag-remove:hover { opacity: 1; }
+  .consulente-add-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .consulente-add-row input { flex: 1; min-width: 220px; }
+
+  /* ===== UTENTI ===== */
+  .utente-add-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 16px;
+  }
+  .td-ruolo-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+  }
+  .td-ruolo-superadmin { background: var(--fucsia-badge-bg); color: var(--fucsia-dark); }
+  .td-ruolo-direzione { background: var(--blu-bg); color: var(--blu); }
+  .td-ruolo-consulente { background: var(--verde-bg); color: var(--verde); }
+  .td-password-input {
+    background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 6px;
+    padding: 5px 8px; font-size: 0.8rem; width: 130px; font-family: Consolas, monospace;
+  }
+  .icon-btn {
+    background: transparent; border: 1px solid var(--card-border); border-radius: 6px;
+    cursor: pointer; padding: 5px 8px; font-size: 0.85rem; margin-right: 4px;
+  }
+  .icon-btn:hover { background: var(--fucsia-light); border-color: var(--fucsia-border); }
+  .icon-btn.danger:hover { background: var(--rosso-bg); border-color: var(--rosso); }
+
+  /* ===== IMPOSTAZIONI ===== */
+  .settings-field { margin-bottom: 18px; }
+  .settings-label { font-size: 0.8rem; font-weight: 700; color: var(--testo); margin-bottom: 6px; display: block; }
+  .settings-hint { font-size: 0.78rem; color: var(--testo-muted); margin-top: 6px; line-height: 1.5; }
+  .settings-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 0.85rem; outline: none; }
+  .settings-input:focus { border-color: var(--fucsia); }
+  .status-line { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--testo-muted); margin-top: 14px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grigio); }
+  .status-dot.ok { background: var(--verde); }
+  .status-dot.err { background: #c0392b; }
+
+  /* ===== LOGIN ===== */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 32px; position: relative; overflow: hidden;
+    background:
+      radial-gradient(ellipse 700px 500px at 12% 8%, rgba(179,70,141,0.14) 0%, transparent 60%),
+      radial-gradient(ellipse 900px 700px at 100% 100%, rgba(179,70,141,0.10) 0%, transparent 55%),
+      linear-gradient(160deg, #fff 0%, var(--bg-soft) 55%, #fdf2f9 100%);
+  }
+  .login-wrap::before, .login-wrap::after {
+    content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(179,70,141,0.16) 0%, transparent 70%);
+  }
+  .login-wrap::before { width: 520px; height: 520px; top: -180px; left: -160px; }
+  .login-wrap::after { width: 420px; height: 420px; bottom: -160px; right: -120px; }
+
+  .login-shell {
+    position: relative; z-index: 1; width: 100%; max-width: 920px;
+    display: grid; grid-template-columns: 1.05fr 1fr; align-items: stretch;
+    background: #fff; border-radius: 26px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(179,70,141,0.16), 0 2px 10px rgba(179,70,141,0.06);
+    border: 1px solid var(--card-border);
+  }
+  .login-brand-panel {
+    background:
+      radial-gradient(ellipse 480px 380px at 20% 0%, rgba(255,255,255,0.16) 0%, transparent 60%),
+      linear-gradient(155deg, var(--fucsia) 0%, var(--fucsia-dark) 100%);
+    padding: 52px 44px; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; gap: 26px; text-align: center; color: #fff; position: relative;
+  }
+  .login-brand-logo {
+    width: 168px; max-width: 70%; background: #fff; border-radius: 20px;
+    padding: 18px; box-shadow: 0 10px 34px rgba(42,17,34,0.28);
+  }
+  .login-brand-logo img { width: 100%; height: auto; display: block; }
+  .login-brand-heading { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.01em; line-height: 1.3; }
+  .login-brand-sub { font-size: 0.85rem; opacity: 0.92; line-height: 1.6; max-width: 300px; }
+  .login-brand-tagline {
+    margin-top: 4px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; opacity: 0.85;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .login-brand-tagline::before, .login-brand-tagline::after {
+    content: ''; display: inline-block; width: 26px; height: 1px; background: rgba(255,255,255,0.55);
+  }
+
+  .login-form-panel { padding: 52px 44px; display: flex; flex-direction: column; justify-content: center; }
+  .login-card { width: 100%; max-width: 360px; margin: 0 auto; }
+  .login-title { font-size: 1.5rem; font-weight: 800; color: var(--testo); text-align: left; margin-bottom: 4px; }
+  .login-subtitle { font-size: 0.85rem; color: var(--testo-muted); text-align: left; margin-bottom: 30px; }
+
+  @media (max-width: 760px) {
+    .login-shell { grid-template-columns: 1fr; }
+    .login-brand-panel { padding: 40px 30px 32px; }
+    .login-form-panel { padding: 36px 28px 44px; }
+    .login-brand-logo { width: 130px; }
+  }
+  .role-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .role-card {
+    display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+    border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .role-card:hover { border-color: var(--fucsia-border); background: var(--fucsia-light); }
+  .role-card.sel { border-color: var(--fucsia); background: var(--fucsia-light); }
+  .role-card-icon { font-size: 1.3rem; }
+  .role-card-title { font-weight: 700; font-size: 0.88rem; color: var(--testo); }
+  .role-card-desc { font-size: 0.74rem; color: var(--testo-muted); }
+  .login-error {
+    background: var(--rosso-bg); color: var(--rosso); padding: 9px 14px; border-radius: 8px;
+    font-size: 0.8rem; margin-top: 12px; display: none;
+  }
+  .login-error.show { display: block; }
+
+  /* ===== NAVBAR RUOLO ===== */
+  .role-badge {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border); color: var(--fucsia-dark);
+    padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+  }
+
+  .col-headers-example {
+    background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 14px 18px; font-size: 0.78rem; color: var(--testo); margin-top: 8px;
+    font-family: Consolas, monospace; overflow-x: auto; white-space: nowrap;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; background: var(--testo); color: #fff;
+    padding: 12px 20px; border-radius: 10px; font-size: 0.83rem; z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25); transform: translateY(60px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 720px) {
+    #map { height: 480px; }
+    .navbar { padding: 0 14px; }
+    .nav-btn { padding: 6px 10px; font-size: 0.76rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="navbar" id="navbar" style="display:none;">
+  <div class="navbar-brand" onclick="goHome()"><img class="navbar-logo" src="Logo OSM Partner/logo osm partner.png" alt="OSM Partner">Clienti Fermi</div>
+  <button class="nav-btn active" data-nav="mappa" onclick="showPage('mappa')">Mappa</button>
+  <button class="nav-btn" data-nav="database" onclick="showPage('database')">Database</button>
+  <button class="nav-btn" data-nav="tutorial" onclick="showPage('tutorial')">Tutorial</button>
+  <button class="nav-btn" data-nav="consulenti" onclick="showPage('consulenti')">Utenti</button>
+  <button class="nav-btn" data-nav="cruscotto" onclick="showPage('cruscotto')">Cruscotto</button>
+  <button class="nav-btn" data-nav="impostazioni" onclick="showPage('impostazioni')">Impostazioni</button>
+  <span class="role-badge" id="roleBadge"></span>
+  <button class="nav-btn" onclick="eseguiLogout()">Esci</button>
+</div>
+
+<!-- ===== PAGINA LOGIN ===== -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-shell">
+      <div class="login-brand-panel">
+        <div class="login-brand-logo">
+          <img src="Logo OSM Partner/logo osm partner.png" alt="OSM Partner">
+        </div>
+        <div class="login-brand-heading">Database Clienti Fermi</div>
+        <div class="login-brand-sub">La mappa nazionale dei clienti fermi OSM Partner Bologna: assegnazioni, stati e fasi cliente in un unico posto.</div>
+        <div class="login-brand-tagline">OSM Partner Bologna</div>
+      </div>
+      <div class="login-form-panel">
+        <div class="login-card">
+          <div class="login-title">Bentornato</div>
+          <div class="login-subtitle">Accedi con la tua email e password</div>
+          <div class="settings-field">
+            <label class="settings-label">Email</label>
+            <input type="email" class="settings-input" id="loginEmailInput" placeholder="nome@osmpartnerbologna.it" onkeydown="if(event.key==='Enter') document.getElementById('loginPasswordInput').focus()">
+          </div>
+          <div class="settings-field">
+            <label class="settings-label">Password</label>
+            <input type="password" class="settings-input" id="loginPasswordInput" onkeydown="if(event.key==='Enter') eseguiLogin()">
+          </div>
+          <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="eseguiLogin()">Entra</button>
+          <div class="login-error" id="loginError">Email o password non corretti.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA MAPPA ===== -->
+<div class="page" id="page-mappa">
+  <div class="map-wrap">
+    <div class="map-header">
+      <div class="map-eyebrow">OSM Partner Bologna</div>
+      <div class="map-title">Database <em>Clienti Fermi</em></div>
+      <div class="map-subtitle">Seleziona una regione, poi una provincia, per vedere i contatti</div>
+    </div>
+
+    <div style="display:flex; justify-content:center;">
+      <div class="breadcrumb" id="breadcrumb">
+        <span class="crumb-current">Italia</span>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="search-box-wrap">
+      <div class="search-box">
+        <input type="text" class="search-input" id="searchProvincia" placeholder="Cerca una provincia o un comune (es. Bologna, Imola)..." autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+
+    <div class="map-toolbar">
+      <button class="btn btn-primary" id="btnVediProvincia" style="display:none;" onclick="apriProvincia(currentProvincia)">Vedi tutti i clienti della provincia →</button>
+    </div>
+
+    <div id="mapContainerWrap">
+      <div id="map"></div>
+      <div class="map-loading" id="mapLoading" style="display:none;"></div>
+    </div>
+
+    <div class="map-empty-state" id="emptyStateNoData" style="display:none; margin-top:20px;">
+      <div class="map-empty-state-icon">📋</div>
+      <div style="font-weight:700; margin-bottom:8px;">Nessun dato caricato</div>
+      <div style="margin-bottom:18px;">Collega il foglio Google con i clienti fermi per iniziare.</div>
+      <a href="#" class="btn btn-primary" onclick="showPage('impostazioni'); return false;">Vai alle Impostazioni</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA PROVINCIA (contatti) ===== -->
+<div class="page" id="page-provincia">
+  <div class="section-wrap">
+    <div class="breadcrumb" id="breadcrumbProvincia"></div>
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span id="provinciaNomeTitolo"></span></div>
+        <div class="section-subtitle" id="provinciaContatore"></div>
+      </div>
+      <button class="btn btn-outline" onclick="tornaAllaMappa()">← Torna alla mappa</button>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Consulente</label>
+        <select class="filter-select" id="filtroConsulente" onchange="renderTabellaProvincia()"></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Stato</label>
+        <select class="filter-select" id="filtroStato" onchange="renderTabellaProvincia()">
+          <option value="">Tutti</option>
+          <option value="Da assegnare">Da assegnare</option>
+          <option value="Assegnato">Assegnato</option>
+          <option value="In trattativa">In trattativa</option>
+          <option value="In contatto con altro consulente">In contatto con altro consulente</option>
+          <option value="Riattivato">Riattivato</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Fase Cliente</label>
+        <select class="filter-select" id="filtroFase" onchange="renderTabellaProvincia()">
+          <option value="">Tutte</option>
+          <option value="Attivo">Attivo</option>
+          <option value="Fermo">Fermo</option>
+          <option value="Bloccato">Bloccato</option>
+          <option value="In Gestione">In Gestione</option>
+          <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;">
+        <label class="filter-label">Cerca azienda / referente</label>
+        <input type="text" class="filter-input" id="filtroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderTabellaProvincia()">
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="tabellaProvincia">
+          <thead>
+            <tr>
+              <th>Ragione Sociale</th>
+              <th>Referente</th>
+              <th>Contatto</th>
+              <th>Email</th>
+              <th>Provincia</th>
+              <th>Comune</th>
+              <th>Vecchio Consulente</th>
+              <th>Consulente Assegnato</th>
+              <th>Stato</th>
+              <th>Fase Cliente</th>
+              <th>Ultimo Contatto</th>
+            </tr>
+          </thead>
+          <tbody id="tabellaProvinciaBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="provinciaEmptyState" style="display:none;">
+        <div class="empty-state-icon">🗂️</div>
+        <div>Nessun cliente fermo registrato per questa provincia.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA DATABASE ===== -->
+<div class="page" id="page-database">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Database</span></div>
+        <div class="section-subtitle" id="databaseContatore">Tutti i clienti fermi</div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group" id="dbFiltroConsulenteWrap">
+        <label class="filter-label">Consulente Assegnato</label>
+        <select class="filter-select" id="dbFiltroConsulente" onchange="renderDatabase()"></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Provincia</label>
+        <select class="filter-select" id="dbFiltroProvincia" onchange="renderDatabase()"></select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Comune</label>
+        <input type="text" class="filter-input" id="dbFiltroComune" placeholder="Digita un comune..." oninput="renderDatabase()">
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Stato</label>
+        <select class="filter-select" id="dbFiltroStato" onchange="renderDatabase()">
+          <option value="">Tutti</option>
+          <option value="Da assegnare">Da assegnare</option>
+          <option value="Assegnato">Assegnato</option>
+          <option value="In trattativa">In trattativa</option>
+          <option value="In contatto con altro consulente">In contatto con altro consulente</option>
+          <option value="Riattivato">Riattivato</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Fase Cliente</label>
+        <select class="filter-select" id="dbFiltroFase" onchange="renderDatabase()">
+          <option value="">Tutte</option>
+          <option value="Attivo">Attivo</option>
+          <option value="Fermo">Fermo</option>
+          <option value="Bloccato">Bloccato</option>
+          <option value="In Gestione">In Gestione</option>
+          <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;">
+        <label class="filter-label">Cerca azienda / referente</label>
+        <input type="text" class="filter-input" id="dbFiltroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderDatabase()">
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="tabellaDatabase">
+          <thead>
+            <tr>
+              <th>Ragione Sociale</th>
+              <th>Referente</th>
+              <th>Contatto</th>
+              <th>Email</th>
+              <th>Provincia</th>
+              <th>Comune</th>
+              <th>Vecchio Consulente</th>
+              <th>Consulente Assegnato</th>
+              <th>Stato</th>
+              <th>Fase Cliente</th>
+              <th>Ultimo Contatto</th>
+            </tr>
+          </thead>
+          <tbody id="databaseBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="databaseEmptyState" style="display:none;">
+        <div class="empty-state-icon">🗂️</div>
+        <div>Nessun cliente fermo trovato con questi filtri.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA TUTORIAL ===== -->
+<div class="page" id="page-tutorial">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Tutorial</span>&nbsp;— come funziona il portale</div>
+        <div class="section-subtitle">Una guida rapida per orientarti tra mappa, database e aggiornamento dei clienti</div>
+      </div>
+    </div>
+
+    <div class="tutorial-intro">
+      <div class="tutorial-intro-title">👋 Benvenuto nel portale Clienti Fermi</div>
+      <div class="tutorial-intro-text">
+        Questo strumento raccoglie tutti i clienti fermi di OSM Partner Bologna in un'unica mappa d'Italia.
+        Da qui puoi cercare un'azienda, vedere a chi è assegnata, aggiornarne lo stato e segnare quando l'hai
+        contattata l'ultima volta. Segui i passaggi qui sotto: bastano pochi minuti per prendere confidenza.
+      </div>
+    </div>
+
+    <div class="tutorial-tip" id="tutorialNotaConsulente" style="display:none; margin-bottom:24px;">
+      <div class="tutorial-tip-icon">👤</div>
+      <div class="tutorial-tip-text">
+        <b>Nota per il tuo account Consulente:</b> in mappa, in Database e in tutte le tabelle del portale vedrai
+        <b>soltanto i clienti fermi assegnati a te</b> — non l'intero database nazionale. Se cerchi un'azienda
+        e non la trovi, probabilmente non è (ancora) assegnata al tuo nome: contatta Direzione Vendite o il
+        Super Admin se pensi manchi un tuo cliente.
+      </div>
+    </div>
+
+    <div class="tutorial-steps">
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">1</div>
+        <div>
+          <div class="tutorial-step-title">🗺️ Muoviti sulla mappa</div>
+          <div class="tutorial-step-text">
+            Dalla pagina <b>Mappa</b> (la prima che vedi dopo l'accesso) clicca su una <b>regione</b> per aprirla:
+            vedrai le sue province. Clicca su una <b>provincia</b> per vedere i suoi comuni. Ogni comune mostra tra
+            parentesi quanti clienti fermi contiene, così sai subito dove guardare. Puoi sempre tornare indietro
+            usando il percorso in alto (es. <code>Italia › Emilia-Romagna › Bologna</code>).
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">2</div>
+        <div>
+          <div class="tutorial-step-title">🔍 Cerca velocemente</div>
+          <div class="tutorial-step-text">
+            Non serve navigare la mappa a mano: usa la <b>barra di ricerca</b> sopra la mappa e digita il nome
+            di una provincia o di un comune. Clicca sul risultato per aprirlo direttamente.
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">3</div>
+        <div>
+          <div class="tutorial-step-title">📋 Apri l'elenco clienti</div>
+          <div class="tutorial-step-text">
+            Cliccando su un comune (o su <b>"Vedi tutti i clienti della provincia"</b>) si apre una tabella con
+            tutti i clienti fermi di quella zona: ragione sociale, referente, contatti, stato e fase. Puoi anche
+            usare la pagina <b>Database</b> in alto per vedere <b>tutti</b> i clienti fermi in un'unica tabella,
+            con filtri per provincia, comune, stato e fase.
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">4</div>
+        <div>
+          <div class="tutorial-step-title">✏️ Aggiorna un cliente</div>
+          <div class="tutorial-step-text">
+            In ogni riga della tabella puoi cambiare direttamente da menu a tendina lo <b>Stato</b> e la
+            <b>Fase Cliente</b>, e impostare la data dell'<b>Ultimo Contatto</b> avuto con quel cliente
+            (clicca sul campo data e scegli il giorno). Ogni modifica si salva automaticamente — vedrai
+            comparire un messaggio "Modifica salvata" in basso a destra.
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">5</div>
+        <div>
+          <div class="tutorial-step-title">📅 Perché segnare l'ultimo contatto</div>
+          <div class="tutorial-step-text">
+            Segnare la data dell'ultimo contatto aiuta te e la Direzione a capire quali clienti non vengono
+            richiamati da tempo. Aggiornala ogni volta che senti o incontri il cliente: è un'informazione
+            semplice ma preziosa per non perdere occasioni.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:8px;">
+      <div>
+        <div class="section-title"><span>Legenda</span>&nbsp;— cosa significano Stato e Fase</div>
+        <div class="section-subtitle">Usa questi valori in modo coerente: aiutano tutto il team a capire a colpo d'occhio la situazione</div>
+      </div>
+    </div>
+
+    <div class="tutorial-legend-grid">
+      <div class="tutorial-legend-item"><span class="badge badge-stato-daassegnare">Da assegnare</span><span class="desc">Cliente non ancora affidato a nessun consulente.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-assegnato">Assegnato</span><span class="desc">Cliente affidato a un consulente, ma non ancora ricontattato.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-intrattativa">In trattativa</span><span class="desc">È in corso una trattativa attiva con il cliente.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-riattivato">Riattivato</span><span class="desc">Il cliente, prima fermo, è tornato attivo.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-incontattoconaltroconsulente">In contatto con altro consulente</span><span class="desc">Il cliente sta parlando con un consulente diverso da quello assegnato.</span></div>
+    </div>
+    <div class="tutorial-legend-grid">
+      <div class="tutorial-legend-item"><span class="badge badge-fase-attivo">Attivo</span><span class="desc">Cliente attualmente in erogazione/collaborazione attiva.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-fermo">Fermo</span><span class="desc">Cliente storico non più attivo, potenziale da riattivare.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-ingestione">In Gestione</span><span class="desc">Il consulente lo sta seguendo, percorso in corso di definizione.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-bloccato">Bloccato</span><span class="desc">Situazione ferma per un motivo esterno (es. cliente irraggiungibile).</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-imprenditorenonseisolo">Imprenditore non sei Solo</span><span class="desc">Cliente inserito nel percorso dedicato "Imprenditore non sei Solo".</span></div>
+    </div>
+
+    <div class="tutorial-tip">
+      <div class="tutorial-tip-icon">💡</div>
+      <div class="tutorial-tip-text">
+        <b>Consiglio:</b> ogni volta che chiami o incontri un cliente fermo, apri la sua riga nel Database,
+        aggiorna Stato e Fase se sono cambiati, e imposta la data di oggi come Ultimo Contatto. In due minuti
+        il portale resta sempre aggiornato per tutto il team.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA UTENTI ===== -->
+<div class="page" id="page-consulenti">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Utenti</span></div>
+        <div class="section-subtitle" id="utentiSubtitle">Account di accesso al portale</div>
+      </div>
+    </div>
+
+    <div class="card" id="utentiAddCard">
+      <div class="settings-label" style="margin-bottom:10px;">Crea nuovo account</div>
+      <div class="utente-add-grid">
+        <div class="settings-field">
+          <label class="settings-label">Nome e cognome</label>
+          <input type="text" class="settings-input" id="nuovoUtenteNome" placeholder="Es. Mario Rossi">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Email</label>
+          <input type="email" class="settings-input" id="nuovoUtenteEmail" placeholder="mario.rossi@osmpartnerbologna.it">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Password</label>
+          <input type="text" class="settings-input" id="nuovoUtentePassword" placeholder="Scegli una password">
+        </div>
+        <div class="settings-field" id="nuovoUtenteRuoloWrap">
+          <label class="settings-label">Ruolo</label>
+          <select class="settings-input" id="nuovoUtenteRuolo">
+            <option value="direzione">Direzione Vendite</option>
+            <option value="consulente">Consulente</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="aggiungiUtente()">+ Crea account</button>
+      <div class="settings-hint" style="margin-top:12px;">
+        Dopo la creazione potrai aprire un'email già pronta con nome e password da inviare alla persona
+        (il portale non può inviare email da solo: prepara il messaggio, ma la spedizione la fai tu dal tuo client di posta).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="tabellaUtenti">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Ruolo</th>
+                <th>Password</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="utentiBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="utentiEmptyState" style="display:none;">
+          <div class="empty-state-icon">👤</div>
+          <div>Nessun account creato.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA CRUSCOTTO DI CONTROLLO ===== -->
+<div class="page" id="page-cruscotto">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Cruscotto</span>&nbsp;di controllo</div>
+        <div class="section-subtitle" id="cruscottoSubtitle">Riepilogo generale e per consulente di tutti i clienti fermi</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="cruscottoKpiGrid"></div>
+
+    <div class="cruscotto-subtable-title">🥧 Ripartizione clienti tra consulenti</div>
+    <div class="chart-card chart-card-pie">
+      <div class="chart-canvas-wrap short">
+        <canvas id="chartRipartizione"></canvas>
+      </div>
+      <div id="chartRipartizioneEmpty" class="chart-empty" style="display:none;">Nessun cliente fermo caricato.</div>
+    </div>
+
+    <div class="cruscotto-subtable-title">📋 Riepilogo per consulente</div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="tabellaCruscotto" style="min-width:1080px;">
+          <thead>
+            <tr>
+              <th>Consulente</th>
+              <th>Assegnati</th>
+              <th>Riattivati</th>
+              <th>In Trattativa</th>
+              <th>Attivi</th>
+              <th>Fermi</th>
+              <th>In Gestione</th>
+              <th>Bloccati</th>
+              <th>Mai Contattati</th>
+              <th>Ultimo Contatto Registrato</th>
+            </tr>
+          </thead>
+          <tbody id="cruscottoBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="cruscottoEmptyState" style="display:none;">
+        <div class="empty-state-icon">📊</div>
+        <div>Nessun cliente ancora assegnato a un consulente.</div>
+      </div>
+    </div>
+
+    <div class="cruscotto-subtable-title">📈 Andamento nel tempo</div>
+    <div class="chart-card">
+      <div class="filters-bar" style="margin-bottom:6px;">
+        <div class="filter-group">
+          <label class="filter-label">Dato mostrato</label>
+          <select class="filter-select" id="filtroMetricaTrend" onchange="renderGraficoTrend()">
+            <option value="assegnato">Contatti assegnati</option>
+            <option value="in_trattativa">Contatti in trattativa</option>
+            <option value="contatto">Contatti fatti</option>
+            <option value="riattivato">Contatti riattivati</option>
+            <option value="in_gestione">Passati "In Gestione"</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Vista</label>
+          <select class="filter-select" id="filtroGranularitaTrend" onchange="renderGraficoTrend()">
+            <option value="mese">Per mese</option>
+            <option value="settimana">Per settimana</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Anno</label>
+          <select class="filter-select" id="filtroAnnoTrend" onchange="renderGraficoTrend()"></select>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="chartTrend"></canvas>
+      </div>
+      <div id="chartTrendEmpty" class="chart-empty" style="display:none;">Nessun dato ancora registrato per questo periodo.</div>
+      <div class="chart-hint">Clicca su un nome nella legenda per nascondere/mostrare momentaneamente la sua linea. I dati storici iniziano ad accumularsi da quando si aggiornano i clienti dal portale: le variazioni avvenute prima di oggi non sono disponibili.</div>
+    </div>
+
+    <div class="cruscotto-subtable-title">🥯 Divisione stato clienti per consulente</div>
+    <div class="stato-legend-row">
+      <span class="badge badge-stato-daassegnare">Da assegnare</span>
+      <span class="badge badge-stato-assegnato">Assegnato</span>
+      <span class="badge badge-stato-intrattativa">In trattativa</span>
+      <span class="badge badge-stato-incontattoconaltroconsulente">In contatto con altro consulente</span>
+      <span class="badge badge-stato-riattivato">Riattivato</span>
+    </div>
+    <div class="stato-legend-row" style="margin-bottom:18px;">
+      <span class="badge" style="background:#e3f5ec; color:#2f9e63;">● Contattato</span>
+      <span class="badge" style="background:#fdecea; color:#c0392b;">● Non contattato</span>
+    </div>
+    <div class="mini-pie-grid" id="miniPieGrid"></div>
+    <div id="miniPieEmpty" class="chart-empty" style="display:none;">Nessun consulente con clienti assegnati.</div>
+  </div>
+</div>
+
+<!-- ===== PAGINA IMPOSTAZIONI ===== -->
+<div class="page" id="page-impostazioni">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Impostazioni</span></div>
+        <div class="section-subtitle">Importa i dati dei clienti fermi dal foglio Google</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="settings-label" style="margin-bottom:6px;">Importa da file (dati privati, consigliato)</div>
+      <div class="settings-hint" style="margin-top:0; margin-bottom:14px;">
+        Su Google Sheets: <b>File → Scarica → Valori separati da virgola (.csv)</b>. Salva il file dove preferisci
+        (ad es. nella cartella di questo portale) e selezionalo qui sotto. Il foglio non viene mai pubblicato online:
+        i dati restano sul tuo computer e vengono salvati solo nel browser che stai usando.
+      </div>
+      <div class="file-import-row">
+        <label class="file-import-label btn btn-primary">
+          📂 Scegli file CSV
+          <input type="file" id="fileImportInput" accept=".csv" style="display:none" onchange="gestisciFileSelezionato(event)">
+        </label>
+        <span class="file-import-name" id="fileImportName">Nessun file selezionato</span>
+      </div>
+      <div class="status-line">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Nessun caricamento effettuato</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <details class="alt-method">
+        <summary>▸ Metodo alternativo: collegamento online a un foglio pubblicato</summary>
+        <div class="settings-field">
+          <label class="settings-label">Link CSV pubblicato del foglio Google</label>
+          <input type="text" class="settings-input" id="csvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
+          <div class="settings-hint">
+            Su Google Sheets: <b>File → Condividi → Pubblica sul web</b> → seleziona il foglio corretto e il formato
+            <b>CSV</b> → Pubblica. Copia il link generato e incollalo qui. <b>Attenzione:</b> con questo metodo il foglio
+            diventa visibile a chiunque abbia il link — usa il metodo da file se vuoi tenere i dati privati.
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="salvaEcaricaCsv()">Salva e aggiorna dati</button>
+          <button class="btn btn-outline" onclick="caricaDatiCsv()">Aggiorna ora</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <div class="settings-label" style="margin-bottom:10px;">Intestazioni colonne richieste nel foglio Google</div>
+      <div class="col-headers-example">Ragione Sociale | Nome Referente | Contatto Referente | Email Referente | Provincia | Comune | Vecchio Consulente | Consulente Assegnato | Stato | Fase Cliente</div>
+      <div class="settings-hint">
+        L'ordine delle colonne non è importante, ma i nomi delle intestazioni devono essere simili a questi (il portale li riconosce automaticamente,
+        anche con piccole variazioni). Il campo <b>Provincia</b> deve contenere il nome della provincia (es. "Bologna", "Reggio Emilia").
+        Il campo <b>Comune</b> è facoltativo: se lo compili, il portale riconosce da solo la provincia corretta (non serve
+        compilare anche la colonna Provincia in quel caso) e posiziona il cliente sulla mappa fino al livello del comune.<br><br>
+        <b>Consulente Assegnato</b>, <b>Stato</b> e <b>Fase Cliente</b> si modificano direttamente dal portale (menu a tendina nella
+        tabella di ogni provincia) — le eventuali indicazioni nel foglio Google vengono usate solo come valore iniziale la prima volta
+        che un cliente viene importato. <b>Vecchio Consulente</b> resta invece un campo informativo, sempre importato dal foglio.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="settings-label" style="margin-bottom:6px;">Il tuo accesso Super Admin</div>
+      <div class="settings-hint" style="margin-top:0; margin-bottom:14px;">
+        Le password di Direzione Vendite e dei Consulenti si gestiscono invece nella pagina "Utenti",
+        un account per persona.
+      </div>
+      <div class="settings-field">
+        <label class="settings-label">Email Super Admin</label>
+        <input type="text" class="settings-input" id="pwdSuperAdminEmailInput" disabled>
+      </div>
+      <div class="settings-field">
+        <label class="settings-label">Password Super Admin</label>
+        <input type="text" class="settings-input" id="pwdSuperAdminInput">
+      </div>
+      <button class="btn btn-primary" onclick="salvaPassword()">Salva password</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="comuni-data.js"></script>
+
+<!-- ===== FIREBASE ===== -->
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMwBTaewsaXajevMR3rpaKGKvAJ51iAfk",
+    authDomain: "academy-beauty-f05ae.firebaseapp.com",
+    projectId: "academy-beauty-f05ae",
+    storageBucket: "academy-beauty-f05ae.firebasestorage.app",
+    messagingSenderId: "112109525390",
+    appId: "1:112109525390:web:58338eea91923b9e8c2cdf"
+  };
+  const _fbApp = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+/* ===================== CONFIG ===================== */
+const REGIONS_URL = "https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_IT_regions.geojson";
+const PROVINCES_URL = "https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_IT_provinces.geojson";
+const REGIONS_URL_FALLBACK = "https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_IT_regions.geojson";
+const PROVINCES_URL_FALLBACK = "https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_IT_provinces.geojson";
+/* Comuni per provincia: {ID} = prov_istat_code_num (1-111 circa) */
+const COMUNI_PROVINCIA_URL = (id) => `https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_P_${id}_municipalities.geojson`;
+const COMUNI_PROVINCIA_URL_FALLBACK = (id) => `https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_P_${id}_municipalities.geojson`;
+
+const STATI_VALIDI = ["Da assegnare", "Assegnato", "In trattativa", "In contatto con altro consulente", "Riattivato"];
+const FASI_VALIDE = ["Attivo", "Fermo", "Bloccato", "In Gestione", "Imprenditore non sei Solo"];
+
+/* Palette categorica per identificare i consulenti nei grafici (ordine fisso, non ciclato
+   per i primi 8 slot — validata per distinguibilità anche in caso di daltonismo). */
+const COLORI_CONSULENTI = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+/* Colori dello Stato: riusano esattamente quelli già assegnati ai badge nel resto del portale */
+const COLORI_STATO = { 'Da assegnare': '#8a8a8a', 'Assegnato': '#8a3570', 'In trattativa': '#c97a1e', 'In contatto con altro consulente': '#3a6fb3', 'Riattivato': '#2f9e63' };
+const MESI_BREVI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+
+/* Alias per far coincidere il testo scritto nel foglio Google con i nomi ufficiali ISTAT */
+const PROVINCIA_ALIAS = {
+  "reggio emilia": "reggio nell emilia",
+  "reggio nell emilia": "reggio nell emilia",
+  "monza brianza": "monza e della brianza",
+  "monza e brianza": "monza e della brianza",
+  "monza": "monza e della brianza",
+  "bolzano": "bolzano bozen",
+  "alto adige": "bolzano bozen",
+  "aosta": "valle d aosta vallee d aoste",
+  "valle d aosta": "valle d aosta vallee d aoste",
+  "massa carrara": "massa carrara",
+  "pesaro urbino": "pesaro e urbino",
+  "forli cesena": "forli cesena",
+  "reggio calabria": "reggio di calabria"
+};
+
+/* ===================== STATO APP ===================== */
+let regionsLayer = null;
+let provincesLayer = null;
+let comuniLayer = null;
+let allProvinceFeatures = [];
+let provinceByNormName = {};   // normalizzato -> feature
+let regioneOfProvincia = {};   // prov_name -> reg_name
+let provinceIstatByName = {};  // prov_name -> prov_istat_code_num (per scaricare i comuni)
+let comuniGeojsonCache = {};   // prov_istat_code_num -> geojson già scaricato
+let comuneByNormName = {};     // normalizzato -> [ [nome, provincia, sigla, regione], ... ]
+let comuniSearchIndex = [];    // [{norm, nome, prov}] per la ricerca rapida
+let contatti = [];             // righe importate dal CSV
+let map = null;
+let currentRegione = null;
+let currentProvincia = null;
+let currentComune = null;
+let sessione = null; // letta da sessionStorage all'avvio nell'IIFE
+
+/* ===================== STATO CONDIVISO (FIRESTORE) ===================== */
+/* Struttura Firestore:
+   - portali/clienti-fermi            → documento principale: utenti, csvUrl, ultimoAgg, nomeFile, superadminPassword
+   - portali/clienti-fermi/clienti/   → sottocollezione: un documento per cliente (fonte unica di verità, senza limite pratico)
+   - portali/clienti-fermi/eventi/    → sottocollezione: un documento per evento del Cruscotto (senza limite pratico)
+
+   Questa struttura elimina il limite di 1MB del documento singolo: le sottocollezioni Firestore
+   possono contenere milioni di documenti senza alcun limite di dimensione. */
+const CF_DOC_PATH  = () => db.collection('portali').doc('clienti-fermi');
+const CF_CLIENTI   = () => db.collection('portali').doc('clienti-fermi').collection('clienti');
+const CF_EVENTI    = () => db.collection('portali').doc('clienti-fermi').collection('eventi');
+
+/* Sanitizza il _key per usarlo come ID documento Firestore (non può contenere '/') */
+function sanitizeDocId(key) {
+  if (!key) return '_empty_' + Date.now();
+  // Sostituisce '/' con '_', poi tronca a 1400 byte (limite Firestore è 1500)
+  return key.replace(/\//g, '_').substring(0, 1400);
+}
+
+/* cfState contiene solo i campi piccoli del documento principale.
+   contatti (array in memoria) e eventiLogCache vengono popolati dalle sottocollezioni. */
+let cfState = {
+  utenti: [],
+  csvUrl: '',
+  ultimoAgg: '',
+  nomeFile: '',
+  superadminPassword: '' // verrà popolato da loadFromFirestore; getSuperAdminPassword() usa SUPERADMIN_PASSWORD_DEFAULT come fallback
+};
+
+/* Cache in memoria degli eventi del Cruscotto (caricata da sottocollezione eventi all'avvio) */
+let eventiLogCache = [];
+
+/* ===================== HELPER MIGRAZIONE ===================== */
+/* Scrive un array di righe (già con overlay applicato) nella sottocollezione clienti,
+   a batch di max 500 per rispettare i limiti Firestore per singola operazione batch. */
+async function scriviClientiNelleSubcollection(righe) {
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < righe.length; i += BATCH_SIZE) {
+    const chunk = righe.slice(i, i + BATCH_SIZE);
+    const batch = db.batch();
+    chunk.forEach(r => {
+      batch.set(CF_CLIENTI().doc(sanitizeDocId(r._key)), r);
+    });
+    await batch.commit();
+  }
+}
+
+/* Scrive un array di eventi nella sottocollezione eventi con ID auto-generati */
+async function scriviEventiNelleSubcollection(eventiLog) {
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < eventiLog.length; i += BATCH_SIZE) {
+    const chunk = eventiLog.slice(i, i + BATCH_SIZE);
+    const batch = db.batch();
+    chunk.forEach(e => {
+      batch.set(CF_EVENTI().doc(), e); // .doc() senza argomento = ID auto-generato
+    });
+    await batch.commit();
+  }
+}
+
+async function loadFromFirestore() {
+  try {
+    const snap = await CF_DOC_PATH().get();
+
+    if (!snap.exists) {
+      /* ---- Caso A: documento principale assente (prima esecuzione) ----
+         Migra eventuali dati dal localStorage di questo browser. */
+      const datiGrezziLs  = JSON.parse(localStorage.getItem('cf_dati_grezzi') || '[]');
+      const overlayLs     = JSON.parse(localStorage.getItem('cf_overlay') || '{}');
+      const eventiLogLs   = JSON.parse(localStorage.getItem('cf_eventi_log') || '[]');
+
+      cfState = {
+        utenti:            JSON.parse(localStorage.getItem('cf_utenti') || '[]'),
+        csvUrl:            localStorage.getItem('cf_csv_url') || '',
+        ultimoAgg:         localStorage.getItem('cf_ultimo_agg') || '',
+        nomeFile:          localStorage.getItem('cf_nome_file') || '',
+        superadminPassword: localStorage.getItem('cf_superadmin_password') || SUPERADMIN_PASSWORD_DEFAULT
+      };
+      await CF_DOC_PATH().set(cfState);
+
+      // Migra clienti dal localStorage (se presenti)
+      if (datiGrezziLs.length) {
+        const righeConOverlay = datiGrezziLs.map(r => {
+          const mod = overlayLs[r._key];
+          if (!mod) return r;
+          return Object.assign({}, r, {
+            consulente:     mod.consulente     !== undefined ? mod.consulente     : r.consulente,
+            stato:          mod.stato          !== undefined ? mod.stato          : r.stato,
+            faseCliente:    mod.faseCliente    !== undefined ? mod.faseCliente    : r.faseCliente,
+            ultimoContatto: mod.ultimoContatto !== undefined ? mod.ultimoContatto : r.ultimoContatto
+          });
+        });
+        await scriviClientiNelleSubcollection(righeConOverlay);
+        contatti = righeConOverlay;
+      }
+
+      // Migra eventi dal localStorage (se presenti)
+      if (eventiLogLs.length) {
+        await scriviEventiNelleSubcollection(eventiLogLs);
+        eventiLogCache = eventiLogLs;
+      }
+
+    } else {
+      /* ---- Caso B: documento principale esistente ---- */
+      const data = snap.data();
+      cfState.utenti            = data.utenti            || [];
+      cfState.csvUrl            = data.csvUrl            || '';
+      cfState.ultimoAgg         = data.ultimoAgg         || '';
+      cfState.nomeFile          = data.nomeFile          || '';
+      cfState.superadminPassword = data.superadminPassword || SUPERADMIN_PASSWORD_DEFAULT;
+
+      /* ---- Migrazione automatica dall'intervento precedente ----
+         Se il documento principale ha ancora i campi "grandi" (datiGrezzi / overlay / eventiLog),
+         li migra nelle sottocollezioni e poi li rimuove dal documento principale.
+         Questa logica gira UNA SOLA VOLTA: al prossimo avvio i campi non esisteranno più. */
+      const needsMigrazione = data.datiGrezzi || data.eventiLog;
+      if (needsMigrazione) {
+        console.log('[Clienti Fermi] Migrazione dati verso le sottocollezioni in corso...');
+
+        const datiGrezziDoc = data.datiGrezzi || [];
+        const overlayDoc    = data.overlay    || {};
+        const eventiLogDoc  = data.eventiLog  || [];
+
+        // Migra clienti solo se la sottocollezione è ancora vuota
+        const clientiCheck = await CF_CLIENTI().limit(1).get();
+        if (datiGrezziDoc.length && clientiCheck.empty) {
+          const righeConOverlay = datiGrezziDoc.map(r => {
+            const mod = overlayDoc[r._key];
+            if (!mod) return r;
+            return Object.assign({}, r, {
+              consulente:     mod.consulente     !== undefined ? mod.consulente     : r.consulente,
+              stato:          mod.stato          !== undefined ? mod.stato          : r.stato,
+              faseCliente:    mod.faseCliente    !== undefined ? mod.faseCliente    : r.faseCliente,
+              ultimoContatto: mod.ultimoContatto !== undefined ? mod.ultimoContatto : r.ultimoContatto
+            });
+          });
+          await scriviClientiNelleSubcollection(righeConOverlay);
+        }
+
+        // Migra eventi solo se la sottocollezione eventi è ancora vuota
+        const eventiCheck = await CF_EVENTI().limit(1).get();
+        if (eventiLogDoc.length && eventiCheck.empty) {
+          await scriviEventiNelleSubcollection(eventiLogDoc);
+        }
+
+        // Rimuovi i campi obsoleti dal documento principale (pulizia)
+        await CF_DOC_PATH().update({
+          datiGrezzi: firebase.firestore.FieldValue.delete(),
+          overlay:    firebase.firestore.FieldValue.delete(),
+          eventiLog:  firebase.firestore.FieldValue.delete()
+        });
+        console.log('[Clienti Fermi] Migrazione completata. Campi obsoleti rimossi dal documento principale.');
+      }
+
+      /* ---- Carica clienti dalla sottocollezione ---- */
+      const clientiSnap = await CF_CLIENTI().get();
+      contatti = clientiSnap.docs.map(d => d.data());
+
+      /* ---- Carica eventi dalla sottocollezione ---- */
+      const eventiSnap = await CF_EVENTI().get();
+      eventiLogCache = eventiSnap.docs.map(d => d.data());
+    }
+
+  } catch(e) {
+    console.error('[Clienti Fermi] Errore caricamento Firestore:', e);
+    showToast('Errore di connessione al database. Controlla la rete e riprova.');
+    throw e;
+  }
+}
+
+async function saveField(campo, valore) {
+  try {
+    await CF_DOC_PATH().update({ [campo]: valore });
+  } catch(e) {
+    console.error('[Clienti Fermi] Errore salvataggio Firestore (' + campo + '):', e);
+    showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
+  }
+}
+
+/* ===================== AUTENTICAZIONE / UTENTI =====================
+   Nota: questo è un controllo di accesso "leggero" pensato per un piccolo team
+   che usa lo stesso file in locale, non una vera sicurezza server-side: chiunque
+   apra il file con un editor di testo può vedere/aggirare le password (che infatti
+   sono in chiaro, modificabili). Serve a evitare modifiche per errore da parte
+   dell'account sbagliato, non a proteggere dati sensibili. */
+const SUPERADMIN_EMAIL = 'l.gorgo@osmpartnerbologna.it';
+const SUPERADMIN_PASSWORD_DEFAULT = 'OsmBologna2026!';
+
+function getSuperAdminPassword() {
+  return cfState.superadminPassword || SUPERADMIN_PASSWORD_DEFAULT;
+}
+
+function getUtenti() { return cfState.utenti || []; }
+async function salvaUtenti(lista) {
+  cfState.utenti = lista;
+  await saveField('utenti', lista);
+}
+
+function ruoloCorrente() { return sessione ? sessione.ruolo : null; }
+function puoAssegnareConsulente() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoVedereImpostazioni() { return sessione && sessione.ruolo === 'superadmin'; }
+function puoVedereUtenti() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoVedereCruscotto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoVedereTutorial() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente'); }
+/* Super Admin gestisce tutti gli account, Direzione Vendite solo quelli con ruolo Consulente */
+function puoGestireUtente(utente) {
+  if (!sessione) return false;
+  if (sessione.ruolo === 'superadmin') return true;
+  if (sessione.ruolo === 'direzione') return utente.ruolo === 'consulente';
+  return false;
+}
+
+/* Il ruolo Consulente vede solo i propri clienti, ovunque nel portale */
+function applicaVisibilitaRuolo(righe) {
+  if (sessione && sessione.ruolo === 'consulente') {
+    return righe.filter(c => c.consulente === sessione.nome);
+  }
+  return righe;
+}
+
+async function eseguiLogin() {
+  const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
+  const password = document.getElementById('loginPasswordInput').value;
+  const errEl = document.getElementById('loginError');
+  const btnLogin = document.querySelector('#page-login .btn-primary');
+
+  errEl.classList.remove('show');
+
+  if (!email || !password) {
+    errEl.textContent = 'Inserisci email e password.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Carica i dati da Firestore prima di validare le credenziali
+  if (btnLogin) { btnLogin.textContent = 'Connessione...'; btnLogin.disabled = true; }
+  try {
+    await loadFromFirestore();
+  } catch(e) {
+    if (btnLogin) { btnLogin.textContent = 'Entra'; btnLogin.disabled = false; }
+    errEl.textContent = 'Impossibile connettersi al database. Controlla la rete e riprova.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (btnLogin) { btnLogin.textContent = 'Entra'; btnLogin.disabled = false; }
+
+  let ok = false, ruolo = null, nome = null;
+  if (email === SUPERADMIN_EMAIL.toLowerCase() && password === getSuperAdminPassword()) {
+    ok = true; ruolo = 'superadmin'; nome = 'Lorenzo';
+  } else {
+    const utente = getUtenti().find(u => u.email.toLowerCase() === email && u.password === password);
+    if (utente) { ok = true; ruolo = utente.ruolo; nome = utente.nome; }
+  }
+
+  if (!ok) {
+    errEl.textContent = 'Email o password non corretti.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  sessione = { ruolo, nome, email };
+  sessionStorage.setItem('cf_sessione', JSON.stringify(sessione));
+  avviaApp();
+}
+
+function eseguiLogout() {
+  sessione = null;
+  sessionStorage.removeItem('cf_sessione');
+  document.getElementById('navbar').style.display = 'none';
+  document.getElementById('loginEmailInput').value = '';
+  document.getElementById('loginPasswordInput').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  showPage('login');
+}
+
+function aggiornaUIPerRuolo() {
+  const etichette = { superadmin: 'Super Admin', direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  document.getElementById('roleBadge').textContent = etichette[sessione.ruolo] + (sessione.nome ? ' · ' + sessione.nome : '');
+  document.querySelector('.nav-btn[data-nav="impostazioni"]').style.display = puoVedereImpostazioni() ? '' : 'none';
+  document.querySelector('.nav-btn[data-nav="consulenti"]').style.display = puoVedereUtenti() ? '' : 'none';
+  document.querySelector('.nav-btn[data-nav="cruscotto"]').style.display = puoVedereCruscotto() ? '' : 'none';
+  document.querySelector('.nav-btn[data-nav="tutorial"]').style.display = puoVedereTutorial() ? '' : 'none';
+  document.getElementById('dbFiltroConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
+}
+
+/* ===================== UTILITY ===================== */
+function normalizza(str) {
+  if (!str) return "";
+  return str.toString()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\/\-'"\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function risolviProvincia(testoProvincia) {
+  const norm = normalizza(testoProvincia);
+  if (!norm) return null;
+  if (provinceByNormName[norm]) return provinceByNormName[norm];
+  const aliasKey = PROVINCIA_ALIAS[norm];
+  if (aliasKey && provinceByNormName[aliasKey]) return provinceByNormName[aliasKey];
+  // match per sigla (es. "BO")
+  const upper = testoProvincia.trim().toUpperCase();
+  const bySigla = allProvinceFeatures.find(f => f.properties.prov_acr === upper);
+  if (bySigla) return bySigla;
+  // match parziale
+  const partial = allProvinceFeatures.find(f => normalizza(f.properties.prov_name).includes(norm) || norm.includes(normalizza(f.properties.prov_name)));
+  return partial || null;
+}
+
+function risolviComune(testoComune, testoProvinciaSuggerita) {
+  const norm = normalizza(testoComune);
+  if (!norm) return null;
+  const candidati = comuneByNormName[norm];
+  if (!candidati || !candidati.length) return null;
+  if (candidati.length === 1) return candidati[0];
+  if (testoProvinciaSuggerita) {
+    const normProv = normalizza(testoProvinciaSuggerita);
+    const trovato = candidati.find(c => normalizza(c[1]) === normProv || normalizza(c[2]) === normProv);
+    if (trovato) return trovato;
+  }
+  return candidati[0];
+}
+
+function escapeJs(str) {
+  return String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ===================== NAVIGAZIONE PAGINE ===================== */
+function showPage(name) {
+  if (name === 'impostazioni' && !puoVedereImpostazioni()) name = 'mappa';
+  if (name === 'cruscotto' && !puoVedereCruscotto()) name = 'mappa';
+  if (name === 'tutorial' && !puoVedereTutorial()) name = 'mappa';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navBtn = document.querySelector('.nav-btn[data-nav="' + name + '"]');
+  if (navBtn) navBtn.classList.add('active');
+  if (name === 'consulenti') renderConsulenti();
+  if (name === 'cruscotto') renderCruscotto();
+  if (name === 'tutorial') {
+    document.getElementById('tutorialNotaConsulente').style.display = (sessione.ruolo === 'consulente') ? 'flex' : 'none';
+  }
+  if (name === 'impostazioni') caricaImpostazioniUI();
+  if (name === 'database') inizializzaPaginaDatabase();
+  if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
+}
+
+function goHome() {
+  showPage('mappa');
+  tornaAllaMappa();
+}
+
+/* ===================== CARICAMENTO GEOJSON ===================== */
+async function fetchJsonConFallback(url, fallback) {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('status ' + r.status);
+    return await r.json();
+  } catch (e) {
+    const r2 = await fetch(fallback);
+    return await r2.json();
+  }
+}
+
+async function initMappa() {
+  map = L.map('map', { zoomControl: true, scrollWheelZoom: true }).setView([42.3, 12.6], 5.4);
+
+  const regionsData = await fetchJsonConFallback(REGIONS_URL, REGIONS_URL_FALLBACK);
+  const provincesData = await fetchJsonConFallback(PROVINCES_URL, PROVINCES_URL_FALLBACK);
+
+  allProvinceFeatures = provincesData.features;
+  allProvinceFeatures.forEach(f => {
+    provinceByNormName[normalizza(f.properties.prov_name)] = f;
+    regioneOfProvincia[f.properties.prov_name] = f.properties.reg_name;
+    provinceIstatByName[f.properties.prov_name] = f.properties.prov_istat_code_num;
+  });
+
+  (COMUNI_LOOKUP || []).forEach(c => {
+    const norm = normalizza(c[0]);
+    if (!comuneByNormName[norm]) comuneByNormName[norm] = [];
+    comuneByNormName[norm].push(c);
+    comuniSearchIndex.push({ norm, nome: c[0], prov: c[1] });
+  });
+
+  regionsLayer = L.geoJSON(regionsData, {
+    style: () => ({ color: '#fff', weight: 1.5, fillColor: '#b3468d', fillOpacity: 0.55 }),
+    onEachFeature: (feature, layer) => {
+      const nome = feature.properties.reg_name;
+      layer.bindTooltip(nome, { sticky: true, className: 'region-tooltip' });
+      layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8 }));
+      layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.55 }));
+      layer.on('click', () => entraInRegione(nome));
+    }
+  }).addTo(map);
+
+  map.fitBounds(regionsLayer.getBounds(), { padding: [10, 10] });
+
+  aggiornaStatsBar();
+}
+
+function entraInRegione(nomeRegione) {
+  currentRegione = nomeRegione;
+  map.removeLayer(regionsLayer);
+  if (provincesLayer) map.removeLayer(provincesLayer);
+
+  const featuresRegione = allProvinceFeatures.filter(f => f.properties.reg_name === nomeRegione);
+  provincesLayer = L.geoJSON({ type: 'FeatureCollection', features: featuresRegione }, {
+    style: () => ({ color: '#fff', weight: 1.5, fillColor: '#b3468d', fillOpacity: 0.55 }),
+    onEachFeature: (feature, layer) => {
+      const nome = feature.properties.prov_name;
+      const n = contattiPerProvincia(nome).length;
+      layer.bindTooltip(nome + (n ? ' (' + n + ')' : ''), { sticky: true, className: 'province-tooltip' });
+      layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.8 }));
+      layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.55 }));
+      layer.on('click', () => entraInProvincia(nome));
+    }
+  }).addTo(map);
+
+  map.fitBounds(provincesLayer.getBounds(), { padding: [20, 20] });
+  document.getElementById('btnVediProvincia').style.display = 'none';
+  aggiornaBreadcrumb();
+}
+
+async function entraInProvincia(nomeProvincia) {
+  currentProvincia = nomeProvincia;
+  currentComune = null;
+  currentRegione = regioneOfProvincia[nomeProvincia] || currentRegione;
+
+  if (provincesLayer) { map.removeLayer(provincesLayer); }
+  if (comuniLayer) { map.removeLayer(comuniLayer); comuniLayer = null; }
+
+  const idIstat = provinceIstatByName[nomeProvincia];
+  document.getElementById('mapLoading').style.display = 'block';
+  document.getElementById('mapLoading').textContent = 'Caricamento comuni di ' + nomeProvincia + '...';
+
+  try {
+    let data = comuniGeojsonCache[idIstat];
+    if (!data) {
+      data = await fetchJsonConFallback(COMUNI_PROVINCIA_URL(idIstat), COMUNI_PROVINCIA_URL_FALLBACK(idIstat));
+      comuniGeojsonCache[idIstat] = data;
+    }
+
+    comuniLayer = L.geoJSON(data, {
+      style: () => ({ color: '#fff', weight: 1, fillColor: '#b3468d', fillOpacity: 0.5 }),
+      onEachFeature: (feature, layer) => {
+        const nomeComune = feature.properties.name;
+        const n = contattiPerComune(nomeComune).length;
+        // Etichetta col nome del comune sempre visibile (senza dover passare sopra col mouse);
+        // il numero di clienti si aggiunge solo se presente, per non affollare la mappa di zeri
+        layer.bindTooltip(nomeComune + (n ? ' (' + n + ')' : ''), { permanent: true, direction: 'center', className: 'comune-label', interactive: false });
+        layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.78 }));
+        layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.5 }));
+        layer.on('click', () => apriComune(nomeComune, nomeProvincia));
+      }
+    }).addTo(map);
+
+    map.fitBounds(comuniLayer.getBounds(), { padding: [20, 20] });
+  } catch (e) {
+    showToast('Impossibile caricare i comuni di ' + nomeProvincia + '. Mostro comunque i clienti della provincia.');
+    apriProvincia(nomeProvincia);
+    return;
+  } finally {
+    document.getElementById('mapLoading').style.display = 'none';
+  }
+
+  document.getElementById('btnVediProvincia').style.display = 'inline-flex';
+  aggiornaBreadcrumb();
+}
+
+function tornaAllaMappa() {
+  showPage('mappa');
+  currentRegione = null;
+  currentProvincia = null;
+  currentComune = null;
+  if (provincesLayer) { map.removeLayer(provincesLayer); provincesLayer = null; }
+  if (comuniLayer) { map.removeLayer(comuniLayer); comuniLayer = null; }
+  if (regionsLayer && !map.hasLayer(regionsLayer)) regionsLayer.addTo(map);
+  map.fitBounds(regionsLayer.getBounds(), { padding: [10, 10] });
+  document.getElementById('btnVediProvincia').style.display = 'none';
+  aggiornaBreadcrumb();
+  setTimeout(() => map.invalidateSize(), 150);
+}
+
+function tornaAllaRegione() {
+  showPage('mappa');
+  if (comuniLayer) { map.removeLayer(comuniLayer); comuniLayer = null; }
+  currentProvincia = null;
+  currentComune = null;
+  if (currentRegione) entraInRegione(currentRegione);
+}
+
+function tornaAllaProvincia() {
+  showPage('mappa');
+  currentComune = null;
+  if (currentProvincia) entraInProvincia(currentProvincia);
+}
+
+function aggiornaBreadcrumb() {
+  const el = document.getElementById('breadcrumb');
+  if (!currentRegione) {
+    el.innerHTML = '<span class="crumb-current">Italia</span>';
+  } else if (!currentProvincia) {
+    el.innerHTML = `<button class="crumb-btn" onclick="tornaAllaMappa()">Italia</button>
+      <span class="crumb-sep">›</span><span class="crumb-current">${currentRegione}</span>`;
+  } else {
+    el.innerHTML = `<button class="crumb-btn" onclick="tornaAllaMappa()">Italia</button>
+      <span class="crumb-sep">›</span><button class="crumb-btn" onclick="tornaAllaRegione()">${currentRegione}</button>
+      <span class="crumb-sep">›</span><span class="crumb-current">${currentProvincia}</span>`;
+  }
+}
+
+/* ===================== PAGINA PROVINCIA / COMUNE ===================== */
+function apriProvincia(nomeProvincia) {
+  currentProvincia = nomeProvincia;
+  currentRegione = regioneOfProvincia[nomeProvincia] || currentRegione;
+  currentComune = null;
+  document.getElementById('provinciaNomeTitolo').textContent = nomeProvincia;
+  document.getElementById('breadcrumbProvincia').innerHTML = `
+    <button class="crumb-btn" onclick="tornaAllaMappa()">Italia</button>
+    <span class="crumb-sep">›</span>
+    <button class="crumb-btn" onclick="tornaAllaRegione()">${currentRegione}</button>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">${nomeProvincia}</span>`;
+  popolaFiltroConsulenti();
+  document.getElementById('filtroStato').value = '';
+  document.getElementById('filtroFase').value = '';
+  document.getElementById('filtroTesto').value = '';
+  renderTabellaProvincia();
+  showPage('provincia');
+}
+
+function apriComune(nomeComune, nomeProvincia) {
+  currentComune = nomeComune;
+  currentProvincia = nomeProvincia;
+  currentRegione = regioneOfProvincia[nomeProvincia] || currentRegione;
+  document.getElementById('provinciaNomeTitolo').textContent = nomeComune;
+  document.getElementById('breadcrumbProvincia').innerHTML = `
+    <button class="crumb-btn" onclick="tornaAllaMappa()">Italia</button>
+    <span class="crumb-sep">›</span>
+    <button class="crumb-btn" onclick="tornaAllaRegione()">${currentRegione}</button>
+    <span class="crumb-sep">›</span>
+    <button class="crumb-btn" onclick="tornaAllaProvincia()">${currentProvincia}</button>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current">${nomeComune}</span>`;
+  popolaFiltroConsulenti();
+  document.getElementById('filtroStato').value = '';
+  document.getElementById('filtroFase').value = '';
+  document.getElementById('filtroTesto').value = '';
+  renderTabellaProvincia();
+  showPage('provincia');
+}
+
+function contattiPerProvincia(nomeProvincia) {
+  return applicaVisibilitaRuolo(contatti.filter(c => c._provinciaMatch === nomeProvincia));
+}
+
+function contattiPerComune(nomeComune) {
+  return applicaVisibilitaRuolo(contatti.filter(c => c._comuneMatch === nomeComune));
+}
+
+function popolaFiltroConsulenti() {
+  const sel = document.getElementById('filtroConsulente');
+  const valorePrecedente = sel.value;
+  const baseRighe = currentComune ? contattiPerComune(currentComune) : contattiPerProvincia(currentProvincia);
+  const nomiInDati = new Set(baseRighe.map(c => c.consulente).filter(Boolean));
+  const tutti = new Set([...nomiConsulenti(), ...nomiInDati]);
+  sel.innerHTML = '<option value="">Tutti</option>' + [...tutti].sort().map(n => `<option value="${n}">${n}</option>`).join('');
+  if ([...tutti].includes(valorePrecedente)) sel.value = valorePrecedente;
+}
+
+function renderTabellaProvincia() {
+  const filtroConsulente = document.getElementById('filtroConsulente').value;
+  const filtroStato = document.getElementById('filtroStato').value;
+  const filtroFase = document.getElementById('filtroFase').value;
+  const filtroTesto = normalizza(document.getElementById('filtroTesto').value);
+
+  let righe = currentComune ? contattiPerComune(currentComune) : contattiPerProvincia(currentProvincia);
+  if (filtroConsulente) righe = righe.filter(c => c.consulente === filtroConsulente);
+  if (filtroStato) righe = righe.filter(c => c.stato === filtroStato);
+  if (filtroFase) righe = righe.filter(c => c.faseCliente === filtroFase);
+  if (filtroTesto) righe = righe.filter(c =>
+    normalizza(c.ragioneSociale).includes(filtroTesto) || normalizza(c.referente).includes(filtroTesto));
+
+  document.getElementById('provinciaContatore').textContent = righe.length + ' client' + (righe.length === 1 ? 'e' : 'i') + ' fermi';
+
+  const body = document.getElementById('tabellaProvinciaBody');
+  const emptyState = document.getElementById('provinciaEmptyState');
+  if (righe.length === 0) {
+    body.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  body.innerHTML = righe.map(c => creaRigaHtml(c)).join('');
+}
+
+function elencoConsulentiPerSelect() {
+  const nomiInDati = new Set(contatti.map(c => c.consulente).filter(Boolean));
+  return [...new Set([...nomiConsulenti(), ...nomiInDati])].sort();
+}
+
+/* Riga tabella condivisa tra pagina Provincia/Comune e pagina Database */
+function creaRigaHtml(c) {
+  const opzioniConsulenti = elencoConsulentiPerSelect();
+  const elencoNomiConsulenti = nomiConsulenti();
+  const statoClass = 'sel-stato-' + normalizza(c.stato || 'Da assegnare').replace(/\s+/g, '');
+  const faseClass = c.faseCliente ? 'sel-fase-' + normalizza(c.faseCliente).replace(/\s+/g, '') : '';
+  const warning = (c.consulente && elencoNomiConsulenti.length && !elencoNomiConsulenti.includes(c.consulente))
+    ? '<span class="badge badge-warning" title="Nome non presente nell\'elenco consulenti">⚠ non in elenco</span>' : '';
+
+  let celleConsulente;
+  if (puoAssegnareConsulente()) {
+    const opzConsulente = ['<option value="">—</option>']
+      .concat(opzioniConsulenti.map(n => `<option value="${escapeHtml(n)}" ${c.consulente === n ? 'selected' : ''}>${escapeHtml(n)}</option>`));
+    if (c.consulente && !opzioniConsulenti.includes(c.consulente)) {
+      opzConsulente.push(`<option value="${escapeHtml(c.consulente)}" selected>${escapeHtml(c.consulente)}</option>`);
+    }
+    celleConsulente = `<select class="td-select" onchange="aggiornaCampoRiga('${c._key}','consulente', this.value)">${opzConsulente.join('')}</select> ${warning}`;
+  } else {
+    celleConsulente = `${escapeHtml(c.consulente) || '—'} ${warning}`;
+  }
+
+  const opzStato = STATI_VALIDI.map(s => `<option value="${s}" ${c.stato === s ? 'selected' : ''}>${s}</option>`);
+  const opzFase = ['<option value="">—</option>'].concat(
+    FASI_VALIDE.map(f => `<option value="${f}" ${c.faseCliente === f ? 'selected' : ''}>${f}</option>`));
+
+  return `<tr>
+      <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
+      <td>${escapeHtml(c.referente)}</td>
+      <td>${c.contatto ? '<a href="tel:'+escapeHtml(c.contatto)+'">'+escapeHtml(c.contatto)+'</a>' : ''}</td>
+      <td>${c.email ? '<a href="mailto:'+escapeHtml(c.email)+'">'+escapeHtml(c.email)+'</a>' : ''}</td>
+      <td>${escapeHtml(c._provinciaMatch || c.provincia) || '—'}</td>
+      <td>${escapeHtml(c._comuneMatch || c.comune) || '—'}</td>
+      <td class="td-vecchio-consulente">${escapeHtml(c.vecchioConsulente) || '—'}</td>
+      <td>${celleConsulente}</td>
+      <td><select class="td-select ${statoClass}" onchange="aggiornaCampoRiga('${c._key}','stato', this.value)">${opzStato.join('')}</select></td>
+      <td><select class="td-select ${faseClass}" onchange="aggiornaCampoRiga('${c._key}','faseCliente', this.value)">${opzFase.join('')}</select></td>
+      <td><input type="date" class="td-date-input" value="${c.ultimoContatto || ''}" onchange="aggiornaCampoRiga('${c._key}','ultimoContatto', this.value)"></td>
+    </tr>`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ===================== RICERCA PROVINCIA ===================== */
+document.getElementById('searchProvincia').addEventListener('input', function() {
+  const val = normalizza(this.value);
+  const results = document.getElementById('searchResults');
+  if (!val) { results.classList.remove('show'); return; }
+
+  const matchProvince = allProvinceFeatures.filter(f => normalizza(f.properties.prov_name).includes(val)).slice(0, 5);
+  const matchComuni = comuniSearchIndex.filter(c => c.norm.includes(val)).slice(0, 8);
+
+  if (!matchProvince.length && !matchComuni.length) {
+    results.innerHTML = '<div class="search-result-item">Nessun risultato</div>';
+    results.classList.add('show');
+    return;
+  }
+
+  let html = '';
+  if (matchProvince.length) {
+    html += '<div class="search-group-label">Provincie</div>' + matchProvince.map(f =>
+      `<div class="search-result-item" onclick="selezionaDaRicerca('${escapeJs(f.properties.prov_name)}')"><b>${f.properties.prov_name}</b> — ${f.properties.reg_name}</div>`).join('');
+  }
+  if (matchComuni.length) {
+    html += '<div class="search-group-label">Comuni</div>' + matchComuni.map(c =>
+      `<div class="search-result-item" onclick="selezionaComuneDaRicerca('${escapeJs(c.nome)}','${escapeJs(c.prov)}')"><b>${c.nome}</b> — ${c.prov}</div>`).join('');
+  }
+  results.innerHTML = html;
+  results.classList.add('show');
+});
+
+function selezionaDaRicerca(nomeProvincia) {
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('searchProvincia').value = '';
+  apriProvincia(nomeProvincia);
+}
+
+function selezionaComuneDaRicerca(nomeComune, nomeProvincia) {
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('searchProvincia').value = '';
+  apriComune(nomeComune, nomeProvincia);
+}
+
+/* ===================== STATISTICHE HOME ===================== */
+function aggiornaStatsBar() {
+  const bar = document.getElementById('statsBar');
+  const righeVisibili = applicaVisibilitaRuolo(contatti);
+  const totale = righeVisibili.length;
+  const province = new Set(righeVisibili.map(c => c._provinciaMatch).filter(Boolean)).size;
+  const comuni = new Set(righeVisibili.map(c => c._comuneMatch).filter(Boolean)).size;
+  const daAssegnare = righeVisibili.filter(c => (c.stato || 'Da assegnare') === 'Da assegnare').length;
+  bar.innerHTML = `
+    <div class="stat-pill"><div class="stat-pill-value">${totale}</div><div class="stat-pill-label">Clienti fermi</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${province}</div><div class="stat-pill-label">Provincie coperte</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${comuni}</div><div class="stat-pill-label">Comuni coperti</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${daAssegnare}</div><div class="stat-pill-label">Da assegnare</div></div>
+  `;
+  document.getElementById('emptyStateNoData').style.display = totale === 0 ? 'block' : 'none';
+}
+
+/* ===================== PAGINA DATABASE ===================== */
+function inizializzaPaginaDatabase() {
+  const selProv = document.getElementById('dbFiltroProvincia');
+  const provinceConDati = [...new Set(applicaVisibilitaRuolo(contatti).map(c => c._provinciaMatch).filter(Boolean))].sort();
+  const valorePrecedenteProv = selProv.value;
+  selProv.innerHTML = '<option value="">Tutte</option>' + provinceConDati.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+  if (provinceConDati.includes(valorePrecedenteProv)) selProv.value = valorePrecedenteProv;
+
+  const selCons = document.getElementById('dbFiltroConsulente');
+  const valorePrecedenteCons = selCons.value;
+  const opzioniConsulenti = elencoConsulentiPerSelect();
+  selCons.innerHTML = '<option value="">Tutti</option>' + opzioniConsulenti.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  if (opzioniConsulenti.includes(valorePrecedenteCons)) selCons.value = valorePrecedenteCons;
+
+  renderDatabase();
+}
+
+function renderDatabase() {
+  const filtroConsulente = puoAssegnareConsulente() ? document.getElementById('dbFiltroConsulente').value : '';
+  const filtroProvincia = document.getElementById('dbFiltroProvincia').value;
+  const filtroComune = normalizza(document.getElementById('dbFiltroComune').value);
+  const filtroStato = document.getElementById('dbFiltroStato').value;
+  const filtroFase = document.getElementById('dbFiltroFase').value;
+  const filtroTesto = normalizza(document.getElementById('dbFiltroTesto').value);
+
+  let righe = applicaVisibilitaRuolo(contatti);
+  if (filtroConsulente) righe = righe.filter(c => c.consulente === filtroConsulente);
+  if (filtroProvincia) righe = righe.filter(c => c._provinciaMatch === filtroProvincia);
+  if (filtroComune) righe = righe.filter(c => normalizza(c._comuneMatch || c.comune).includes(filtroComune));
+  if (filtroStato) righe = righe.filter(c => c.stato === filtroStato);
+  if (filtroFase) righe = righe.filter(c => c.faseCliente === filtroFase);
+  if (filtroTesto) righe = righe.filter(c =>
+    normalizza(c.ragioneSociale).includes(filtroTesto) || normalizza(c.referente).includes(filtroTesto));
+
+  document.getElementById('databaseContatore').textContent = righe.length + ' client' + (righe.length === 1 ? 'e' : 'i') + ' fermi';
+
+  const body = document.getElementById('databaseBody');
+  const emptyState = document.getElementById('databaseEmptyState');
+  if (righe.length === 0) {
+    body.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+  body.innerHTML = righe.map(c => creaRigaHtml(c)).join('');
+}
+
+/* ===================== UTENTI ===================== */
+function nomiConsulenti() {
+  return getUtenti().filter(u => u.ruolo === 'consulente').map(u => u.nome).sort();
+}
+
+function renderConsulenti() {
+  document.getElementById('utentiAddCard').style.display = puoVedereUtenti() ? 'block' : 'none';
+
+  const ruoloSelect = document.getElementById('nuovoUtenteRuolo');
+  const ruoloWrap = document.getElementById('nuovoUtenteRuoloWrap');
+  if (sessione.ruolo === 'direzione') {
+    ruoloSelect.innerHTML = '<option value="consulente">Consulente</option>';
+    ruoloWrap.style.display = 'none';
+  } else {
+    ruoloSelect.innerHTML = '<option value="direzione">Direzione Vendite</option><option value="consulente">Consulente</option>';
+    ruoloWrap.style.display = '';
+  }
+
+  let visibili = [];
+  if (sessione.ruolo === 'superadmin') visibili = getUtenti();
+  else if (sessione.ruolo === 'direzione') visibili = getUtenti().filter(u => u.ruolo === 'consulente');
+
+  document.getElementById('utentiSubtitle').textContent = sessione.ruolo === 'superadmin'
+    ? 'Tutti gli account di accesso al portale'
+    : 'I tuoi consulenti';
+
+  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  const body = document.getElementById('utentiBody');
+  const empty = document.getElementById('utentiEmptyState');
+  if (!visibili.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  body.innerHTML = visibili.map(u => `<tr>
+      <td class="ragione-sociale">${escapeHtml(u.nome)}</td>
+      <td>${escapeHtml(u.email)}</td>
+      <td><span class="td-ruolo-badge td-ruolo-${u.ruolo}">${etichette[u.ruolo] || u.ruolo}</span></td>
+      <td><input type="text" class="td-password-input" value="${escapeHtml(u.password)}" onchange="modificaPasswordUtente('${u.id}', this.value)"></td>
+      <td>
+        <button class="icon-btn" title="Apri email con le credenziali" onclick="inviaEmailUtente('${u.id}')">✉️</button>
+        <button class="icon-btn danger" title="Elimina account" onclick="eliminaUtente('${u.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function aggiungiUtente() {
+  if (!puoVedereUtenti()) return;
+  const nome = document.getElementById('nuovoUtenteNome').value.trim();
+  const email = document.getElementById('nuovoUtenteEmail').value.trim();
+  const password = document.getElementById('nuovoUtentePassword').value.trim();
+  let ruolo = document.getElementById('nuovoUtenteRuolo').value;
+  if (sessione.ruolo === 'direzione') ruolo = 'consulente';
+
+  if (!nome || !email || !password) { showToast('Compila nome, email e password'); return; }
+  const utenti = getUtenti();
+  if (email.toLowerCase() === SUPERADMIN_EMAIL.toLowerCase() || utenti.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+    showToast('Esiste già un account con questa email');
+    return;
+  }
+
+  const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), nome, email, password, ruolo };
+  utenti.push(nuovo);
+  await salvaUtenti(utenti);
+
+  document.getElementById('nuovoUtenteNome').value = '';
+  document.getElementById('nuovoUtenteEmail').value = '';
+  document.getElementById('nuovoUtentePassword').value = '';
+
+  renderConsulenti();
+  showToast('Account creato');
+  apriEmailCredenziali(nuovo);
+}
+
+async function modificaPasswordUtente(id, nuovaPassword) {
+  const utenti = getUtenti();
+  const u = utenti.find(x => x.id === id);
+  if (!u || !puoGestireUtente(u)) return;
+  u.password = nuovaPassword.trim() || u.password;
+  await salvaUtenti(utenti);
+  showToast('Password aggiornata');
+}
+
+async function eliminaUtente(id) {
+  const utenti = getUtenti();
+  const u = utenti.find(x => x.id === id);
+  if (!u || !puoGestireUtente(u)) return;
+  if (!confirm('Eliminare l\'account di ' + u.nome + '?')) return;
+  await salvaUtenti(utenti.filter(x => x.id !== id));
+  renderConsulenti();
+  showToast('Account eliminato');
+}
+
+/* Il portale non può inviare email da solo: apre il client di posta di Lorenzo con
+   il messaggio già pronto (destinatario, oggetto, testo con nome e password) da spedire con un click. */
+function apriEmailCredenziali(u) {
+  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  const oggetto = 'Le tue credenziali di accesso - Clienti Fermi OSM';
+  const corpo = 'Ciao ' + u.nome + ',\n\n' +
+    'Ecco le tue credenziali per accedere al portale Clienti Fermi OSM:\n\n' +
+    'Email: ' + u.email + '\n' +
+    'Password: ' + u.password + '\n' +
+    'Ruolo: ' + (etichette[u.ruolo] || u.ruolo) + '\n\n' +
+    'A presto,\nOSM Partner Bologna';
+  const link = 'mailto:' + encodeURIComponent(u.email) + '?subject=' + encodeURIComponent(oggetto) + '&body=' + encodeURIComponent(corpo);
+  window.location.href = link;
+}
+
+function inviaEmailUtente(id) {
+  const u = getUtenti().find(x => x.id === id);
+  if (u) apriEmailCredenziali(u);
+}
+
+/* ===================== CRUSCOTTO DI CONTROLLO ===================== */
+/* Riservato a Super Admin e Direzione Vendite: riepiloga per consulente numero di
+   contatti assegnati, riattivati, in lavorazione e data dell'ultimo contatto avuto. */
+function giorniDaData(dataIso) {
+  if (!dataIso) return null;
+  const d = new Date(dataIso + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function formattaDataItaliana(dataIso) {
+  if (!dataIso) return null;
+  const d = new Date(dataIso + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('it-IT');
+}
+
+function calcolaStatisticheCruscotto() {
+  // Il cruscotto mostra sempre tutti i clienti fermi (non filtrati per consulente):
+  // è uno strumento riservato a chi supervisiona l'intero database.
+  const tutti = contatti;
+  const nomiAssegnatari = new Set(tutti.map(c => c.consulente).filter(Boolean));
+  nomiConsulenti().forEach(n => nomiAssegnatari.add(n));
+
+  const perConsulente = [...nomiAssegnatari].sort().map(nome => {
+    const righe = tutti.filter(c => c.consulente === nome);
+    const dateValide = righe.map(c => c.ultimoContatto).filter(Boolean).sort();
+    return {
+      nome,
+      assegnati: righe.length,
+      riattivati: righe.filter(c => c.stato === 'Riattivato').length,
+      inTrattativa: righe.filter(c => c.stato === 'In trattativa').length,
+      attivi: righe.filter(c => c.faseCliente === 'Attivo').length,
+      fermi: righe.filter(c => c.faseCliente === 'Fermo').length,
+      inGestione: righe.filter(c => c.faseCliente === 'In Gestione').length,
+      bloccati: righe.filter(c => c.faseCliente === 'Bloccato').length,
+      maiContattati: righe.filter(c => !c.ultimoContatto).length,
+      ultimoContattoRecente: dateValide.length ? dateValide[dateValide.length - 1] : null
+    };
+  }).filter(r => r.assegnati > 0);
+
+  const nonAssegnati = tutti.filter(c => !c.consulente).length;
+  const dateGlobali = tutti.map(c => c.ultimoContatto).filter(Boolean).sort();
+
+  return {
+    totale: tutti.length,
+    assegnati: tutti.filter(c => c.consulente).length,
+    nonAssegnati,
+    daAssegnare: tutti.filter(c => (c.stato || 'Da assegnare') === 'Da assegnare').length,
+    riattivati: tutti.filter(c => c.stato === 'Riattivato').length,
+    inTrattativa: tutti.filter(c => c.stato === 'In trattativa').length,
+    inGestione: tutti.filter(c => c.faseCliente === 'In Gestione').length,
+    bloccati: tutti.filter(c => c.faseCliente === 'Bloccato').length,
+    maiContattati: tutti.filter(c => !c.ultimoContatto).length,
+    contattatiUltimi30gg: tutti.filter(c => { const g = giorniDaData(c.ultimoContatto); return g !== null && g <= 30; }).length,
+    ultimoContattoGlobale: dateGlobali.length ? dateGlobali[dateGlobali.length - 1] : null,
+    perConsulente
+  };
+}
+
+function renderCruscotto() {
+  const s = calcolaStatisticheCruscotto();
+  document.getElementById('cruscottoSubtitle').textContent =
+    s.totale + ' client' + (s.totale === 1 ? 'e' : 'i') + ' fermi nel database, ' + s.perConsulente.length + ' consulenti con assegnazioni attive';
+
+  const kpi = document.getElementById('cruscottoKpiGrid');
+  kpi.innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${s.totale}</div><div class="kpi-label">Clienti fermi totali</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.assegnati}</div><div class="kpi-label">Assegnati a un consulente</div></div>
+    <div class="kpi-card kpi-neutral"><div class="kpi-value">${s.daAssegnare}</div><div class="kpi-label">Da assegnare</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.riattivati}</div><div class="kpi-label">Riattivati</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.inTrattativa}</div><div class="kpi-label">In lavorazione</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.inGestione}</div><div class="kpi-label">In gestione</div></div>
+    <div class="kpi-card ${s.bloccati ? 'kpi-alert' : ''}"><div class="kpi-value">${s.bloccati}</div><div class="kpi-label">Bloccati</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.contattatiUltimi30gg}</div><div class="kpi-label">Contattati (ultimi 30gg)</div></div>
+    <div class="kpi-card ${s.maiContattati ? 'kpi-alert' : ''}"><div class="kpi-value">${s.maiContattati}</div><div class="kpi-label">Mai contattati</div></div>
+  `;
+
+  const body = document.getElementById('cruscottoBody');
+  const empty = document.getElementById('cruscottoEmptyState');
+  if (!s.perConsulente.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = s.perConsulente.map(r => {
+    const dataFormattata = formattaDataItaliana(r.ultimoContattoRecente);
+    return `<tr>
+      <td class="ragione-sociale">${escapeHtml(r.nome)}</td>
+      <td class="num-cell">${r.assegnati}</td>
+      <td class="num-cell ${r.riattivati ? '' : 'zero'}">${r.riattivati}</td>
+      <td class="num-cell ${r.inTrattativa ? '' : 'zero'}">${r.inTrattativa}</td>
+      <td class="num-cell ${r.attivi ? '' : 'zero'}">${r.attivi}</td>
+      <td class="num-cell ${r.fermi ? '' : 'zero'}">${r.fermi}</td>
+      <td class="num-cell ${r.inGestione ? '' : 'zero'}">${r.inGestione}</td>
+      <td class="num-cell ${r.bloccati ? 'alert' : 'zero'}">${r.bloccati}</td>
+      <td class="num-cell ${r.maiContattati ? 'alert' : 'zero'}">${r.maiContattati}</td>
+      <td>${dataFormattata ? dataFormattata : '<span class="td-date-empty">Nessun dato</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  renderGraficoRipartizione(s);
+  renderMiniPieStato(s);
+  popolaFiltroAnnoTrend();
+  renderGraficoTrend();
+}
+
+/* ===================== GRAFICI CRUSCOTTO ===================== */
+const chartRegistry = {};
+function distruggiChart(id) {
+  if (chartRegistry[id]) { chartRegistry[id].destroy(); delete chartRegistry[id]; }
+}
+
+/* Colore stabile per consulente: stesso ordine alfabetico usato ovunque nel cruscotto,
+   così l'identità cromatica resta coerente tra torta e grafico lineare. */
+function coloreConsulente(nome, elencoOrdinato) {
+  const idx = elencoOrdinato.indexOf(nome);
+  return COLORI_CONSULENTI[idx % COLORI_CONSULENTI.length];
+}
+
+function renderGraficoRipartizione(s) {
+  distruggiChart('ripartizione');
+  const canvas = document.getElementById('chartRipartizione');
+  const emptyEl = document.getElementById('chartRipartizioneEmpty');
+
+  if (!s.totale) { canvas.style.display = 'none'; emptyEl.style.display = 'block'; return; }
+  canvas.style.display = 'block'; emptyEl.style.display = 'none';
+
+  const nomiOrdinati = s.perConsulente.map(r => r.nome);
+  const labels = s.perConsulente.map(r => r.nome).concat(s.nonAssegnati ? ['Non assegnato'] : []);
+  const valori = s.perConsulente.map(r => r.assegnati).concat(s.nonAssegnati ? [s.nonAssegnati] : []);
+  const colori = s.perConsulente.map(r => coloreConsulente(r.nome, nomiOrdinati)).concat(s.nonAssegnati ? ['#c3c2b7'] : []);
+
+  chartRegistry.ripartizione = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: valori, backgroundColor: colori, borderColor: '#fff', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '58%',
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 12, font: { size: 11 }, color: '#2a1122' } },
+        tooltip: { callbacks: { label: (ctx) => {
+          const tot = ctx.dataset.data.reduce((a, b) => a + b, 0);
+          const pct = tot ? Math.round(ctx.parsed / tot * 100) : 0;
+          return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+        } } }
+      }
+    }
+  });
+}
+
+function renderMiniPieStato(s) {
+  const grid = document.getElementById('miniPieGrid');
+  const emptyEl = document.getElementById('miniPieEmpty');
+  Object.keys(chartRegistry).filter(k => k.startsWith('mini-')).forEach(distruggiChart);
+  grid.innerHTML = '';
+
+  if (!s.perConsulente.length) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+
+  s.perConsulente.forEach(r => {
+    const righeConsulente = contatti.filter(c => c.consulente === r.nome);
+    const valoriStato = STATI_VALIDI.map(st => righeConsulente.filter(c => (c.stato || 'Da assegnare') === st).length);
+    const contattati = righeConsulente.filter(c => c.ultimoContatto).length;
+    const nonContattati = righeConsulente.length - contattati;
+
+    const card = document.createElement('div');
+    card.className = 'mini-pie-card';
+    const baseId = normalizza(r.nome).replace(/\s+/g, '-');
+    const idStato = 'mini-stato-' + baseId;
+    const idContatto = 'mini-contatto-' + baseId;
+    card.innerHTML = `
+      <div class="mini-pie-name" title="${escapeHtml(r.nome)}">${escapeHtml(r.nome)}</div>
+      <div class="mini-pie-count">${r.assegnati} client${r.assegnati === 1 ? 'e' : 'i'}</div>
+      <div class="mini-pie-dual">
+        <div class="mini-pie-col">
+          <div class="mini-pie-col-label">Stato</div>
+          <div class="mini-pie-canvas-wrap small"><canvas id="${idStato}"></canvas></div>
+        </div>
+        <div class="mini-pie-col">
+          <div class="mini-pie-col-label">Contatto</div>
+          <div class="mini-pie-canvas-wrap small"><canvas id="${idContatto}"></canvas></div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    const tooltipPct = (ctx) => {
+      const tot = ctx.dataset.data.reduce((a, b) => a + b, 0);
+      const pct = tot ? Math.round(ctx.parsed / tot * 100) : 0;
+      return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+    };
+
+    chartRegistry[idStato] = new Chart(document.getElementById(idStato), {
+      type: 'doughnut',
+      data: { labels: STATI_VALIDI, datasets: [{ data: valoriStato, backgroundColor: STATI_VALIDI.map(st => COLORI_STATO[st]), borderColor: '#fff', borderWidth: 2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: tooltipPct } } }
+      }
+    });
+
+    chartRegistry[idContatto] = new Chart(document.getElementById(idContatto), {
+      type: 'doughnut',
+      data: { labels: ['Contattato', 'Non contattato'], datasets: [{ data: [contattati, nonContattati], backgroundColor: ['#2f9e63', '#c0392b'], borderColor: '#fff', borderWidth: 2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: tooltipPct } } }
+      }
+    });
+  });
+}
+
+/* ---- Grafico lineare nel tempo ---- */
+function popolaFiltroAnnoTrend() {
+  const sel = document.getElementById('filtroAnnoTrend');
+  const valorePrecedente = sel.value;
+  const annoCorrente = new Date().getFullYear();
+  const anniLog = getEventiLog().map(e => new Date(e.data + 'T00:00:00').getFullYear()).filter(a => !isNaN(a));
+  const anni = [...new Set([annoCorrente, ...anniLog])].sort((a, b) => b - a);
+  sel.innerHTML = anni.map(a => `<option value="${a}">${a}</option>`).join('');
+  sel.value = anni.includes(parseInt(valorePrecedente)) ? valorePrecedente : String(annoCorrente);
+}
+
+function lunediDellaSettimana(data) {
+  const d = new Date(data.getFullYear(), data.getMonth(), data.getDate());
+  const giorno = (d.getDay() + 6) % 7; // 0 = lunedì
+  d.setDate(d.getDate() - giorno);
+  return d;
+}
+
+function generaSecchiTempo(anno, granularita) {
+  const secchi = [];
+  if (granularita === 'mese') {
+    for (let m = 0; m < 12; m++) secchi.push({ key: anno + '-' + String(m + 1).padStart(2, '0'), label: MESI_BREVI[m] });
+  } else {
+    const primoLunedi = lunediDellaSettimana(new Date(anno, 0, 1));
+    let cursore = new Date(primoLunedi);
+    while (cursore.getFullYear() <= anno) {
+      const key = cursore.toISOString().slice(0, 10);
+      const label = String(cursore.getDate()).padStart(2, '0') + '/' + String(cursore.getMonth() + 1).padStart(2, '0');
+      secchi.push({ key, label });
+      cursore.setDate(cursore.getDate() + 7);
+    }
+  }
+  return secchi;
+}
+
+function chiaveSecchioData(dataIso, granularita) {
+  const d = new Date(dataIso + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  if (granularita === 'mese') return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  return lunediDellaSettimana(d).toISOString().slice(0, 10);
+}
+
+function renderGraficoTrend() {
+  distruggiChart('trend');
+  const metrica = document.getElementById('filtroMetricaTrend').value;
+  const granularita = document.getElementById('filtroGranularitaTrend').value;
+  const anno = parseInt(document.getElementById('filtroAnnoTrend').value) || new Date().getFullYear();
+
+  const canvas = document.getElementById('chartTrend');
+  const emptyEl = document.getElementById('chartTrendEmpty');
+
+  const eventi = getEventiLog().filter(e => e.tipo === metrica && e.consulente);
+  const secchi = generaSecchiTempo(anno, granularita);
+
+  if (!eventi.length) { canvas.style.display = 'none'; emptyEl.style.display = 'block'; return; }
+
+  // Un dataset per consulente, solo per chi ha almeno un evento nell'anno selezionato (altrimenti la legenda sarebbe enorme e vuota)
+  const nomiConEventiAnno = [...new Set(eventi.filter(e => chiaveSecchioData(e.data, granularita) && String(new Date(e.data + 'T00:00:00').getFullYear()) === String(anno)).map(e => e.consulente))].sort();
+
+  if (!nomiConEventiAnno.length) { canvas.style.display = 'none'; emptyEl.style.display = 'block'; return; }
+  canvas.style.display = 'block'; emptyEl.style.display = 'none';
+
+  const datasets = nomiConEventiAnno.map(nome => {
+    const eventiConsulente = eventi.filter(e => e.consulente === nome);
+    const data = secchi.map(b => eventiConsulente.filter(e => chiaveSecchioData(e.data, granularita) === b.key).length);
+    const colore = coloreConsulente(nome, nomiConEventiAnno);
+    return {
+      label: nome, data, borderColor: colore, backgroundColor: colore,
+      tension: 0.3, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, pointBackgroundColor: '#fff', pointBorderColor: colore, pointBorderWidth: 2
+    };
+  });
+
+  chartRegistry.trend = new Chart(canvas, {
+    type: 'line',
+    data: { labels: secchi.map(b => b.label), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 12, font: { size: 11 }, color: '#2a1122' } },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0, color: '#7a6b76' }, grid: { color: '#e1e0d9' } },
+        x: { ticks: { color: '#7a6b76', maxRotation: 0, autoSkip: true }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ===================== IMPOSTAZIONI / IMPORT DATI ===================== */
+function caricaImpostazioniUI() {
+  document.getElementById('csvUrlInput').value = cfState.csvUrl || '';
+  document.getElementById('fileImportName').textContent = cfState.nomeFile || 'Nessun file selezionato';
+  if (cfState.ultimoAgg) impostaStatus(true, 'Ultimo aggiornamento: ' + cfState.ultimoAgg + ' — ' + contatti.length + ' righe caricate');
+
+  document.getElementById('pwdSuperAdminEmailInput').value = SUPERADMIN_EMAIL;
+  document.getElementById('pwdSuperAdminInput').value = getSuperAdminPassword();
+}
+
+async function salvaPassword() {
+  const nuova = document.getElementById('pwdSuperAdminInput').value.trim();
+  const nuovaPassword = nuova || SUPERADMIN_PASSWORD_DEFAULT;
+  cfState.superadminPassword = nuovaPassword;
+  await saveField('superadminPassword', nuovaPassword);
+  showToast('Password aggiornata');
+}
+
+function impostaStatus(ok, testo) {
+  document.getElementById('statusText').textContent = testo;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot ' + (ok === null ? '' : (ok ? 'ok' : 'err'));
+}
+
+/* Pipeline comune: testo CSV grezzo -> righe mappate -> sottocollezione clienti -> stato app.
+   Usa batch write (max 500 op per batch) per supportare qualsiasi numero di righe.
+   Preserva i valori overlay già impostati manualmente nel portale (consulente, stato,
+   faseCliente, ultimoContatto), replicando il comportamento di applicaOverlay().
+   Rimuove anche i documenti di clienti non più presenti nel CSV importato. */
+async function elaboraTestoCsv(testo) {
+  const righe = parseCsv(testo);
+  const righeGrezze = mappaRighe(righe);
+
+  impostaStatus(true, 'Salvataggio in corso... — ' + righeGrezze.length + ' righe');
+
+  /* Mappa overlay: legge i valori correnti da contatti (già in memoria da Firestore)
+     così i campi modificati manualmente non vengono sovrascritti dal nuovo CSV. */
+  const overlayEsistente = {};
+  contatti.forEach(c => {
+    overlayEsistente[c._key] = {
+      consulente:     c.consulente,
+      stato:          c.stato,
+      faseCliente:    c.faseCliente,
+      ultimoContatto: c.ultimoContatto
+    };
+  });
+
+  /* Unisci dati grezzi con overlay esistente */
+  const righeUnificate = righeGrezze.map(r => {
+    const mod = overlayEsistente[r._key];
+    if (!mod) return r;
+    return Object.assign({}, r, {
+      consulente:     mod.consulente     !== undefined ? mod.consulente     : r.consulente,
+      stato:          mod.stato          !== undefined ? mod.stato          : r.stato,
+      faseCliente:    mod.faseCliente    !== undefined ? mod.faseCliente    : r.faseCliente,
+      ultimoContatto: mod.ultimoContatto !== undefined ? mod.ultimoContatto : r.ultimoContatto
+    });
+  });
+
+  /* Calcola quali docId sono nel nuovo CSV */
+  const nuoviDocIds = new Set(righeGrezze.map(r => sanitizeDocId(r._key)));
+
+  /* Leggi i docId esistenti nella sottocollezione per trovare i client obsoleti */
+  const clientiSnap = await CF_CLIENTI().get();
+  const daEliminare = clientiSnap.docs.map(d => d.id).filter(id => !nuoviDocIds.has(id));
+
+  const BATCH_SIZE = 500;
+
+  /* Elimina i client non più presenti nel CSV */
+  for (let i = 0; i < daEliminare.length; i += BATCH_SIZE) {
+    const chunk = daEliminare.slice(i, i + BATCH_SIZE);
+    const batch = db.batch();
+    chunk.forEach(id => batch.delete(CF_CLIENTI().doc(id)));
+    await batch.commit();
+  }
+
+  /* Scrivi / aggiorna tutti i client del nuovo CSV */
+  for (let i = 0; i < righeUnificate.length; i += BATCH_SIZE) {
+    const chunk = righeUnificate.slice(i, i + BATCH_SIZE);
+    const batch = db.batch();
+    chunk.forEach(r => {
+      batch.set(CF_CLIENTI().doc(sanitizeDocId(r._key)), r);
+    });
+    await batch.commit();
+  }
+
+  contatti = righeUnificate;
+  const ora = new Date().toLocaleString('it-IT');
+  cfState.ultimoAgg = ora;
+
+  aggiornaStatsBar();
+  await saveField('ultimoAgg', ora);
+  impostaStatus(true, 'Ultimo aggiornamento: ' + ora + ' — ' + contatti.length + ' righe caricate');
+  showToast('Dati aggiornati: ' + contatti.length + ' clienti fermi');
+}
+
+function gestisciFileSelezionato(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      await elaboraTestoCsv(e.target.result);
+      cfState.nomeFile = file.name;
+      document.getElementById('fileImportName').textContent = file.name;
+      await saveField('nomeFile', file.name);
+    } catch (err) {
+      impostaStatus(false, 'Errore nella lettura del file. Verifica che sia un CSV valido.');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function salvaEcaricaCsv() {
+  const url = document.getElementById('csvUrlInput').value.trim();
+  cfState.csvUrl = url;
+  await saveField('csvUrl', url);
+  caricaDatiCsv();
+}
+
+async function caricaDatiCsv() {
+  const url = cfState.csvUrl;
+  if (!url) { impostaStatus(false, 'Inserisci prima il link del foglio Google pubblicato come CSV.'); return; }
+  impostaStatus(null, 'Caricamento in corso...');
+  try {
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'cachebust=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const testo = await r.text();
+    await elaboraTestoCsv(testo);
+  } catch (e) {
+    impostaStatus(false, 'Errore nel caricamento del foglio. Verifica che il link sia pubblicato come CSV e accessibile pubblicamente.');
+  }
+}
+
+function parseCsv(testo) {
+  const delimitatore = (testo.split('\n')[0].split(';').length > testo.split('\n')[0].split(',').length) ? ';' : ',';
+  const righe = [];
+  let riga = [], campo = '', inQuote = false;
+  for (let i = 0; i < testo.length; i++) {
+    const ch = testo[i], next = testo[i + 1];
+    if (inQuote) {
+      if (ch === '"' && next === '"') { campo += '"'; i++; }
+      else if (ch === '"') { inQuote = false; }
+      else { campo += ch; }
+    } else {
+      if (ch === '"') inQuote = true;
+      else if (ch === delimitatore) { riga.push(campo); campo = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && next === '\n') continue;
+        riga.push(campo); campo = '';
+        if (riga.length > 1 || riga[0] !== '') righe.push(riga);
+        riga = [];
+      } else campo += ch;
+    }
+  }
+  if (campo !== '' || riga.length) { riga.push(campo); righe.push(riga); }
+  return righe;
+}
+
+const HEADER_ALIASES = {
+  ragioneSociale: ['ragione sociale', 'azienda', 'nome azienda'],
+  referente: ['nome referente', 'referente', 'contatto nome'],
+  contatto: ['contatto referente', 'telefono referente', 'telefono', 'contatto'],
+  email: ['email referente', 'mail referente', 'email', 'mail'],
+  provincia: ['provincia'],
+  comune: ['comune', 'città', 'citta'],
+  vecchioConsulente: ['vecchio consulente', 'ex consulente', 'consulente precedente'],
+  consulente: ['consulente assegnato', 'consulente'],
+  stato: ['stato'],
+  faseCliente: ['fase cliente', 'fase', 'categoria cliente']
+};
+
+function mappaRighe(righe) {
+  if (!righe.length) return [];
+  const intestazioni = righe[0].map(h => normalizza(h));
+  const indici = {};
+  Object.keys(HEADER_ALIASES).forEach(campo => {
+    const idx = intestazioni.findIndex(h => HEADER_ALIASES[campo].some(alias => h === normalizza(alias)));
+    indici[campo] = idx;
+  });
+
+  const out = [];
+  for (let i = 1; i < righe.length; i++) {
+    const r = righe[i];
+    if (!r || r.every(v => !v || !v.trim())) continue;
+    const get = campo => indici[campo] >= 0 ? (r[indici[campo]] || '').trim() : '';
+    const provinciaTesto = get('provincia');
+    const comuneTesto = get('comune');
+    const ragioneSociale = get('ragioneSociale');
+
+    // Se è indicato il comune, la provincia viene dedotta automaticamente da quello
+    const comuneRisolto = comuneTesto ? risolviComune(comuneTesto, provinciaTesto) : null;
+    const provFeature = comuneRisolto ? risolviProvincia(comuneRisolto[1]) : risolviProvincia(provinciaTesto);
+
+    out.push({
+      ragioneSociale: ragioneSociale,
+      referente: get('referente'),
+      contatto: get('contatto'),
+      email: get('email'),
+      provincia: provinciaTesto,
+      comune: comuneTesto,
+      vecchioConsulente: get('vecchioConsulente'),
+      consulente: get('consulente'),
+      stato: STATI_VALIDI.includes(get('stato')) ? get('stato') : (get('stato') || 'Da assegnare'),
+      faseCliente: FASI_VALIDE.includes(get('faseCliente')) ? get('faseCliente') : '',
+      ultimoContatto: '',
+      _provinciaMatch: provFeature ? provFeature.properties.prov_name : null,
+      _comuneMatch: comuneRisolto ? comuneRisolto[0] : null,
+      _key: normalizza(ragioneSociale) + '|' + normalizza(provinciaTesto || comuneTesto)
+    });
+  }
+  return out;
+}
+
+/* ===================== MODIFICHE (sottocollezione clienti) ===================== */
+/* Stato, Consulente Assegnato, Fase Cliente e Ultimo Contatto si modificano dal portale:
+   aggiornaCampoRiga() scrive direttamente il campo nel documento cliente della sottocollezione,
+   eliminando la distinzione datiGrezzi + overlay che era necessaria nel documento unico. */
+
+/* ===================== LOG EVENTI (per i grafici storici del Cruscotto) =====================
+   Ogni evento viene scritto come documento separato nella sottocollezione eventi con ID
+   auto-generato (.add()). Non esiste più alcun limite pratico al numero di eventi: la
+   sottocollezione può contenere milioni di documenti.
+   eventiLogCache è la copia in memoria caricata all'avvio da loadFromFirestore(). */
+function getEventiLog() { return eventiLogCache; }
+function oggiIso() { return new Date().toISOString().slice(0, 10); }
+
+async function registraEventoCruscotto(campo, valore, vecchioValore, riga) {
+  const nuoviEventi = [];
+  if (campo === 'ultimoContatto' && valore) {
+    nuoviEventi.push({ tipo: 'contatto', consulente: riga.consulente, data: valore });
+  }
+  if (campo === 'faseCliente' && valore === 'In Gestione' && vecchioValore !== 'In Gestione') {
+    nuoviEventi.push({ tipo: 'in_gestione', consulente: riga.consulente, data: oggiIso() });
+  }
+  if (campo === 'stato' && valore === 'Riattivato' && vecchioValore !== 'Riattivato') {
+    nuoviEventi.push({ tipo: 'riattivato', consulente: riga.consulente, data: oggiIso() });
+  }
+  if (campo === 'stato' && valore === 'In trattativa' && vecchioValore !== 'In trattativa') {
+    nuoviEventi.push({ tipo: 'in_trattativa', consulente: riga.consulente, data: oggiIso() });
+  }
+  if (campo === 'consulente' && valore && valore !== vecchioValore) {
+    nuoviEventi.push({ tipo: 'assegnato', consulente: valore, data: oggiIso() });
+  }
+  if (!nuoviEventi.length) return;
+
+  // Aggiorna cache in memoria e persiste ogni evento nella sottocollezione
+  for (const e of nuoviEventi) {
+    eventiLogCache.push(e);
+    try {
+      await CF_EVENTI().add(e);
+    } catch(err) {
+      console.error('[Clienti Fermi] Errore salvataggio evento:', err);
+    }
+  }
+}
+
+async function aggiornaCampoRiga(key, campo, valore) {
+  if (campo === 'consulente' && !puoAssegnareConsulente()) return;
+
+  // Aggiorna in memoria
+  const riga = contatti.find(c => c._key === key);
+  let vecchioValore;
+  if (riga) {
+    vecchioValore = riga[campo];
+    riga[campo] = valore;
+    await registraEventoCruscotto(campo, valore, vecchioValore, riga);
+  }
+
+  aggiornaStatsBar();
+  if (document.getElementById('page-provincia').classList.contains('active')) {
+    popolaFiltroConsulenti();
+    renderTabellaProvincia();
+  }
+  if (document.getElementById('page-database').classList.contains('active')) {
+    renderDatabase();
+  }
+  if (document.getElementById('page-cruscotto').classList.contains('active')) {
+    renderCruscotto();
+  }
+
+  // Persiste il singolo campo nel documento cliente della sottocollezione
+  try {
+    await CF_CLIENTI().doc(sanitizeDocId(key)).update({ [campo]: valore });
+    showToast('Modifica salvata');
+  } catch(e) {
+    console.error('[Clienti Fermi] Errore salvataggio campo cliente:', e);
+    showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
+  }
+}
+
+/* ===================== AVVIO ===================== */
+async function avviaApp() {
+  document.getElementById('navbar').style.display = 'flex';
+  aggiornaUIPerRuolo();
+  showPage('mappa');
+  if (!map) await initMappa();
+  // contatti ed eventiLogCache sono già popolati da loadFromFirestore()
+  if (contatti.length > 0) aggiornaStatsBar();
+  // Se c'è un URL CSV salvato, aggiorna i dati dal foglio Google
+  if (cfState.csvUrl) await caricaDatiCsv();
+}
+
+(function avvio() {
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-box')) document.getElementById('searchResults').classList.remove('show');
+  });
+  // Legge la sessione da sessionStorage (non persiste tra tab/finestre)
+  sessione = JSON.parse(sessionStorage.getItem('cf_sessione') || 'null');
+  if (sessione) {
+    // Utente già loggato: carica Firestore e avvia
+    loadFromFirestore().then(() => {
+      avviaApp();
+    }).catch(() => {
+      showToast('Errore di connessione. Ricarica la pagina.');
+    });
+  } else {
+    showPage('login');
+  }
+})();
+</script>
+</body>
+</html>
