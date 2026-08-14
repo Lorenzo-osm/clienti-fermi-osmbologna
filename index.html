@@ -349,12 +349,24 @@
   .badge-stato-riattivato { background: var(--verde-bg); color: var(--verde); }
   .badge-stato-incontattoconaltroconsulente { background: var(--blu-bg); color: var(--blu); }
   .badge-warning { background: #fdecea; color: #c0392b; font-size: 0.68rem; padding: 2px 8px; }
+  /* Esito Contatto (nuovo significato del campo Stato) */
+  .badge-stato-nonrisponde { background: var(--grigio-bg); color: var(--grigio); }
+  .badge-stato-appuntamentofissato { background: var(--verde-bg); color: var(--verde); }
+  .badge-stato-noninteressato { background: var(--arancio-bg); color: var(--arancio); }
+  .badge-stato-danonricontattare { background: var(--rosso-bg); color: var(--rosso); }
 
   .badge-fase-attivo { background: var(--verde-bg); color: var(--verde); }
   .badge-fase-fermo { background: var(--grigio-bg); color: var(--grigio); }
   .badge-fase-bloccato { background: var(--rosso-bg); color: var(--rosso); }
   .badge-fase-ingestione { background: var(--arancio-bg); color: var(--arancio); }
   .badge-fase-imprenditorenonseisolo { background: var(--blu-bg); color: var(--blu); }
+  /* Stato di gestione: nuovi valori confluiti da Stato nell'elenco unico Fase Cliente */
+  .badge-fase-riattivato { background: var(--verde-bg); color: var(--verde); }
+  .badge-fase-gestitodaunaltroconsulente { background: var(--blu-bg); color: var(--blu); }
+
+  /* Riga evidenziata quando il cliente è Bloccato */
+  tr.riga-bloccata td { background: var(--rosso-bg) !important; }
+  tr.riga-bloccata:hover td { background: #fbdcd8 !important; }
 
   .td-select {
     background: #fff; border: 1px solid var(--card-border); color: var(--testo);
@@ -367,11 +379,17 @@
   .td-select.sel-stato-intrattativa { color: var(--arancio); }
   .td-select.sel-stato-riattivato { color: var(--verde); }
   .td-select.sel-stato-incontattoconaltroconsulente { color: var(--blu); }
+  .td-select.sel-stato-nonrisponde { color: var(--grigio); }
+  .td-select.sel-stato-appuntamentofissato { color: var(--verde); }
+  .td-select.sel-stato-noninteressato { color: var(--arancio); }
+  .td-select.sel-stato-danonricontattare { color: var(--rosso); font-weight: 700; }
   .td-select.sel-fase-attivo { color: var(--verde); }
   .td-select.sel-fase-fermo { color: var(--grigio); }
-  .td-select.sel-fase-bloccato { color: var(--rosso); }
+  .td-select.sel-fase-bloccato { color: var(--rosso); font-weight: 700; }
   .td-select.sel-fase-ingestione { color: var(--arancio); }
   .td-select.sel-fase-imprenditorenonseisolo { color: var(--blu); }
+  .td-select.sel-fase-riattivato { color: var(--verde); }
+  .td-select.sel-fase-gestitodaunaltroconsulente { color: var(--blu); }
   .td-vecchio-consulente { color: var(--testo-muted); font-size: 0.82rem; }
   .td-date-input {
     background: #fff; border: 1px solid var(--card-border); color: var(--testo);
@@ -571,6 +589,7 @@
 
   /* ===== STAMPA RIASSUNTO (@media print) ===== */
   @media print {
+    @page { size: A4 landscape; margin: 10mm; }
     .navbar, .riassunto-print-btn-wrap, .nav-btn, .role-badge { display: none !important; }
     body { background: #fff !important; }
     .page { display: none !important; padding-top: 0 !important; }
@@ -578,8 +597,10 @@
     #page-riassunto .section-wrap { padding: 10px 0 !important; max-width: 100% !important; }
     .riassunto-consulente-section { page-break-after: always; }
     .riassunto-consulente-section:last-child { page-break-after: avoid; }
-    .table-wrap { box-shadow: none !important; border: 1px solid #ccc !important; }
-    table { min-width: unset !important; }
+    .table-wrap { box-shadow: none !important; border: 1px solid #ccc !important; width: 100% !important; }
+    .table-scroll { overflow: visible !important; }
+    table { min-width: unset !important; width: 100% !important; table-layout: fixed !important; }
+    th, td { padding: 5px 6px !important; font-size: 0.68rem !important; word-break: break-word !important; white-space: normal !important; }
     a { color: inherit !important; text-decoration: none !important; }
     * { box-shadow: none !important; }
     .section-header { display: block !important; }
@@ -693,14 +714,13 @@
         <select class="filter-select" id="filtroConsulente" onchange="renderTabellaProvincia()"></select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Stato</label>
+        <label class="filter-label">Esito Contatto</label>
         <select class="filter-select" id="filtroStato" onchange="renderTabellaProvincia()">
           <option value="">Tutti</option>
-          <option value="Da assegnare">Da assegnare</option>
-          <option value="Assegnato">Assegnato</option>
-          <option value="In trattativa">In trattativa</option>
-          <option value="In contatto con altro consulente">In contatto con altro consulente</option>
-          <option value="Riattivato">Riattivato</option>
+          <option value="Non risponde">Non risponde</option>
+          <option value="Appuntamento fissato">Appuntamento fissato</option>
+          <option value="Non interessato">Non interessato</option>
+          <option value="Da non ricontattare">Da non ricontattare</option>
         </select>
       </div>
       <div class="filter-group">
@@ -710,7 +730,9 @@
           <option value="Fermo">Fermo</option>
           <option value="Bloccato">Bloccato</option>
           <option value="In Gestione">In Gestione</option>
+          <option value="Riattivato">Riattivato</option>
           <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
+          <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
         </select>
       </div>
       <div class="filter-group">
@@ -770,6 +792,17 @@
         <label class="filter-label">Consulente Assegnato</label>
         <select class="filter-select" id="dbFiltroConsulente" onchange="renderDatabase()"></select>
       </div>
+      <div class="filter-group" id="dbFiltroVecchioConsulenteWrap">
+        <label class="filter-label">Vecchio Consulente</label>
+        <select class="filter-select" id="dbFiltroVecchioConsulente" onchange="renderDatabase()"></select>
+      </div>
+      <div class="filter-group" id="dbFiltroNonAssegnatiWrap">
+        <label class="filter-label">Assegnazione</label>
+        <label class="check-attivo-label" style="margin-top:4px; padding:8px 0;">
+          <input type="checkbox" id="dbFiltroNonAssegnati" onchange="renderDatabase()">
+          Solo senza consulente
+        </label>
+      </div>
       <div class="filter-group">
         <label class="filter-label">Provincia</label>
         <select class="filter-select" id="dbFiltroProvincia" onchange="renderDatabase()"></select>
@@ -779,14 +812,13 @@
         <input type="text" class="filter-input" id="dbFiltroComune" placeholder="Digita un comune..." oninput="renderDatabase()">
       </div>
       <div class="filter-group">
-        <label class="filter-label">Stato</label>
+        <label class="filter-label">Esito Contatto</label>
         <select class="filter-select" id="dbFiltroStato" onchange="renderDatabase()">
           <option value="">Tutti</option>
-          <option value="Da assegnare">Da assegnare</option>
-          <option value="Assegnato">Assegnato</option>
-          <option value="In trattativa">In trattativa</option>
-          <option value="In contatto con altro consulente">In contatto con altro consulente</option>
-          <option value="Riattivato">Riattivato</option>
+          <option value="Non risponde">Non risponde</option>
+          <option value="Appuntamento fissato">Appuntamento fissato</option>
+          <option value="Non interessato">Non interessato</option>
+          <option value="Da non ricontattare">Da non ricontattare</option>
         </select>
       </div>
       <div class="filter-group">
@@ -796,7 +828,9 @@
           <option value="Fermo">Fermo</option>
           <option value="Bloccato">Bloccato</option>
           <option value="In Gestione">In Gestione</option>
+          <option value="Riattivato">Riattivato</option>
           <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
+          <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
         </select>
       </div>
       <div class="filter-group">
@@ -936,24 +970,25 @@
 
     <div class="section-header" style="margin-top:8px;">
       <div>
-        <div class="section-title"><span>Legenda</span>&nbsp;— cosa significano Stato e Fase</div>
+        <div class="section-title"><span>Legenda</span>&nbsp;— cosa significano Esito Contatto e Fase Cliente</div>
         <div class="section-subtitle">Usa questi valori in modo coerente: aiutano tutto il team a capire a colpo d'occhio la situazione</div>
       </div>
     </div>
 
     <div class="tutorial-legend-grid">
-      <div class="tutorial-legend-item"><span class="badge badge-stato-daassegnare">Da assegnare</span><span class="desc">Cliente non ancora affidato a nessun consulente.</span></div>
-      <div class="tutorial-legend-item"><span class="badge badge-stato-assegnato">Assegnato</span><span class="desc">Cliente affidato a un consulente, ma non ancora ricontattato.</span></div>
-      <div class="tutorial-legend-item"><span class="badge badge-stato-intrattativa">In trattativa</span><span class="desc">È in corso una trattativa attiva con il cliente.</span></div>
-      <div class="tutorial-legend-item"><span class="badge badge-stato-riattivato">Riattivato</span><span class="desc">Il cliente, prima fermo, è tornato attivo.</span></div>
-      <div class="tutorial-legend-item"><span class="badge badge-stato-incontattoconaltroconsulente">In contatto con altro consulente</span><span class="desc">Il cliente sta parlando con un consulente diverso da quello assegnato.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-nonrisponde">Non risponde</span><span class="desc">Tentativo di contatto fatto, il cliente non ha risposto.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-appuntamentofissato">Appuntamento fissato</span><span class="desc">È stato fissato un appuntamento con il cliente.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-noninteressato">Non interessato</span><span class="desc">Il cliente ha risposto ma non è interessato al momento.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-stato-danonricontattare">Da non ricontattare</span><span class="desc">Il cliente non va più ricontattato — segna automaticamente anche "Bloccato" in Fase Cliente.</span></div>
     </div>
     <div class="tutorial-legend-grid">
       <div class="tutorial-legend-item"><span class="badge-cliente-attivo">● Cliente attivo</span><span class="desc">Spunta la checkbox "Cliente attivo" nella riga: indica che il cliente è attualmente in erogazione/collaborazione.</span></div>
       <div class="tutorial-legend-item"><span class="badge badge-fase-fermo">Fermo</span><span class="desc">Cliente storico non più attivo, potenziale da riattivare.</span></div>
       <div class="tutorial-legend-item"><span class="badge badge-fase-ingestione">In Gestione</span><span class="desc">Il consulente lo sta seguendo, percorso in corso di definizione.</span></div>
-      <div class="tutorial-legend-item"><span class="badge badge-fase-bloccato">Bloccato</span><span class="desc">Situazione ferma per un motivo esterno (es. cliente irraggiungibile).</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-bloccato">Bloccato</span><span class="desc">Situazione ferma per un motivo esterno (es. cliente irraggiungibile, o "Da non ricontattare").</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-riattivato">Riattivato</span><span class="desc">Il cliente, prima fermo, è tornato attivo.</span></div>
       <div class="tutorial-legend-item"><span class="badge badge-fase-imprenditorenonseisolo">Imprenditore non sei Solo</span><span class="desc">Cliente inserito nel percorso dedicato "Imprenditore non sei Solo".</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-gestitodaunaltroconsulente">Gestito da un altro consulente</span><span class="desc">Il cliente è seguito da un consulente diverso da quello assegnato qui.</span></div>
     </div>
 
     <div class="tutorial-tip">
@@ -994,9 +1029,15 @@
         </div>
         <div class="settings-field" id="nuovoUtenteRuoloWrap">
           <label class="settings-label">Ruolo</label>
-          <select class="settings-input" id="nuovoUtenteRuolo">
+          <select class="settings-input" id="nuovoUtenteRuolo" onchange="aggiornaVisibilitaDvNuovoUtente()">
             <option value="direzione">Direzione Vendite</option>
             <option value="consulente">Consulente</option>
+          </select>
+        </div>
+        <div class="settings-field" id="nuovoUtenteDvWrap" style="display:none;">
+          <label class="settings-label">DV a carico</label>
+          <select class="settings-input" id="nuovoUtenteDv">
+            <option value="">— Nessuno —</option>
           </select>
         </div>
       </div>
@@ -1016,6 +1057,7 @@
                 <th>Nome</th>
                 <th>Email</th>
                 <th>Ruolo</th>
+                <th>DV a carico</th>
                 <th>Password</th>
                 <th>Azioni</th>
               </tr>
@@ -1061,7 +1103,6 @@
               <th>Consulente</th>
               <th>Assegnati</th>
               <th>Riattivati</th>
-              <th>In Trattativa</th>
               <th>Clienti Attivi</th>
               <th>Fermi</th>
               <th>In Gestione</th>
@@ -1086,7 +1127,8 @@
           <label class="filter-label">Dato mostrato</label>
           <select class="filter-select" id="filtroMetricaTrend" onchange="renderGraficoTrend()">
             <option value="assegnato">Contatti assegnati</option>
-            <option value="in_trattativa">Contatti in trattativa</option>
+            <option value="rimosso">Contatti rimossi da un consulente</option>
+            <option value="in_trattativa">Contatti in trattativa (storico)</option>
             <option value="contatto">Contatti fatti</option>
             <option value="riattivato">Contatti riattivati</option>
             <option value="in_gestione">Passati "In Gestione"</option>
@@ -1112,13 +1154,12 @@
       <div class="chart-hint">Clicca su un nome nella legenda per nascondere/mostrare momentaneamente la sua linea. I dati storici iniziano ad accumularsi da quando si aggiornano i clienti dal portale: le variazioni avvenute prima di oggi non sono disponibili.</div>
     </div>
 
-    <div class="cruscotto-subtable-title">🥯 Divisione stato clienti per consulente</div>
+    <div class="cruscotto-subtable-title">🥯 Divisione esito contatti per consulente</div>
     <div class="stato-legend-row">
-      <span class="badge badge-stato-daassegnare">Da assegnare</span>
-      <span class="badge badge-stato-assegnato">Assegnato</span>
-      <span class="badge badge-stato-intrattativa">In trattativa</span>
-      <span class="badge badge-stato-incontattoconaltroconsulente">In contatto con altro consulente</span>
-      <span class="badge badge-stato-riattivato">Riattivato</span>
+      <span class="badge badge-stato-nonrisponde">Non risponde</span>
+      <span class="badge badge-stato-appuntamentofissato">Appuntamento fissato</span>
+      <span class="badge badge-stato-noninteressato">Non interessato</span>
+      <span class="badge badge-stato-danonricontattare">Da non ricontattare</span>
     </div>
     <div class="stato-legend-row" style="margin-bottom:18px;">
       <span class="badge" style="background:#e3f5ec; color:#2f9e63;">● Contattato</span>
@@ -1259,14 +1300,17 @@ const PROVINCES_URL_FALLBACK = "https://raw.githubusercontent.com/openpolis/geoj
 const COMUNI_PROVINCIA_URL = (id) => `https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_P_${id}_municipalities.geojson`;
 const COMUNI_PROVINCIA_URL_FALLBACK = (id) => `https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_P_${id}_municipalities.geojson`;
 
-const STATI_VALIDI = ["Da assegnare", "Assegnato", "In trattativa", "In contatto con altro consulente", "Riattivato"];
-const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Imprenditore non sei Solo"];
+/* Stato = Esito Contatto: cosa è successo nell'ultimo tentativo di contatto */
+const STATI_VALIDI = ["Non risponde", "Appuntamento fissato", "Non interessato", "Da non ricontattare"];
+/* Fase Cliente = Stato di gestione: elenco unico (assorbe i vecchi "Riattivato" e
+   "In contatto con altro consulente", ora "Gestito da un altro consulente") */
+const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente"];
 
 /* Palette categorica per identificare i consulenti nei grafici (ordine fisso, non ciclato
    per i primi 8 slot — validata per distinguibilità anche in caso di daltonismo). */
 const COLORI_CONSULENTI = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
-/* Colori dello Stato: riusano esattamente quelli già assegnati ai badge nel resto del portale */
-const COLORI_STATO = { 'Da assegnare': '#8a8a8a', 'Assegnato': '#8a3570', 'In trattativa': '#c97a1e', 'In contatto con altro consulente': '#3a6fb3', 'Riattivato': '#2f9e63' };
+/* Colori dello Stato (Esito Contatto): riusano esattamente quelli già assegnati ai badge nel resto del portale */
+const COLORI_STATO = { 'Non risponde': '#8a8a8a', 'Appuntamento fissato': '#2f9e63', 'Non interessato': '#c97a1e', 'Da non ricontattare': '#c0392b' };
 const MESI_BREVI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 /* Alias per far coincidere il testo scritto nel foglio Google con i nomi ufficiali ISTAT */
@@ -1483,6 +1527,39 @@ async function loadFromFirestore() {
         });
       }
 
+      /* ---- Migrazione soft: unificazione Stato → Fase Cliente (2026-08-xx) ----
+         "Riattivato" e "In contatto con altro consulente" sono stati rimossi da STATI_VALIDI
+         e assorbiti nell'unico elenco FASI_VALIDE (il secondo rinominato "Gestito da un altro
+         consulente"). Il campo Stato viene ridefinito come "Esito Contatto" (Non risponde /
+         Appuntamento fissato / Non interessato / Da non ricontattare).
+         Per non perdere nessun dato storico, il vecchio valore di Stato (qualunque fosse) viene
+         sempre copiato in "statoPrecedente" prima di essere svuotato — anche se non era né
+         "Riattivato" né "In contatto con altro consulente" (es. "Da assegnare", "Assegnato",
+         "In trattativa": valori ormai privi di una casella nel nuovo schema, ma conservati). */
+      const MAPPA_VECCHIO_STATO_A_FASE = { 'Riattivato': 'Riattivato', 'In contatto con altro consulente': 'Gestito da un altro consulente' };
+      const daMigrareStatoFase = contatti.filter(c => c.stato && !STATI_VALIDI.includes(c.stato));
+      if (daMigrareStatoFase.length) {
+        const BATCH_SIZE_MIG2 = 500;
+        for (let i = 0; i < daMigrareStatoFase.length; i += BATCH_SIZE_MIG2) {
+          const chunk = daMigrareStatoFase.slice(i, i + BATCH_SIZE_MIG2);
+          const batchMig2 = db.batch();
+          chunk.forEach(c => {
+            const nuovaFase = (!c.faseCliente && MAPPA_VECCHIO_STATO_A_FASE[c.stato]) ? MAPPA_VECCHIO_STATO_A_FASE[c.stato] : (c.faseCliente || '');
+            batchMig2.update(CF_CLIENTI().doc(sanitizeDocId(c._key)), { statoPrecedente: c.stato, stato: '', faseCliente: nuovaFase });
+          });
+          await batchMig2.commit();
+        }
+        // Aggiorna in memoria senza ricaricare
+        contatti.forEach(c => {
+          if (c.stato && !STATI_VALIDI.includes(c.stato)) {
+            const nuovaFase = (!c.faseCliente && MAPPA_VECCHIO_STATO_A_FASE[c.stato]) ? MAPPA_VECCHIO_STATO_A_FASE[c.stato] : (c.faseCliente || '');
+            c.statoPrecedente = c.stato;
+            c.stato = '';
+            c.faseCliente = nuovaFase;
+          }
+        });
+      }
+
       /* ---- Carica eventi dalla sottocollezione ---- */
       const eventiSnap = await CF_EVENTI().get();
       eventiLogCache = eventiSnap.docs.map(d => d.data());
@@ -1610,6 +1687,8 @@ function aggiornaUIPerRuolo() {
   document.querySelector('.nav-btn[data-nav="tutorial"]').style.display = puoVedereTutorial() ? '' : 'none';
   document.querySelector('.nav-btn[data-nav="riassunto"]').style.display = puoVedereRiassunto() ? '' : 'none';
   document.getElementById('dbFiltroConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
+  document.getElementById('dbFiltroVecchioConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
+  document.getElementById('dbFiltroNonAssegnatiWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
 }
 
 /* ===================== UTILITY ===================== */
@@ -1946,7 +2025,7 @@ function elencoConsulentiPerSelect() {
 function creaRigaHtml(c) {
   const opzioniConsulenti = elencoConsulentiPerSelect();
   const elencoNomiConsulenti = nomiConsulenti();
-  const statoClass = 'sel-stato-' + normalizza(c.stato || 'Da assegnare').replace(/\s+/g, '');
+  const statoClass = c.stato ? 'sel-stato-' + normalizza(c.stato).replace(/\s+/g, '') : '';
   const faseClass = c.faseCliente ? 'sel-fase-' + normalizza(c.faseCliente).replace(/\s+/g, '') : '';
   const warning = (c.consulente && elencoNomiConsulenti.length && !elencoNomiConsulenti.includes(c.consulente))
     ? '<span class="badge badge-warning" title="Nome non presente nell\'elenco consulenti">⚠ non in elenco</span>' : '';
@@ -1963,7 +2042,8 @@ function creaRigaHtml(c) {
     celleConsulente = `${escapeHtml(c.consulente) || '—'} ${warning}`;
   }
 
-  const opzStato = STATI_VALIDI.map(s => `<option value="${s}" ${c.stato === s ? 'selected' : ''}>${s}</option>`);
+  const opzStato = ['<option value="">—</option>'].concat(
+    STATI_VALIDI.map(s => `<option value="${s}" ${c.stato === s ? 'selected' : ''}>${s}</option>`));
   const opzFase = ['<option value="">—</option>'].concat(
     FASI_VALIDE.map(f => `<option value="${f}" ${c.faseCliente === f ? 'selected' : ''}>${f}</option>`));
 
@@ -1972,7 +2052,9 @@ function creaRigaHtml(c) {
       Cliente attivo
     </label>`;
 
-  return `<tr>
+  const rigaBloccataClass = c.faseCliente === 'Bloccato' ? ' class="riga-bloccata"' : '';
+
+  return `<tr${rigaBloccataClass}>
       <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
       <td>${escapeHtml(c.referente)}</td>
       <td>${c.contatto ? '<a href="tel:'+escapeHtml(c.contatto)+'">'+escapeHtml(c.contatto)+'</a>' : ''}</td>
@@ -2039,12 +2121,12 @@ function aggiornaStatsBar() {
   const totale = righeVisibili.length;
   const province = new Set(righeVisibili.map(c => c._provinciaMatch).filter(Boolean)).size;
   const comuni = new Set(righeVisibili.map(c => c._comuneMatch).filter(Boolean)).size;
-  const daAssegnare = righeVisibili.filter(c => (c.stato || 'Da assegnare') === 'Da assegnare').length;
+  const nonAssegnati = righeVisibili.filter(c => !c.consulente).length;
   bar.innerHTML = `
     <div class="stat-pill"><div class="stat-pill-value">${totale}</div><div class="stat-pill-label">Clienti fermi</div></div>
     <div class="stat-pill"><div class="stat-pill-value">${province}</div><div class="stat-pill-label">Provincie coperte</div></div>
     <div class="stat-pill"><div class="stat-pill-value">${comuni}</div><div class="stat-pill-label">Comuni coperti</div></div>
-    <div class="stat-pill"><div class="stat-pill-value">${daAssegnare}</div><div class="stat-pill-label">Da assegnare</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${nonAssegnati}</div><div class="stat-pill-label">Senza consulente</div></div>
   `;
   document.getElementById('emptyStateNoData').style.display = totale === 0 ? 'block' : 'none';
 }
@@ -2063,11 +2145,19 @@ function inizializzaPaginaDatabase() {
   selCons.innerHTML = '<option value="">Tutti</option>' + opzioniConsulenti.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
   if (opzioniConsulenti.includes(valorePrecedenteCons)) selCons.value = valorePrecedenteCons;
 
+  const selVecchioCons = document.getElementById('dbFiltroVecchioConsulente');
+  const valorePrecedenteVecchioCons = selVecchioCons.value;
+  const opzioniVecchiConsulenti = [...new Set(applicaVisibilitaRuolo(contatti).map(c => c.vecchioConsulente).filter(Boolean))].sort();
+  selVecchioCons.innerHTML = '<option value="">Tutti</option>' + opzioniVecchiConsulenti.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  if (opzioniVecchiConsulenti.includes(valorePrecedenteVecchioCons)) selVecchioCons.value = valorePrecedenteVecchioCons;
+
   renderDatabase();
 }
 
 function renderDatabase() {
   const filtroConsulente = puoAssegnareConsulente() ? document.getElementById('dbFiltroConsulente').value : '';
+  const filtroVecchioConsulente = puoAssegnareConsulente() ? document.getElementById('dbFiltroVecchioConsulente').value : '';
+  const filtroNonAssegnati = puoAssegnareConsulente() && document.getElementById('dbFiltroNonAssegnati').checked;
   const filtroProvincia = document.getElementById('dbFiltroProvincia').value;
   const filtroComune = normalizza(document.getElementById('dbFiltroComune').value);
   const filtroStato = document.getElementById('dbFiltroStato').value;
@@ -2077,6 +2167,8 @@ function renderDatabase() {
 
   let righe = applicaVisibilitaRuolo(contatti);
   if (filtroConsulente) righe = righe.filter(c => c.consulente === filtroConsulente);
+  if (filtroVecchioConsulente) righe = righe.filter(c => c.vecchioConsulente === filtroVecchioConsulente);
+  if (filtroNonAssegnati) righe = righe.filter(c => !c.consulente);
   if (filtroProvincia) righe = righe.filter(c => c._provinciaMatch === filtroProvincia);
   if (filtroComune) righe = righe.filter(c => normalizza(c._comuneMatch || c.comune).includes(filtroComune));
   if (filtroStato) righe = righe.filter(c => c.stato === filtroStato);
@@ -2103,6 +2195,24 @@ function nomiConsulenti() {
   return getUtenti().filter(u => u.ruolo === 'consulente').map(u => u.nome).sort();
 }
 
+function elencoDirezione() {
+  return getUtenti().filter(u => u.ruolo === 'direzione');
+}
+
+function opzioniDvHtml(selezionato) {
+  const direzione = elencoDirezione();
+  let opts = '<option value="">— Nessuno —</option>';
+  opts += direzione.map(u => `<option value="${u.id}" ${selezionato === u.id ? 'selected' : ''}>${escapeHtml(u.nome)}</option>`).join('');
+  return opts;
+}
+
+function aggiornaVisibilitaDvNuovoUtente() {
+  const ruolo = sessione.ruolo === 'direzione' ? 'consulente' : document.getElementById('nuovoUtenteRuolo').value;
+  const dvWrap = document.getElementById('nuovoUtenteDvWrap');
+  dvWrap.style.display = ruolo === 'consulente' ? '' : 'none';
+  if (ruolo === 'consulente') document.getElementById('nuovoUtenteDv').innerHTML = opzioniDvHtml('');
+}
+
 function renderConsulenti() {
   document.getElementById('utentiAddCard').style.display = puoVedereUtenti() ? 'block' : 'none';
 
@@ -2115,6 +2225,7 @@ function renderConsulenti() {
     ruoloSelect.innerHTML = '<option value="direzione">Direzione Vendite</option><option value="consulente">Consulente</option>';
     ruoloWrap.style.display = '';
   }
+  aggiornaVisibilitaDvNuovoUtente();
 
   let visibili = [];
   if (sessione.ruolo === 'superadmin') visibili = getUtenti();
@@ -2130,16 +2241,31 @@ function renderConsulenti() {
   if (!visibili.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
-  body.innerHTML = visibili.map(u => `<tr>
+  body.innerHTML = visibili.map(u => {
+    const cellaDv = u.ruolo === 'consulente'
+      ? `<select class="td-select" onchange="modificaDvUtente('${u.id}', this.value)">${opzioniDvHtml(u.dvAssegnato || '')}</select>`
+      : '—';
+    return `<tr>
       <td class="ragione-sociale">${escapeHtml(u.nome)}</td>
       <td>${escapeHtml(u.email)}</td>
       <td><span class="td-ruolo-badge td-ruolo-${u.ruolo}">${etichette[u.ruolo] || u.ruolo}</span></td>
+      <td>${cellaDv}</td>
       <td><input type="text" class="td-password-input" value="${escapeHtml(u.password)}" onchange="modificaPasswordUtente('${u.id}', this.value)"></td>
       <td>
         <button class="icon-btn" title="Apri email con le credenziali" onclick="inviaEmailUtente('${u.id}')">✉️</button>
         <button class="icon-btn danger" title="Elimina account" onclick="eliminaUtente('${u.id}')">🗑️</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+}
+
+async function modificaDvUtente(id, dvId) {
+  const utenti = getUtenti();
+  const u = utenti.find(x => x.id === id);
+  if (!u || !puoGestireUtente(u)) return;
+  u.dvAssegnato = dvId || null;
+  await salvaUtenti(utenti);
+  showToast('DV a carico aggiornato');
 }
 
 async function aggiungiUtente() {
@@ -2149,6 +2275,7 @@ async function aggiungiUtente() {
   const password = document.getElementById('nuovoUtentePassword').value.trim();
   let ruolo = document.getElementById('nuovoUtenteRuolo').value;
   if (sessione.ruolo === 'direzione') ruolo = 'consulente';
+  const dvAssegnato = ruolo === 'consulente' ? (document.getElementById('nuovoUtenteDv').value || null) : null;
 
   if (!nome || !email || !password) { showToast('Compila nome, email e password'); return; }
   const utenti = getUtenti();
@@ -2157,7 +2284,7 @@ async function aggiungiUtente() {
     return;
   }
 
-  const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), nome, email, password, ruolo };
+  const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), nome, email, password, ruolo, dvAssegnato };
   utenti.push(nuovo);
   await salvaUtenti(utenti);
 
@@ -2239,8 +2366,7 @@ function calcolaStatisticheCruscotto() {
     return {
       nome,
       assegnati: righe.length,
-      riattivati: righe.filter(c => c.stato === 'Riattivato').length,
-      inTrattativa: righe.filter(c => c.stato === 'In trattativa').length,
+      riattivati: righe.filter(c => c.faseCliente === 'Riattivato').length,
       attivi: righe.filter(c => c.clienteAttivo === true).length,
       fermi: righe.filter(c => c.faseCliente === 'Fermo').length,
       inGestione: righe.filter(c => c.faseCliente === 'In Gestione').length,
@@ -2257,9 +2383,7 @@ function calcolaStatisticheCruscotto() {
     totale: tutti.length,
     assegnati: tutti.filter(c => c.consulente).length,
     nonAssegnati,
-    daAssegnare: tutti.filter(c => (c.stato || 'Da assegnare') === 'Da assegnare').length,
-    riattivati: tutti.filter(c => c.stato === 'Riattivato').length,
-    inTrattativa: tutti.filter(c => c.stato === 'In trattativa').length,
+    riattivati: tutti.filter(c => c.faseCliente === 'Riattivato').length,
     inGestione: tutti.filter(c => c.faseCliente === 'In Gestione').length,
     bloccati: tutti.filter(c => c.faseCliente === 'Bloccato').length,
     clientiAttiviTot: tutti.filter(c => c.clienteAttivo === true).length,
@@ -2279,9 +2403,8 @@ function renderCruscotto() {
   kpi.innerHTML = `
     <div class="kpi-card"><div class="kpi-value">${s.totale}</div><div class="kpi-label">Clienti fermi totali</div></div>
     <div class="kpi-card"><div class="kpi-value">${s.assegnati}</div><div class="kpi-label">Assegnati a un consulente</div></div>
-    <div class="kpi-card kpi-neutral"><div class="kpi-value">${s.daAssegnare}</div><div class="kpi-label">Da assegnare</div></div>
+    <div class="kpi-card kpi-neutral"><div class="kpi-value">${s.nonAssegnati}</div><div class="kpi-label">Senza consulente</div></div>
     <div class="kpi-card"><div class="kpi-value">${s.riattivati}</div><div class="kpi-label">Riattivati</div></div>
-    <div class="kpi-card"><div class="kpi-value">${s.inTrattativa}</div><div class="kpi-label">In lavorazione</div></div>
     <div class="kpi-card"><div class="kpi-value">${s.inGestione}</div><div class="kpi-label">In gestione</div></div>
     <div class="kpi-card ${s.bloccati ? 'kpi-alert' : ''}"><div class="kpi-value">${s.bloccati}</div><div class="kpi-label">Bloccati</div></div>
     <div class="kpi-card" style="--fucsia:#2f9e63;--fucsia-dark:#1f7a4a;"><div class="kpi-value">${s.clientiAttiviTot}</div><div class="kpi-label">Clienti attivi</div></div>
@@ -2304,7 +2427,6 @@ function renderCruscotto() {
       <td class="ragione-sociale">${escapeHtml(r.nome)}</td>
       <td class="num-cell">${r.assegnati}</td>
       <td class="num-cell ${r.riattivati ? '' : 'zero'}">${r.riattivati}</td>
-      <td class="num-cell ${r.inTrattativa ? '' : 'zero'}">${r.inTrattativa}</td>
       <td class="num-cell ${r.attivi ? '' : 'zero'}">${r.attivi}</td>
       <td class="num-cell ${r.fermi ? '' : 'zero'}">${r.fermi}</td>
       <td class="num-cell ${r.inGestione ? '' : 'zero'}">${r.inGestione}</td>
@@ -2374,7 +2496,7 @@ function renderRiassunto() {
         <td>${c.email ? '<a href="mailto:' + escapeHtml(c.email) + '">' + escapeHtml(c.email) + '</a>' : '—'}</td>
         <td>${escapeHtml(c._comuneMatch || c.comune) || '—'}</td>
         <td>${escapeHtml(c._provinciaMatch || c.provincia) || '—'}</td>
-        <td>${escapeHtml(c.stato || 'Da assegnare')}</td>
+        <td>${escapeHtml(c.stato) || '—'}</td>
         <td>${escapeHtml(c.faseCliente) || '—'}</td>
         <td>${badgeAttivo}</td>
       </tr>`;
@@ -2440,7 +2562,7 @@ function renderMiniPieStato(s) {
 
   s.perConsulente.forEach(r => {
     const righeConsulente = contatti.filter(c => c.consulente === r.nome);
-    const valoriStato = STATI_VALIDI.map(st => righeConsulente.filter(c => (c.stato || 'Da assegnare') === st).length);
+    const valoriStato = STATI_VALIDI.map(st => righeConsulente.filter(c => c.stato === st).length);
     const contattati = righeConsulente.filter(c => c.ultimoContatto).length;
     const nonContattati = righeConsulente.length - contattati;
 
@@ -2786,7 +2908,7 @@ function mappaRighe(righe) {
       comune: comuneTesto,
       vecchioConsulente: get('vecchioConsulente'),
       consulente: get('consulente'),
-      stato: STATI_VALIDI.includes(get('stato')) ? get('stato') : (get('stato') || 'Da assegnare'),
+      stato: STATI_VALIDI.includes(get('stato')) ? get('stato') : (get('stato') || ''),
       faseCliente: FASI_VALIDE.includes(get('faseCliente')) ? get('faseCliente') : '',
       ultimoContatto: '',
       _provinciaMatch: provFeature ? provFeature.properties.prov_name : null,
@@ -2821,11 +2943,21 @@ async function registraEventoCruscotto(campo, valore, vecchioValore, riga) {
   if (campo === 'stato' && valore === 'Riattivato' && vecchioValore !== 'Riattivato') {
     nuoviEventi.push({ tipo: 'riattivato', consulente: riga.consulente, data: oggiIso() });
   }
+  /* "Riattivato" ora vive in Fase Cliente (non più in Stato): stesso tipo evento, nuova origine */
+  if (campo === 'faseCliente' && valore === 'Riattivato' && vecchioValore !== 'Riattivato') {
+    nuoviEventi.push({ tipo: 'riattivato', consulente: riga.consulente, data: oggiIso() });
+  }
   if (campo === 'stato' && valore === 'In trattativa' && vecchioValore !== 'In trattativa') {
     nuoviEventi.push({ tipo: 'in_trattativa', consulente: riga.consulente, data: oggiIso() });
   }
   if (campo === 'consulente' && valore && valore !== vecchioValore) {
     nuoviEventi.push({ tipo: 'assegnato', consulente: valore, data: oggiIso() });
+  }
+  /* Registra la rimozione di un cliente dalla gestione di un consulente, per poterla
+     vedere nel grafico "Andamento nel tempo" (altrimenti il grafico mostra solo assegnazioni
+     e sembra "non aggiornarsi mai" quando un contatto viene tolto a un consulente). */
+  if (campo === 'consulente' && !valore && vecchioValore) {
+    nuoviEventi.push({ tipo: 'rimosso', consulente: vecchioValore, data: oggiIso() });
   }
   /* Nuovo: registra attivazione cliente (clienteAttivo = true) */
   if (campo === 'clienteAttivo' && valore === true) {
@@ -2850,10 +2982,19 @@ async function aggiornaCampoRiga(key, campo, valore) {
   // Aggiorna in memoria
   const riga = contatti.find(c => c._key === key);
   let vecchioValore;
+  const campiExtra = {};
   if (riga) {
     vecchioValore = riga[campo];
     riga[campo] = valore;
     await registraEventoCruscotto(campo, valore, vecchioValore, riga);
+
+    // "Da non ricontattare" fa scattare in automatico "Bloccato" nello Stato di gestione
+    if (campo === 'stato' && valore === 'Da non ricontattare' && riga.faseCliente !== 'Bloccato') {
+      const vecchiaFase = riga.faseCliente;
+      riga.faseCliente = 'Bloccato';
+      campiExtra.faseCliente = 'Bloccato';
+      await registraEventoCruscotto('faseCliente', 'Bloccato', vecchiaFase, riga);
+    }
   }
 
   aggiornaStatsBar();
@@ -2868,10 +3009,10 @@ async function aggiornaCampoRiga(key, campo, valore) {
     renderCruscotto();
   }
 
-  // Persiste il singolo campo nel documento cliente della sottocollezione
+  // Persiste il campo modificato (+ eventuale campo collegato, es. Bloccato automatico) nel documento cliente
   try {
-    await CF_CLIENTI().doc(sanitizeDocId(key)).update({ [campo]: valore });
-    showToast('Modifica salvata');
+    await CF_CLIENTI().doc(sanitizeDocId(key)).update({ [campo]: valore, ...campiExtra });
+    showToast(campiExtra.faseCliente ? 'Modifica salvata — cliente segnato come Bloccato' : 'Modifica salvata');
   } catch(e) {
     console.error('[Clienti Fermi] Errore salvataggio campo cliente:', e);
     showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
