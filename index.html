@@ -30,6 +30,8 @@
     --rosso-bg: #fdecea;
     --blu: #3a6fb3;
     --blu-bg: #e6eefb;
+    --viola: #7a4bc9;
+    --viola-bg: #efe6fb;
   }
 
   html { height: 100%; }
@@ -363,10 +365,13 @@
   /* Stato di gestione: nuovi valori confluiti da Stato nell'elenco unico Fase Cliente */
   .badge-fase-riattivato { background: var(--verde-bg); color: var(--verde); }
   .badge-fase-gestitodaunaltroconsulente { background: var(--blu-bg); color: var(--blu); }
+  .badge-fase-fuorizona { background: var(--viola-bg); color: var(--viola); }
 
   /* Riga evidenziata quando il cliente è Bloccato */
   tr.riga-bloccata td { background: var(--rosso-bg) !important; }
   tr.riga-bloccata:hover td { background: #fbdcd8 !important; }
+  tr.riga-fuorizona td { background: var(--viola-bg) !important; }
+  tr.riga-fuorizona:hover td { background: #e2d2f7 !important; }
 
   .td-select {
     background: #fff; border: 1px solid var(--card-border); color: var(--testo);
@@ -390,6 +395,7 @@
   .td-select.sel-fase-imprenditorenonseisolo { color: var(--blu); }
   .td-select.sel-fase-riattivato { color: var(--verde); }
   .td-select.sel-fase-gestitodaunaltroconsulente { color: var(--blu); }
+  .td-select.sel-fase-fuorizona { color: var(--viola); font-weight: 700; }
   .td-vecchio-consulente { color: var(--testo-muted); font-size: 0.82rem; }
   .td-date-input {
     background: #fff; border: 1px solid var(--card-border); color: var(--testo);
@@ -733,6 +739,7 @@
           <option value="Riattivato">Riattivato</option>
           <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
           <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
+          <option value="Fuori Zona">Fuori Zona</option>
         </select>
       </div>
       <div class="filter-group">
@@ -831,6 +838,7 @@
           <option value="Riattivato">Riattivato</option>
           <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
           <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
+          <option value="Fuori Zona">Fuori Zona</option>
         </select>
       </div>
       <div class="filter-group">
@@ -989,6 +997,7 @@
       <div class="tutorial-legend-item"><span class="badge badge-fase-riattivato">Riattivato</span><span class="desc">Il cliente, prima fermo, è tornato attivo.</span></div>
       <div class="tutorial-legend-item"><span class="badge badge-fase-imprenditorenonseisolo">Imprenditore non sei Solo</span><span class="desc">Cliente inserito nel percorso dedicato "Imprenditore non sei Solo".</span></div>
       <div class="tutorial-legend-item"><span class="badge badge-fase-gestitodaunaltroconsulente">Gestito da un altro consulente</span><span class="desc">Il cliente è seguito da un consulente diverso da quello assegnato qui.</span></div>
+      <div class="tutorial-legend-item"><span class="badge badge-fase-fuorizona">Fuori Zona</span><span class="desc">Il cliente si trova fuori dalla zona di competenza.</span></div>
     </div>
 
     <div class="tutorial-tip">
@@ -1304,7 +1313,7 @@ const COMUNI_PROVINCIA_URL_FALLBACK = (id) => `https://raw.githubusercontent.com
 const STATI_VALIDI = ["Non risponde", "Appuntamento fissato", "Non interessato", "Da non ricontattare"];
 /* Fase Cliente = Stato di gestione: elenco unico (assorbe i vecchi "Riattivato" e
    "In contatto con altro consulente", ora "Gestito da un altro consulente") */
-const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente"];
+const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente", "Fuori Zona"];
 
 /* Palette categorica per identificare i consulenti nei grafici (ordine fisso, non ciclato
    per i primi 8 slot — validata per distinguibilità anche in caso di daltonismo). */
@@ -2073,7 +2082,8 @@ function creaRigaHtml(c) {
       Cliente attivo
     </label>`;
 
-  const rigaBloccataClass = c.faseCliente === 'Bloccato' ? ' class="riga-bloccata"' : '';
+  const rigaBloccataClass = c.faseCliente === 'Bloccato' ? ' class="riga-bloccata"'
+    : c.faseCliente === 'Fuori Zona' ? ' class="riga-fuorizona"' : '';
 
   return `<tr${rigaBloccataClass}>
       <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
