@@ -1560,6 +1560,27 @@ async function loadFromFirestore() {
         });
       }
 
+      /* ---- Migrazione soft: dataAssegnazione per contatti già assegnati prima di questa modifica ----
+         Senza questa data il grafico "Contatti assegnati" del Cruscotto (ora basato sui contatti
+         attualmente assegnati, non sul log eventi) non li mostrerebbe. Non conoscendo la data reale
+         della loro assegnazione, si usa la data odierna come punto di partenza: da qui in avanti
+         restano sincronizzati automaticamente con il database (spariscono se il contatto viene tolto
+         al consulente, si spostano se viene riassegnato). */
+      const daInizializzareDataAssegnazione = contatti.filter(c => c.consulente && !c.dataAssegnazione);
+      if (daInizializzareDataAssegnazione.length) {
+        const oggi = oggiIso();
+        const BATCH_SIZE_MIG3 = 500;
+        for (let i = 0; i < daInizializzareDataAssegnazione.length; i += BATCH_SIZE_MIG3) {
+          const chunk = daInizializzareDataAssegnazione.slice(i, i + BATCH_SIZE_MIG3);
+          const batchMig3 = db.batch();
+          chunk.forEach(c => {
+            batchMig3.update(CF_CLIENTI().doc(sanitizeDocId(c._key)), { dataAssegnazione: oggi });
+          });
+          await batchMig3.commit();
+        }
+        daInizializzareDataAssegnazione.forEach(c => { c.dataAssegnazione = oggi; });
+      }
+
       /* ---- Carica eventi dalla sottocollezione ---- */
       const eventiSnap = await CF_EVENTI().get();
       eventiLogCache = eventiSnap.docs.map(d => d.data());
@@ -2664,7 +2685,12 @@ function renderGraficoTrend() {
   const canvas = document.getElementById('chartTrend');
   const emptyEl = document.getElementById('chartTrendEmpty');
 
-  const eventi = getEventiLog().filter(e => e.tipo === metrica && e.consulente);
+  /* "Contatti assegnati" è l'unica metrica calcolata dal database live (chi ha DAVVERO il
+     contatto in carico oggi), non dal log eventi: così, se un contatto viene tolto a un
+     consulente, sparisce subito dal grafico invece di restarci per sempre come evento storico. */
+  const eventi = metrica === 'assegnato'
+    ? contatti.filter(c => c.consulente && c.dataAssegnazione).map(c => ({ consulente: c.consulente, data: c.dataAssegnazione }))
+    : getEventiLog().filter(e => e.tipo === metrica && e.consulente);
   const secchi = generaSecchiTempo(anno, granularita);
 
   if (!eventi.length) { canvas.style.display = 'none'; emptyEl.style.display = 'block'; return; }
@@ -2908,6 +2934,7 @@ function mappaRighe(righe) {
       comune: comuneTesto,
       vecchioConsulente: get('vecchioConsulente'),
       consulente: get('consulente'),
+      dataAssegnazione: get('consulente') ? oggiIso() : '',
       stato: STATI_VALIDI.includes(get('stato')) ? get('stato') : (get('stato') || ''),
       faseCliente: FASI_VALIDE.includes(get('faseCliente')) ? get('faseCliente') : '',
       ultimoContatto: '',
@@ -2994,6 +3021,21 @@ async function aggiornaCampoRiga(key, campo, valore) {
       riga.faseCliente = 'Bloccato';
       campiExtra.faseCliente = 'Bloccato';
       await registraEventoCruscotto('faseCliente', 'Bloccato', vecchiaFase, riga);
+    }
+
+    /* Data della assegnazione attualmente in vigore: usata dal grafico "Contatti assegnati"
+       nel Cruscotto per restare sempre sincronizzato con chi ha DAVVERO il contatto in carico
+       oggi (a differenza del log eventi, che è uno storico immutabile e continuerebbe a contare
+       anche le assegnazioni poi tolte). Se il contatto viene rimosso da un consulente, la data
+       viene svuotata: non essendo più assegnato a nessuno, non deve comparire nel grafico. */
+    if (campo === 'consulente') {
+      if (valore && valore !== vecchioValore) {
+        riga.dataAssegnazione = oggiIso();
+        campiExtra.dataAssegnazione = riga.dataAssegnazione;
+      } else if (!valore) {
+        riga.dataAssegnazione = '';
+        campiExtra.dataAssegnazione = '';
+      }
     }
   }
 
