@@ -1067,7 +1067,7 @@
                 <th>Email</th>
                 <th>Ruolo</th>
                 <th>DV a carico</th>
-                <th>Password</th>
+                <th>Accesso</th>
                 <th>Azioni</th>
               </tr>
             </thead>
@@ -1253,10 +1253,10 @@
         <input type="text" class="settings-input" id="pwdSuperAdminEmailInput" disabled>
       </div>
       <div class="settings-field">
-        <label class="settings-label">Password Super Admin</label>
-        <input type="text" class="settings-input" id="pwdSuperAdminInput">
+        <label class="settings-label">Nuova password (lascia vuoto se non vuoi cambiarla)</label>
+        <input type="text" class="settings-input" id="pwdSuperAdminInput" placeholder="Almeno 6 caratteri">
       </div>
-      <button class="btn btn-primary" onclick="salvaPassword()">Salva password</button>
+      <button class="btn btn-primary" onclick="salvaPassword()">Cambia password</button>
     </div>
   </div>
 </div>
@@ -1286,6 +1286,7 @@
 <!-- ===== FIREBASE ===== -->
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDMwBTaewsaXajevMR3rpaKGKvAJ51iAfk",
@@ -1297,6 +1298,16 @@
   };
   const _fbApp = firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const _fbAuth = firebase.auth();
+  /* Sessione solo per la scheda corrente (si perde chiudendo la scheda), come il vecchio
+     sistema: la sessione Firebase Auth di default persisterebbe anche riaprendo il browser. */
+  _fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(() => {});
+  /* App Firebase "secondaria": serve per creare un nuovo account (o migrarne uno esistente)
+     senza disconnettere l'amministratore che sta eseguendo l'operazione — altrimenti
+     createUserWithEmailAndPassword accederebbe automaticamente come il nuovo utente al posto suo. */
+  const _fbSecondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary');
+  const _fbSecondaryAuth = _fbSecondaryApp.auth();
+  _fbSecondaryAuth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(() => {});
 </script>
 
 <script>
@@ -1653,6 +1664,18 @@ function applicaVisibilitaRuolo(righe) {
   return righe;
 }
 
+/* Traduce i codici di errore di Firebase Authentication in messaggi comprensibili */
+function messaggioErroreAuth(e) {
+  const codice = (e && e.code) || '';
+  if (codice === 'auth/invalid-email') return 'Indirizzo email non valido.';
+  if (codice === 'auth/user-not-found' || codice === 'auth/wrong-password' || codice === 'auth/invalid-credential' || codice === 'auth/invalid-login-credentials') return 'Email o password non corretti.';
+  if (codice === 'auth/too-many-requests') return 'Troppi tentativi. Riprova tra qualche minuto.';
+  if (codice === 'auth/network-request-failed') return 'Impossibile connettersi. Controlla la rete e riprova.';
+  if (codice === 'auth/email-already-in-use') return 'Esiste già un account con questa email.';
+  if (codice === 'auth/weak-password') return 'La password deve avere almeno 6 caratteri.';
+  return 'Si è verificato un errore (' + (codice || 'sconosciuto') + '). Riprova.';
+}
+
 async function eseguiLogin() {
   const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
   const password = document.getElementById('loginPasswordInput').value;
@@ -1667,29 +1690,43 @@ async function eseguiLogin() {
     return;
   }
 
-  // Carica i dati da Firestore prima di validare le credenziali
   if (btnLogin) { btnLogin.textContent = 'Connessione...'; btnLogin.disabled = true; }
+
+  // 1. Verifica identità con Firebase Authentication
+  try {
+    await _fbAuth.signInWithEmailAndPassword(email, password);
+  } catch(e) {
+    if (btnLogin) { btnLogin.textContent = 'Entra'; btnLogin.disabled = false; }
+    errEl.textContent = messaggioErroreAuth(e);
+    errEl.classList.add('show');
+    return;
+  }
+
+  // 2. Carica i dati da Firestore (ora consentito: l'utente è autenticato)
   try {
     await loadFromFirestore();
   } catch(e) {
     if (btnLogin) { btnLogin.textContent = 'Entra'; btnLogin.disabled = false; }
     errEl.textContent = 'Impossibile connettersi al database. Controlla la rete e riprova.';
     errEl.classList.add('show');
+    await _fbAuth.signOut();
     return;
   }
   if (btnLogin) { btnLogin.textContent = 'Entra'; btnLogin.disabled = false; }
 
-  let ok = false, ruolo = null, nome = null;
-  if (email === SUPERADMIN_EMAIL.toLowerCase() && password === getSuperAdminPassword()) {
-    ok = true; ruolo = 'superadmin'; nome = 'Lorenzo';
+  // 3. Determina il ruolo (Firebase Auth verifica solo l'identità, non il ruolo)
+  let ruolo = null, nome = null;
+  if (email === SUPERADMIN_EMAIL.toLowerCase()) {
+    ruolo = 'superadmin'; nome = 'Lorenzo';
   } else {
-    const utente = getUtenti().find(u => u.email.toLowerCase() === email && u.password === password);
-    if (utente) { ok = true; ruolo = utente.ruolo; nome = utente.nome; }
+    const utente = getUtenti().find(u => u.email.toLowerCase() === email);
+    if (utente) { ruolo = utente.ruolo; nome = utente.nome; }
   }
 
-  if (!ok) {
-    errEl.textContent = 'Email o password non corretti.';
+  if (!ruolo) {
+    errEl.textContent = 'Il tuo account non è (più) abilitato su questo portale. Contatta il Super Admin.';
     errEl.classList.add('show');
+    await _fbAuth.signOut();
     return;
   }
 
@@ -1698,7 +1735,8 @@ async function eseguiLogin() {
   avviaApp();
 }
 
-function eseguiLogout() {
+async function eseguiLogout() {
+  try { await _fbAuth.signOut(); } catch(e) {}
   sessione = null;
   sessionStorage.removeItem('cf_sessione');
   document.getElementById('navbar').style.display = 'none';
@@ -2276,14 +2314,16 @@ function renderConsulenti() {
     const cellaDv = u.ruolo === 'consulente'
       ? `<select class="td-select" onchange="modificaDvUtente('${u.id}', this.value)">${opzioniDvHtml(u.dvAssegnato || '')}</select>`
       : '—';
+    const cellaAccesso = u.uid
+      ? `<button class="icon-btn" title="Invia email per reimpostare la password" onclick="inviaResetPasswordUtente('${u.id}')">🔑 Reset password</button>`
+      : `<button class="icon-btn" title="Attiva l'accesso sicuro per questo account, riusando la password già in uso" onclick="migraUtenteAdAuth('${u.id}')" style="color:var(--arancio);">⚠️ Migra ad Authentication</button>`;
     return `<tr>
       <td class="ragione-sociale">${escapeHtml(u.nome)}</td>
       <td>${escapeHtml(u.email)}</td>
       <td><span class="td-ruolo-badge td-ruolo-${u.ruolo}">${etichette[u.ruolo] || u.ruolo}</span></td>
       <td>${cellaDv}</td>
-      <td><input type="text" class="td-password-input" value="${escapeHtml(u.password)}" onchange="modificaPasswordUtente('${u.id}', this.value)"></td>
+      <td>${cellaAccesso}</td>
       <td>
-        <button class="icon-btn" title="Apri email con le credenziali" onclick="inviaEmailUtente('${u.id}')">✉️</button>
         <button class="icon-btn danger" title="Elimina account" onclick="eliminaUtente('${u.id}')">🗑️</button>
       </td>
     </tr>`;
@@ -2309,13 +2349,26 @@ async function aggiungiUtente() {
   const dvAssegnato = ruolo === 'consulente' ? (document.getElementById('nuovoUtenteDv').value || null) : null;
 
   if (!nome || !email || !password) { showToast('Compila nome, email e password'); return; }
+  if (password.length < 6) { showToast('La password deve avere almeno 6 caratteri (richiesto da Firebase)'); return; }
   const utenti = getUtenti();
   if (email.toLowerCase() === SUPERADMIN_EMAIL.toLowerCase() || utenti.some(u => u.email.toLowerCase() === email.toLowerCase())) {
     showToast('Esiste già un account con questa email');
     return;
   }
 
-  const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), nome, email, password, ruolo, dvAssegnato };
+  // Crea l'account di accesso vero e proprio su Firebase Authentication, usando l'app
+  // "secondaria" per non disconnettere l'amministratore che sta creando l'account.
+  let cred;
+  try {
+    cred = await _fbSecondaryAuth.createUserWithEmailAndPassword(email, password);
+  } catch(e) {
+    showToast(messaggioErroreAuth(e));
+    return;
+  }
+  await _fbSecondaryAuth.signOut();
+
+  // In Firestore si salva solo il ruolo/nome/uid: la password NON viene più scritta qui.
+  const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), uid: cred.user.uid, nome, email, ruolo, dvAssegnato };
   utenti.push(nuovo);
   await salvaUtenti(utenti);
 
@@ -2325,46 +2378,72 @@ async function aggiungiUtente() {
 
   renderConsulenti();
   showToast('Account creato');
-  apriEmailCredenziali(nuovo);
+  apriEmailCredenziali(nuovo, password);
 }
 
-async function modificaPasswordUtente(id, nuovaPassword) {
-  const utenti = getUtenti();
-  const u = utenti.find(x => x.id === id);
+/* Con Firebase Authentication non è più possibile impostare direttamente la password di
+   un altro utente da qui (servirebbe un server, che questo portale non ha): si invia invece
+   una email di reset generata e spedita automaticamente da Firebase, con un link che permette
+   alla persona di scegliersi una nuova password in autonomia. */
+async function inviaResetPasswordUtente(id) {
+  const u = getUtenti().find(x => x.id === id);
   if (!u || !puoGestireUtente(u)) return;
-  u.password = nuovaPassword.trim() || u.password;
-  await salvaUtenti(utenti);
-  showToast('Password aggiornata');
+  if (!u.uid) { showToast('Questo account non è ancora migrato a Firebase Authentication — usa prima "Migra"'); return; }
+  try {
+    await _fbAuth.sendPasswordResetEmail(u.email);
+    showToast('Email di reimpostazione password inviata a ' + u.email);
+  } catch(e) {
+    showToast(messaggioErroreAuth(e));
+  }
 }
 
 async function eliminaUtente(id) {
   const utenti = getUtenti();
   const u = utenti.find(x => x.id === id);
   if (!u || !puoGestireUtente(u)) return;
-  if (!confirm('Eliminare l\'account di ' + u.nome + '?')) return;
+  if (!confirm('Eliminare l\'account di ' + u.nome + '?\n\nNota: l\'account su Firebase Authentication non viene eliminato automaticamente (richiederebbe un server dedicato) — ma senza il suo profilo qui nel portale, questa persona non riuscirà comunque più ad accedere.')) return;
   await salvaUtenti(utenti.filter(x => x.id !== id));
   renderConsulenti();
   showToast('Account eliminato');
 }
 
+/* Migra un account creato PRIMA dell'introduzione di Firebase Authentication: crea il vero
+   account di accesso riusando la stessa password già in uso (nessun reset necessario per la
+   persona), poi rimuove la password in chiaro dal database. Va eseguita una sola volta per
+   ciascun account esistente. */
+async function migraUtenteAdAuth(id) {
+  const utenti = getUtenti();
+  const u = utenti.find(x => x.id === id);
+  if (!u || !puoGestireUtente(u)) return;
+  if (u.uid) { showToast('Questo account è già migrato'); return; }
+  if (!u.password) { showToast('Nessuna vecchia password trovata da migrare per questo account'); return; }
+  try {
+    const cred = await _fbSecondaryAuth.createUserWithEmailAndPassword(u.email, u.password);
+    await _fbSecondaryAuth.signOut();
+    u.uid = cred.user.uid;
+    delete u.password;
+    await salvaUtenti(utenti);
+    renderConsulenti();
+    showToast('Account migrato: ' + u.nome + ' può continuare ad accedere con la stessa password di prima');
+  } catch(e) {
+    showToast(messaggioErroreAuth(e));
+  }
+}
+
 /* Il portale non può inviare email da solo: apre il client di posta di Lorenzo con
-   il messaggio già pronto (destinatario, oggetto, testo con nome e password) da spedire con un click. */
-function apriEmailCredenziali(u) {
+   il messaggio già pronto (destinatario, oggetto, testo con nome e password) da spedire con un click.
+   La password va passata esplicitamente: non viene più salvata da nessuna parte dopo la creazione. */
+function apriEmailCredenziali(u, password) {
   const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente' };
   const oggetto = 'Le tue credenziali di accesso - Clienti Fermi OSM';
   const corpo = 'Ciao ' + u.nome + ',\n\n' +
     'Ecco le tue credenziali per accedere al portale Clienti Fermi OSM:\n\n' +
     'Email: ' + u.email + '\n' +
-    'Password: ' + u.password + '\n' +
+    'Password: ' + password + '\n' +
     'Ruolo: ' + (etichette[u.ruolo] || u.ruolo) + '\n\n' +
     'A presto,\nOSM Partner Bologna';
   const link = 'mailto:' + encodeURIComponent(u.email) + '?subject=' + encodeURIComponent(oggetto) + '&body=' + encodeURIComponent(corpo);
   window.location.href = link;
-}
-
-function inviaEmailUtente(id) {
-  const u = getUtenti().find(x => x.id === id);
-  if (u) apriEmailCredenziali(u);
 }
 
 /* ===================== CRUSCOTTO DI CONTROLLO ===================== */
@@ -2746,15 +2825,26 @@ function caricaImpostazioniUI() {
   if (cfState.ultimoAgg) impostaStatus(true, 'Ultimo aggiornamento: ' + cfState.ultimoAgg + ' — ' + contatti.length + ' righe caricate');
 
   document.getElementById('pwdSuperAdminEmailInput').value = SUPERADMIN_EMAIL;
-  document.getElementById('pwdSuperAdminInput').value = getSuperAdminPassword();
+  document.getElementById('pwdSuperAdminInput').value = '';
 }
 
+/* Con Firebase Authentication la password non è più leggibile da nessuna parte (nemmeno da
+   qui): puoi solo impostarne una nuova per te stesso, mentre sei loggato. */
 async function salvaPassword() {
   const nuova = document.getElementById('pwdSuperAdminInput').value.trim();
-  const nuovaPassword = nuova || SUPERADMIN_PASSWORD_DEFAULT;
-  cfState.superadminPassword = nuovaPassword;
-  await saveField('superadminPassword', nuovaPassword);
-  showToast('Password aggiornata');
+  if (!nuova) { showToast('Inserisci una nuova password'); return; }
+  if (nuova.length < 6) { showToast('La password deve avere almeno 6 caratteri'); return; }
+  try {
+    await _fbAuth.currentUser.updatePassword(nuova);
+    document.getElementById('pwdSuperAdminInput').value = '';
+    showToast('Password aggiornata');
+  } catch(e) {
+    if (e.code === 'auth/requires-recent-login') {
+      showToast('Per sicurezza: esci e rientra nel portale, poi riprova subito a cambiare la password');
+    } else {
+      showToast(messaggioErroreAuth(e));
+    }
+  }
 }
 
 function impostaStatus(ok, testo) {
@@ -3087,18 +3177,29 @@ async function avviaApp() {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-box')) document.getElementById('searchResults').classList.remove('show');
   });
-  // Legge la sessione da sessionStorage (non persiste tra tab/finestre)
-  sessione = JSON.parse(sessionStorage.getItem('cf_sessione') || 'null');
-  if (sessione) {
-    // Utente già loggato: carica Firestore e avvia
-    loadFromFirestore().then(() => {
-      avviaApp();
-    }).catch(() => {
-      showToast('Errore di connessione. Ricarica la pagina.');
-    });
-  } else {
+
+  /* La verità su "sono loggato?" ora è Firebase Authentication, non più solo sessionStorage.
+     onAuthStateChanged si attiva una volta all'avvio con lo stato corrente (persistenza SESSION:
+     resta valido ricaricando la pagina nella stessa scheda, si perde chiudendola — stesso
+     comportamento del vecchio sistema). */
+  _fbAuth.onAuthStateChanged((user) => {
+    if (user) {
+      const sessioneSalvata = JSON.parse(sessionStorage.getItem('cf_sessione') || 'null');
+      if (sessioneSalvata && sessioneSalvata.email === (user.email || '').toLowerCase()) {
+        sessione = sessioneSalvata;
+        loadFromFirestore().then(() => {
+          avviaApp();
+        }).catch(() => {
+          showToast('Errore di connessione. Ricarica la pagina.');
+        });
+        return;
+      }
+    }
+    // Nessun utente Firebase autenticato, o sessione applicativa mancante/incoerente: richiedi login
+    sessione = null;
+    sessionStorage.removeItem('cf_sessione');
     showPage('login');
-  }
+  });
 })();
 </script>
 </body>
