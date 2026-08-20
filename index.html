@@ -566,6 +566,274 @@
     .nav-btn { padding: 6px 10px; font-size: 0.76rem; }
   }
 
+  /* ===== HOME CHOOSER ===== */
+  #page-home { padding-top: 0; }
+  .home-wrap { min-height: calc(100vh - 60px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+  .home-wrap > div { max-width: 820px; width: 100%; }
+  .home-eyebrow {
+    font-size: 0.72rem; font-weight: 700; color: var(--fucsia);
+    letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .home-eyebrow::before, .home-eyebrow::after {
+    content: ''; display: inline-block; width: 30px; height: 1px; background: var(--fucsia-border);
+  }
+  .home-title {
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem); font-weight: 800; color: var(--testo);
+    text-align: center; margin-bottom: 10px; line-height: 1.2;
+  }
+  .home-subtitle {
+    text-align: center; font-size: 0.9rem; color: var(--testo-muted);
+    margin-bottom: 40px; line-height: 1.6;
+  }
+  .home-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+  }
+  @media (max-width: 600px) { .home-cards { grid-template-columns: 1fr; } }
+  .home-card {
+    background: #fff; border: 2px solid var(--card-border); border-radius: 22px;
+    padding: 36px 28px; text-align: center; cursor: pointer; transition: all 0.25s;
+    box-shadow: var(--card-shadow);
+  }
+  .home-card:hover {
+    border-color: var(--fucsia);
+    box-shadow: 0 14px 44px rgba(179,70,141,0.2);
+    transform: translateY(-5px);
+  }
+  .home-card-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+  .home-card-title { font-size: 1.25rem; font-weight: 800; color: var(--testo); margin-bottom: 10px; }
+  .home-card-desc { font-size: 0.85rem; color: var(--testo-muted); line-height: 1.65; }
+  .home-card-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--fucsia-light); color: var(--fucsia-dark);
+    border: 1px solid var(--fucsia-border); border-radius: 20px;
+    padding: 4px 12px; font-size: 0.72rem; font-weight: 700;
+    margin-top: 16px; letter-spacing: 0.03em;
+  }
+  .home-card.home-card-bbc { border-color: #1baf7a22; }
+  .home-card.home-card-bbc:hover { border-color: #1baf7a; box-shadow: 0 14px 44px rgba(27,175,122,0.18); }
+  .home-card-bbc .home-card-badge { background: #e3f5ec; color: #2f9e63; border-color: #c0e8d5; }
+  /* ===== SEZIONE BBC — CAMBIO SEZIONE ===== */
+  .nav-section-sep { width: 1px; height: 20px; background: var(--card-border); margin: 0 4px; flex-shrink: 0; }
+  .nav-cambio-sezione {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border);
+    color: var(--fucsia-dark); padding: 6px 12px; border-radius: 7px;
+    font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+    font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .nav-cambio-sezione:hover { background: var(--fucsia); color: #fff; }
+  .nav-bbc-badge {
+    background: #e3f5ec; color: #2f9e63;
+    border: 1px solid #c0e8d5; border-radius: 20px;
+    padding: 3px 10px; font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+  }
+  /* ===== BBC ADD CONTACT FORM ===== */
+  .bbc-add-card { display: none; }  /* show via JS */
+  .bbc-add-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px; margin-bottom: 16px;
+  }
+  /* ===== BBC EVENTI ===== */
+  .bbc-eventi-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px; margin-top: 20px;
+  }
+  .bbc-evento-card {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 18px 20px; box-shadow: var(--card-shadow);
+    display: flex; flex-direction: column; gap: 6px; position: relative;
+  }
+  .bbc-evento-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #1baf7a, #0e8a5c); border-radius: 14px 14px 0 0;
+  }
+  .bbc-evento-nome { font-weight: 800; font-size: 0.92rem; color: var(--testo); }
+  .bbc-evento-data { font-size: 0.76rem; color: var(--testo-muted); font-weight: 600; }
+  .bbc-evento-note { font-size: 0.8rem; color: var(--testo); line-height: 1.5; }
+  .bbc-evento-del {
+    position: absolute; top: 12px; right: 12px;
+    background: transparent; border: 1px solid var(--card-border); border-radius: 6px;
+    cursor: pointer; padding: 3px 7px; font-size: 0.78rem; transition: all 0.15s;
+  }
+  .bbc-evento-del:hover { background: var(--rosso-bg); border-color: var(--rosso); color: var(--rosso); }
+  .bbc-eventi-empty { text-align: center; padding: 40px 20px; color: var(--testo-muted); font-size: 0.85rem; }
+
+  /* ===== ORGANIGRAMMA ===== */
+  .org-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  @media (max-width: 880px) {
+    .org-layout { grid-template-columns: 1fr; }
+  }
+  .org-form-card {
+    background: #fff;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: var(--card-shadow);
+    position: sticky;
+    top: 76px;
+  }
+  .org-form-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--testo);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .org-form-field { margin-bottom: 14px; }
+  .org-tree-card {
+    background: #fff;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px 24px 30px;
+    box-shadow: var(--card-shadow);
+    min-height: 280px;
+    overflow-x: auto;
+  }
+  .org-tree-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--testo-muted);
+  }
+  .org-tree-empty-icon { font-size: 2.4rem; margin-bottom: 12px; opacity: 0.5; }
+  /* Albero gerarchico */
+  .org-tree {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10px;
+  }
+  .org-tree ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    list-style: none;
+    margin: 0;
+    padding: 20px 5px 0;
+    position: relative;
+  }
+  .org-tree li {
+    float: left;
+    text-align: center;
+    list-style-type: none;
+    position: relative;
+    padding: 20px 10px 0;
+  }
+  .org-tree li::before, .org-tree li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 50%;
+    border-top: 2px solid var(--fucsia-border);
+    width: 50%;
+    height: 20px;
+  }
+  .org-tree li::after {
+    right: auto;
+    left: 50%;
+    border-left: 2px solid var(--fucsia-border);
+  }
+  .org-tree li:only-child::after,
+  .org-tree li:only-child::before { display: none; }
+  .org-tree li:only-child { padding-top: 0; }
+  .org-tree li:first-child::before,
+  .org-tree li:last-child::after { border: 0 none; }
+  .org-tree li:last-child::before {
+    border-right: 2px solid var(--fucsia-border);
+    border-radius: 0 5px 0 0;
+  }
+  .org-tree li:first-child::after { border-radius: 5px 0 0 0; }
+  .org-tree ul ul::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    border-left: 2px solid var(--fucsia-border);
+    width: 0;
+    height: 20px;
+  }
+  /* Nodo */
+  .org-node {
+    background: #fff;
+    border: 1.5px solid var(--fucsia-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-block;
+    min-width: 120px;
+    max-width: 190px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 8px rgba(179,70,141,0.07);
+    position: relative;
+    text-align: center;
+    vertical-align: top;
+  }
+  .org-node:hover {
+    border-color: var(--fucsia);
+    box-shadow: 0 4px 16px rgba(179,70,141,0.18);
+    transform: translateY(-2px);
+  }
+  .org-node.org-node-selected {
+    border-color: var(--fucsia);
+    background: var(--fucsia-light);
+  }
+  .org-node.org-node-root {
+    border-color: var(--fucsia);
+    border-width: 2px;
+    background: var(--fucsia-light);
+  }
+  .org-node-nome {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--testo);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .org-node.org-node-root .org-node-nome { color: var(--fucsia-dark); }
+  .org-node-ruolo {
+    font-size: 0.69rem;
+    color: var(--testo-muted);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+  .org-hint {
+    font-size: 0.76rem;
+    color: var(--testo-muted);
+    padding: 12px 0 0;
+    line-height: 1.55;
+  }
+
+  /* ===== BBC ===== */
+  .bbc-add-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 16px;
+  }
+  .bbc-add-card { border-left: 3px solid var(--fucsia); }
+  .bbc-evento-card {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 12px; box-shadow: var(--card-shadow);
+  }
+  .bbc-evento-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .bbc-evento-nome { font-weight: 700; font-size: 1rem; color: var(--testo); }
+  .bbc-evento-data { font-size: 0.8rem; color: var(--testo-muted); font-weight: 600; }
+  .bbc-evento-luogo { font-size: 0.82rem; color: var(--testo-muted); margin-bottom: 4px; }
+  .bbc-evento-note { font-size: 0.8rem; color: var(--grigio); margin-bottom: 6px; }
+  .bbc-evento-contatti { font-size: 0.82rem; color: var(--testo-muted); }
+
   /* ===== CHECKBOX CLIENTE ATTIVO (nelle righe tabella) ===== */
   .check-attivo-label {
     display: flex; align-items: center; gap: 5px; margin-top: 7px;
@@ -617,15 +885,153 @@
 
 <div class="navbar" id="navbar" style="display:none;">
   <div class="navbar-brand" onclick="goHome()"><img class="navbar-logo" src="data:image/png;base64,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" alt="OSM Partner">Clienti Fermi</div>
-  <button class="nav-btn active" data-nav="mappa" onclick="showPage('mappa')">Mappa</button>
-  <button class="nav-btn" data-nav="database" onclick="showPage('database')">Database</button>
-  <button class="nav-btn" data-nav="tutorial" onclick="showPage('tutorial')">Tutorial</button>
-  <button class="nav-btn" data-nav="consulenti" onclick="showPage('consulenti')">Utenti</button>
-  <button class="nav-btn" data-nav="cruscotto" onclick="showPage('cruscotto')">Cruscotto</button>
-  <button class="nav-btn" data-nav="riassunto" onclick="showPage('riassunto')">Riassunto</button>
-  <button class="nav-btn" data-nav="impostazioni" onclick="showPage('impostazioni')">Impostazioni</button>
+  <!-- Bottoni sezione CF -->
+  <button class="nav-btn active nav-cf-only" data-nav="mappa" onclick="showPage('mappa')">Mappa</button>
+  <button class="nav-btn nav-cf-only" data-nav="database" onclick="showPage('database')">Database</button>
+  <button class="nav-btn nav-cf-only" data-nav="tutorial" onclick="showPage('tutorial')">Tutorial</button>
+  <button class="nav-btn nav-cf-only" data-nav="consulenti" onclick="showPage('consulenti')">Utenti</button>
+  <button class="nav-btn nav-cf-only" data-nav="cruscotto" onclick="showPage('cruscotto')">Cruscotto</button>
+  <button class="nav-btn nav-cf-only" data-nav="riassunto" onclick="showPage('riassunto')">Riassunto</button>
+  <!-- Organigramma rimosso su richiesta -->
+  <button class="nav-btn nav-cf-only" data-nav="impostazioni" onclick="showPage('impostazioni')">Impostazioni</button>
+  <!-- Bottoni sezione BBC -->
+  <button class="nav-btn nav-bbc-only" data-nav="mappa" onclick="showPage('mappa')" style="display:none;">Mappa</button>
+  <button class="nav-btn nav-bbc-only" data-nav="database" onclick="showPage('database')" style="display:none;">Database BBC</button>
+  <button class="nav-btn nav-bbc-only" data-nav="tutorial" onclick="showPage('bbc-tutorial')" style="display:none;">Tutorial</button>
+  <button class="nav-btn nav-bbc-only" data-nav="consulenti" onclick="showPage('consulenti')" style="display:none;">Utenti</button>
+  <button class="nav-btn nav-bbc-only" data-nav="cruscotto" onclick="showPage('cruscotto')" style="display:none;">Cruscotto BBC</button>
+  <button class="nav-btn nav-bbc-only" data-nav="riassunto" onclick="showPage('riassunto')" style="display:none;">Riassunto BBC</button>
+  <button class="nav-btn nav-bbc-only" data-nav="bbc-eventi" onclick="showPage('bbc-eventi')" id="navBtnBbcEventi" style="display:none;">Eventi BBC</button>
+  <!-- Sempre visibili -->
+  <div class="nav-section-sep"></div>
+  <button class="nav-cambio-sezione" onclick="showPage('home')">&#8644; Cambia sezione</button>
   <span class="role-badge" id="roleBadge"></span>
   <button class="nav-btn" onclick="eseguiLogout()">Esci</button>
+</div>
+
+<!-- ===== PAGINA HOME (Scelta sezione) ===== -->
+<div class="page" id="page-home">
+  <div class="home-wrap">
+    <div style="padding-top:30px;">
+      <div class="home-eyebrow">OSM Partner Bologna</div>
+      <div class="home-title">Dove vuoi andare?</div>
+      <div class="home-subtitle">Scegli la sezione a cui accedere. Puoi tornare qui in qualsiasi momento dal menu.</div>
+      <div class="home-cards">
+        <div class="home-card" onclick="selezionaSezione('cf')">
+          <span class="home-card-icon">🗺️</span>
+          <div class="home-card-title">Database Clienti Fermi</div>
+          <div class="home-card-desc">La mappa nazionale dei clienti fermi OSM Partner Bologna. Assegnazioni, stati e fasi cliente, statistiche per consulente.</div>
+          <div class="home-card-badge">Clienti Fermi</div>
+        </div>
+        <div class="home-card home-card-bbc" onclick="selezionaSezione('bbc')">
+          <span class="home-card-icon">🤝</span>
+          <div class="home-card-title">Bologna Business Club</div>
+          <div class="home-card-desc">Il database dei contatti BBC. Aggiungi contatti direttamente, collegali agli eventi e gestisci il follow-up.</div>
+          <div class="home-card-badge">Bologna Business Club</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA BBC TUTORIAL ===== -->
+<div class="page" id="page-bbc-tutorial">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Tutorial</span> — Bologna Business Club</div>
+        <div class="section-subtitle">Come usare la sezione BBC del portale</div>
+      </div>
+    </div>
+    <div class="card tutorial-card">
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">1</div>
+        <div>
+          <div class="tutorial-step-title">Aggiungi i tuoi contatti BBC</div>
+          <div class="tutorial-step-desc">
+            Vai nella sezione <strong>Database BBC</strong> e usa il form in cima per aggiungere i contatti che hai incontrato agli eventi BBC. Inserisci nome/azienda, telefono, email e la città di provenienza.
+          </div>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">2</div>
+        <div>
+          <div class="tutorial-step-title">Collega il contatto a un evento</div>
+          <div class="tutorial-step-desc">
+            Quando aggiungi un contatto, puoi selezionare l'<strong>evento di provenienza</strong> (es. una serata networking). Questo aiuta a tracciare da quale evento sono arrivati i contatti.
+          </div>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">3</div>
+        <div>
+          <div class="tutorial-step-title">Segui i tuoi contatti</div>
+          <div class="tutorial-step-desc">
+            Usa le colonne <strong>Esito Contatto</strong> e <strong>Fase Cliente</strong> nel database per tenere traccia di come procede il rapporto con ogni contatto. Aggiorna la data di ultimo contatto ogni volta che li senti.
+          </div>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">4</div>
+        <div>
+          <div class="tutorial-step-title">Usa la mappa</div>
+          <div class="tutorial-step-desc">
+            La mappa in sezione BBC mostra la distribuzione geografica dei tuoi contatti esattamente come in sezione CF. Clicca su una regione e poi su una provincia per vedere i dettagli.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tutorial-tip">
+      <div class="tutorial-tip-icon">💡</div>
+      <div class="tutorial-tip-text">
+        <b>Ricorda:</b> i dati BBC sono completamente separati dal database Clienti Fermi. Puoi passare dall'una all'altra sezione in qualsiasi momento usando il pulsante "Cambia sezione" in alto.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA BBC EVENTI ===== -->
+<div class="page" id="page-bbc-eventi">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Eventi BBC</span></div>
+        <div class="section-subtitle">Gestione delle serate di networking e altri eventi fisici del Bologna Business Club</div>
+      </div>
+    </div>
+
+    <!-- Form aggiungi evento (solo Super Admin) -->
+    <div class="card">
+      <div class="settings-label" style="margin-bottom:12px;">Aggiungi nuovo evento</div>
+      <div class="bbc-add-grid">
+        <div class="settings-field">
+          <label class="settings-label">Nome evento *</label>
+          <input type="text" class="settings-input" id="bbcEventoNome" placeholder="Es. Serata Networking Maggio 2026">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Data</label>
+          <input type="date" class="settings-input" id="bbcEventoData">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Luogo</label>
+          <input type="text" class="settings-input" id="bbcEventoLuogo" placeholder="Es. Hotel Savoia, Bologna">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Note</label>
+          <input type="text" class="settings-input" id="bbcEventoNote" placeholder="Eventuali note aggiuntive">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="aggiungiBbcEvento()">+ Aggiungi evento</button>
+    </div>
+
+    <!-- Lista eventi -->
+    <div class="section-header" style="margin-top:8px;">
+      <div>
+        <div class="section-title" style="font-size:1rem;">Lista eventi</div>
+      </div>
+    </div>
+    <div id="bbcEventiWrap"></div>
+  </div>
 </div>
 
 <!-- ===== PAGINA LOGIN ===== -->
@@ -789,9 +1195,51 @@
   <div class="section-wrap">
     <div class="section-header">
       <div>
-        <div class="section-title"><span>Database</span></div>
-        <div class="section-subtitle" id="databaseContatore">Tutti i clienti fermi</div>
+        <div class="section-title"><span id="databaseTitolo">Database</span></div>
+        <div class="section-subtitle" id="databaseContatore">Tutti i contatti</div>
       </div>
+    </div>
+
+    <!-- Form aggiungi contatto BBC (nascosto in CF mode) -->
+    <div class="card bbc-add-card" id="bbcAddContactCard">
+      <div class="settings-label" style="margin-bottom:12px;">Aggiungi contatto BBC</div>
+      <div class="bbc-add-grid">
+        <div class="settings-field">
+          <label class="settings-label">Ragione Sociale / Nome</label>
+          <input type="text" class="settings-input" id="bbcNomeAzienda" placeholder="Es. Rossi Srl">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Referente</label>
+          <input type="text" class="settings-input" id="bbcReferente" placeholder="Es. Mario Rossi">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Telefono</label>
+          <input type="tel" class="settings-input" id="bbcContatto" placeholder="Es. 051 123456">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Email</label>
+          <input type="email" class="settings-input" id="bbcEmail" placeholder="mario@azienda.it">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Provincia</label>
+          <input type="text" class="settings-input" id="bbcProvincia" placeholder="Es. Bologna">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Comune</label>
+          <input type="text" class="settings-input" id="bbcComune" placeholder="Es. Imola">
+        </div>
+        <div class="settings-field" id="bbcConsulenteWrap">
+          <label class="settings-label">Assegna a</label>
+          <select class="settings-input" id="bbcConsulenteSelect"></select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Evento di provenienza (opzionale)</label>
+          <select class="settings-input" id="bbcEventoSelect">
+            <option value="">— Nessun evento —</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="aggiungiBbcContatto()">+ Aggiungi contatto</button>
     </div>
 
     <div class="filters-bar">
@@ -1129,6 +1577,7 @@
       </div>
     </div>
 
+    <div id="cruscottoTrendSection">
     <div class="cruscotto-subtable-title">📈 Andamento nel tempo</div>
     <div class="chart-card">
       <div class="filters-bar" style="margin-bottom:6px;">
@@ -1176,6 +1625,7 @@
     </div>
     <div class="mini-pie-grid" id="miniPieGrid"></div>
     <div id="miniPieEmpty" class="chart-empty" style="display:none;">Nessun consulente con clienti assegnati.</div>
+  </div>
   </div>
 </div>
 
@@ -1274,6 +1724,70 @@
       <button class="btn btn-outline" onclick="window.print()">🖨️ Stampa Riassunto</button>
     </div>
     <div id="riassuntoWrap"></div>
+  </div>
+</div>
+
+
+<!-- ===== PAGINA ORGANIGRAMMA (Solo Super Admin e Direzione Vendite) ===== -->
+<div class="page" id="page-organigramma">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Organigramma</span></div>
+        <div class="section-subtitle">Struttura gerarchica del team — aggiungibile e modificabile in tempo reale</div>
+      </div>
+    </div>
+
+    <div class="org-layout">
+      <!-- Form laterale -->
+      <div class="org-form-card">
+        <div class="org-form-title" id="orgFormTitle">Aggiungi persona</div>
+
+        <div class="org-form-field">
+          <label class="settings-label">Nome persona</label>
+          <input type="text" class="settings-input" id="orgNomeInput" list="orgNomeDatalist"
+            placeholder="Es. Mario Rossi" autocomplete="off">
+          <datalist id="orgNomeDatalist"></datalist>
+        </div>
+
+        <div class="org-form-field">
+          <label class="settings-label">Ruolo / Titolo</label>
+          <input type="text" class="settings-input" id="orgRuoloInput"
+            placeholder="Es. Direttore Vendite">
+        </div>
+
+        <div class="org-form-field">
+          <label class="settings-label">Riporta a</label>
+          <select class="settings-input" id="orgParentSelect">
+            <option value="">— Nessuno (vertice) —</option>
+          </select>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+          <button class="btn btn-primary" id="orgSaveBtn"
+            onclick="salvaNodeOrganigrammaUI()" style="justify-content:center;">+ Aggiungi</button>
+          <div id="orgEditBtns" style="display:none; gap:8px;">
+            <button class="btn btn-outline" onclick="annullaEditOrg()"
+              style="flex:1; justify-content:center;">Annulla</button>
+            <button class="btn" onclick="eliminaNodeOrgUI()"
+              style="flex:1; background:var(--rosso-bg); color:var(--rosso); border:1px solid var(--rosso); justify-content:center;">Elimina</button>
+          </div>
+        </div>
+
+        <div class="org-hint">Clicca su un nome nell'albero per modificarlo o eliminarlo.</div>
+      </div>
+
+      <!-- Albero gerarchico -->
+      <div class="org-tree-card">
+        <div id="orgTreeWrap">
+          <div class="org-tree-empty">
+            <div class="org-tree-empty-icon">🏢</div>
+            <div style="font-weight:700; margin-bottom:6px;">Organigramma vuoto</div>
+            <div>Aggiungi la prima persona usando il form a sinistra.</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1378,7 +1892,8 @@ let sessione = null; // letta da sessionStorage all'avvio nell'IIFE
    possono contenere milioni di documenti senza alcun limite di dimensione. */
 const CF_DOC_PATH  = () => db.collection('portali').doc('clienti-fermi');
 const CF_CLIENTI   = () => db.collection('portali').doc('clienti-fermi').collection('clienti');
-const CF_EVENTI    = () => db.collection('portali').doc('clienti-fermi').collection('eventi');
+const CF_EVENTI        = () => db.collection('portali').doc('clienti-fermi').collection('eventi');
+const CF_ORGANIGRAMMA  = () => db.collection('portali').doc('clienti-fermi').collection('organigramma');
 
 /* Sanitizza il _key per usarlo come ID documento Firestore (non può contenere '/') */
 function sanitizeDocId(key) {
@@ -1399,6 +1914,17 @@ let cfState = {
 
 /* Cache in memoria degli eventi del Cruscotto (caricata da sottocollezione eventi all'avvio) */
 let eventiLogCache = [];
+
+/* Cache in memoria dell'organigramma (caricata da sottocollezione organigramma all'avvio) */
+let organigrammaData = []; // array di { id, nome, ruolo, parentId }
+let orgEditingId    = null; // ID nodo in modifica; null = modalità aggiungi
+
+/* ===================== BBC — Bologna Business Club ===================== */
+const CF_BBC_CLIENTI    = () => db.collection('portali').doc('clienti-fermi').collection('bbc-clienti');
+const CF_BBC_EVENTI_LIST = () => db.collection('portali').doc('clienti-fermi').collection('bbc-eventi');
+let bbcContatti  = [];         // contatti della sezione BBC
+let bbcEventiList = [];        // eventi fisici BBC (serate networking, ecc.)
+let sezioneCorrente = 'cf';    // 'cf' oppure 'bbc'
 
 /* ===================== HELPER MIGRAZIONE ===================== */
 /* Scrive un array di righe (già con overlay applicato) nella sottocollezione clienti,
@@ -1648,6 +2174,7 @@ function puoVedereUtenti() { return sessione && (sessione.ruolo === 'superadmin'
 function puoVedereCruscotto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
 function puoVedereTutorial() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente'); }
 function puoVedereRiassunto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoVedereOrganigramma() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
 /* Super Admin gestisce tutti gli account, Direzione Vendite solo quelli con ruolo Consulente */
 function puoGestireUtente(utente) {
   if (!sessione) return false;
@@ -1749,11 +2276,20 @@ async function eseguiLogout() {
 function aggiornaUIPerRuolo() {
   const etichette = { superadmin: 'Super Admin', direzione: 'Direzione Vendite', consulente: 'Consulente' };
   document.getElementById('roleBadge').textContent = etichette[sessione.ruolo] + (sessione.nome ? ' · ' + sessione.nome : '');
-  document.querySelector('.nav-btn[data-nav="impostazioni"]').style.display = puoVedereImpostazioni() ? '' : 'none';
-  document.querySelector('.nav-btn[data-nav="consulenti"]').style.display = puoVedereUtenti() ? '' : 'none';
-  document.querySelector('.nav-btn[data-nav="cruscotto"]').style.display = puoVedereCruscotto() ? '' : 'none';
-  document.querySelector('.nav-btn[data-nav="tutorial"]').style.display = puoVedereTutorial() ? '' : 'none';
-  document.querySelector('.nav-btn[data-nav="riassunto"]').style.display = puoVedereRiassunto() ? '' : 'none';
+  // Prima imposta la sezione (CF/BBC): rende visibili tutti i bottoni della sezione attiva,
+  // nasconde quelli dell'altra sezione. Deve venire PRIMA dei controlli permesso.
+  aggiornaNvbarPerSezione(sezioneCorrente);
+  // Poi i controlli permesso: agiscono SOLO sui bottoni della sezione corrente
+  // usando il prefisso .nav-cf-only / .nav-bbc-only per evitare di riattivare
+  // bottoni dell'altra sezione tramite querySelector generico.
+  const _navPfx = sezioneCorrente === 'bbc' ? '.nav-bbc-only' : '.nav-cf-only';
+  const _q = (nav) => document.querySelector(_navPfx + '[data-nav="' + nav + '"]');
+  const _show = (el, vis) => { if (el) el.style.display = vis ? '' : 'none'; };
+  _show(_q('impostazioni'), puoVedereImpostazioni());
+  _show(_q('consulenti'), puoVedereUtenti());
+  _show(_q('cruscotto'), puoVedereCruscotto());
+  _show(_q('tutorial'), puoVedereTutorial());
+  _show(_q('riassunto'), puoVedereRiassunto());
   document.getElementById('dbFiltroConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
   document.getElementById('dbFiltroVecchioConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
   document.getElementById('dbFiltroNonAssegnatiWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
@@ -1799,6 +2335,15 @@ function risolviComune(testoComune, testoProvinciaSuggerita) {
   return candidati[0];
 }
 
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function escapeJs(str) {
   return String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
@@ -1812,12 +2357,16 @@ function showToast(msg) {
 
 /* ===================== NAVIGAZIONE PAGINE ===================== */
 function showPage(name) {
+  // In BBC mode, "tutorial" va alla pagina tutorial BBC
+  if (name === 'tutorial' && sezioneCorrente === 'bbc') name = 'bbc-tutorial';
   if (name === 'impostazioni' && !puoVedereImpostazioni()) name = 'mappa';
   if (name === 'cruscotto' && !puoVedereCruscotto()) name = 'mappa';
   if (name === 'tutorial' && !puoVedereTutorial()) name = 'mappa';
   if (name === 'riassunto' && !puoVedereRiassunto()) name = 'mappa';
+  if (name === 'organigramma') name = 'mappa'; // organigramma disabilitato
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
+  const pageEl = document.getElementById('page-' + name);
+  if (pageEl) pageEl.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const navBtn = document.querySelector('.nav-btn[data-nav="' + name + '"]');
   if (navBtn) navBtn.classList.add('active');
@@ -1829,6 +2378,8 @@ function showPage(name) {
   }
   if (name === 'impostazioni') caricaImpostazioniUI();
   if (name === 'database') inizializzaPaginaDatabase();
+  if (name === 'organigramma') inizializzaPaginaOrganigramma();
+  if (name === 'bbc-eventi') renderBbcEventi();
   if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
 }
 
@@ -2038,11 +2589,11 @@ function apriComune(nomeComune, nomeProvincia) {
 }
 
 function contattiPerProvincia(nomeProvincia) {
-  return applicaVisibilitaRuolo(contatti.filter(c => c._provinciaMatch === nomeProvincia));
+  return applicaVisibilitaRuolo(getContattiCorrenti().filter(c => c._provinciaMatch === nomeProvincia));
 }
 
 function contattiPerComune(nomeComune) {
-  return applicaVisibilitaRuolo(contatti.filter(c => c._comuneMatch === nomeComune));
+  return applicaVisibilitaRuolo(getContattiCorrenti().filter(c => c._comuneMatch === nomeComune));
 }
 
 function popolaFiltroConsulenti() {
@@ -2085,7 +2636,7 @@ function renderTabellaProvincia() {
 }
 
 function elencoConsulentiPerSelect() {
-  const nomiInDati = new Set(contatti.map(c => c.consulente).filter(Boolean));
+  const nomiInDati = new Set(getContattiCorrenti().map(c => c.consulente).filter(Boolean));
   return [...new Set([...nomiConsulenti(), ...nomiInDati])].sort();
 }
 
@@ -2186,13 +2737,13 @@ function selezionaComuneDaRicerca(nomeComune, nomeProvincia) {
 /* ===================== STATISTICHE HOME ===================== */
 function aggiornaStatsBar() {
   const bar = document.getElementById('statsBar');
-  const righeVisibili = applicaVisibilitaRuolo(contatti);
+  const righeVisibili = applicaVisibilitaRuolo(getContattiCorrenti());
   const totale = righeVisibili.length;
   const province = new Set(righeVisibili.map(c => c._provinciaMatch).filter(Boolean)).size;
   const comuni = new Set(righeVisibili.map(c => c._comuneMatch).filter(Boolean)).size;
   const nonAssegnati = righeVisibili.filter(c => !c.consulente).length;
   bar.innerHTML = `
-    <div class="stat-pill"><div class="stat-pill-value">${totale}</div><div class="stat-pill-label">Clienti fermi</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${totale}</div><div class="stat-pill-label">${sezioneCorrente === 'bbc' ? 'Contatti BBC' : 'Clienti fermi'}</div></div>
     <div class="stat-pill"><div class="stat-pill-value">${province}</div><div class="stat-pill-label">Provincie coperte</div></div>
     <div class="stat-pill"><div class="stat-pill-value">${comuni}</div><div class="stat-pill-label">Comuni coperti</div></div>
     <div class="stat-pill"><div class="stat-pill-value">${nonAssegnati}</div><div class="stat-pill-label">Senza consulente</div></div>
@@ -2202,8 +2753,20 @@ function aggiornaStatsBar() {
 
 /* ===================== PAGINA DATABASE ===================== */
 function inizializzaPaginaDatabase() {
+  // Titolo dinamico per sezione
+  const titoloEl = document.getElementById('databaseTitolo');
+  if (titoloEl) titoloEl.textContent = sezioneCorrente === 'bbc' ? 'Database Bologna Business Club' : 'Database';
+
+  // Form BBC add-contact: visibile a tutti in BBC mode (consulente, DV, SA)
+  const bbcCard = document.getElementById('bbcAddContactCard');
+  if (bbcCard) {
+    bbcCard.style.display = sezioneCorrente === 'bbc' ? 'block' : 'none';
+    if (sezioneCorrente === 'bbc') inizializzaFormAggiuntaBbc();
+  }
+
   const selProv = document.getElementById('dbFiltroProvincia');
-  const provinceConDati = [...new Set(applicaVisibilitaRuolo(contatti).map(c => c._provinciaMatch).filter(Boolean))].sort();
+  const dati = applicaVisibilitaRuolo(getContattiCorrenti());
+  const provinceConDati = [...new Set(dati.map(c => c._provinciaMatch).filter(Boolean))].sort();
   const valorePrecedenteProv = selProv.value;
   selProv.innerHTML = '<option value="">Tutte</option>' + provinceConDati.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
   if (provinceConDati.includes(valorePrecedenteProv)) selProv.value = valorePrecedenteProv;
@@ -2216,7 +2779,7 @@ function inizializzaPaginaDatabase() {
 
   const selVecchioCons = document.getElementById('dbFiltroVecchioConsulente');
   const valorePrecedenteVecchioCons = selVecchioCons.value;
-  const opzioniVecchiConsulenti = [...new Set(applicaVisibilitaRuolo(contatti).map(c => c.vecchioConsulente).filter(Boolean))].sort();
+  const opzioniVecchiConsulenti = [...new Set(dati.map(c => c.vecchioConsulente).filter(Boolean))].sort();
   selVecchioCons.innerHTML = '<option value="">Tutti</option>' + opzioniVecchiConsulenti.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
   if (opzioniVecchiConsulenti.includes(valorePrecedenteVecchioCons)) selVecchioCons.value = valorePrecedenteVecchioCons;
 
@@ -2234,7 +2797,7 @@ function renderDatabase() {
   const filtroTesto = normalizza(document.getElementById('dbFiltroTesto').value);
   const filtroSoloAttiviDb = document.getElementById('dbFiltroClientiAttivi') && document.getElementById('dbFiltroClientiAttivi').checked;
 
-  let righe = applicaVisibilitaRuolo(contatti);
+  let righe = applicaVisibilitaRuolo(getContattiCorrenti());
   if (filtroConsulente) righe = righe.filter(c => c.consulente === filtroConsulente);
   if (filtroVecchioConsulente) righe = righe.filter(c => c.vecchioConsulente === filtroVecchioConsulente);
   if (filtroNonAssegnati) righe = righe.filter(c => !c.consulente);
@@ -2246,7 +2809,9 @@ function renderDatabase() {
   if (filtroTesto) righe = righe.filter(c =>
     normalizza(c.ragioneSociale).includes(filtroTesto) || normalizza(c.referente).includes(filtroTesto));
 
-  document.getElementById('databaseContatore').textContent = righe.length + ' client' + (righe.length === 1 ? 'e' : 'i') + ' fermi';
+  const labelContatti = sezioneCorrente === 'bbc' ? 'contatto BBC' : 'cliente fermo';
+  const labelContattis = sezioneCorrente === 'bbc' ? 'contatti BBC' : 'clienti fermi';
+  document.getElementById('databaseContatore').textContent = righe.length + ' ' + (righe.length === 1 ? labelContatti : labelContattis);
 
   const body = document.getElementById('databaseBody');
   const emptyState = document.getElementById('databaseEmptyState');
@@ -2464,9 +3029,8 @@ function formattaDataItaliana(dataIso) {
 }
 
 function calcolaStatisticheCruscotto() {
-  // Il cruscotto mostra sempre tutti i clienti fermi (non filtrati per consulente):
-  // è uno strumento riservato a chi supervisiona l'intero database.
-  const tutti = contatti;
+  // Il cruscotto mostra tutti i contatti della sezione corrente (CF o BBC).
+  const tutti = getContattiCorrenti();
   const nomiAssegnatari = new Set(tutti.map(c => c.consulente).filter(Boolean));
   nomiConsulenti().forEach(n => nomiAssegnatari.add(n));
 
@@ -2506,8 +3070,12 @@ function calcolaStatisticheCruscotto() {
 
 function renderCruscotto() {
   const s = calcolaStatisticheCruscotto();
+  const nomeSezione = sezioneCorrente === 'bbc' ? 'BBC' : 'fermi';
   document.getElementById('cruscottoSubtitle').textContent =
-    s.totale + ' client' + (s.totale === 1 ? 'e' : 'i') + ' fermi nel database, ' + s.perConsulente.length + ' consulenti con assegnazioni attive';
+    s.totale + ' contatt' + (s.totale === 1 ? 'o' : 'i') + ' ' + nomeSezione + ' nel database, ' + s.perConsulente.length + ' consulenti con assegnazioni attive';
+  // Nasconde il grafico trend in sezione BBC (non disponibile)
+  const trendSec = document.getElementById('cruscottoTrendSection');
+  if (trendSec) trendSec.style.display = (sezioneCorrente === 'bbc') ? 'none' : '';
 
   const kpi = document.getElementById('cruscottoKpiGrid');
   kpi.innerHTML = `
@@ -2559,7 +3127,7 @@ function renderRiassunto() {
   if (!puoVedereRiassunto()) return;
   const wrap = document.getElementById('riassuntoWrap');
 
-  const nomiAssegnatari = [...new Set(contatti.map(c => c.consulente).filter(Boolean))].sort();
+  const nomiAssegnatari = [...new Set(getContattiCorrenti().map(c => c.consulente).filter(Boolean))].sort();
 
   if (!nomiAssegnatari.length) {
     wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div>Nessun cliente ancora assegnato a un consulente.</div></div>';
@@ -2568,7 +3136,7 @@ function renderRiassunto() {
 
   let html = '';
   nomiAssegnatari.forEach(nome => {
-    const righe = contatti.filter(c => c.consulente === nome);
+    const righe = getContattiCorrenti().filter(c => c.consulente === nome);
     if (!righe.length) return;
 
     const totAttivi = righe.filter(c => c.clienteAttivo === true).length;
@@ -3107,20 +3675,20 @@ async function aggiornaCampoRiga(key, campo, valore) {
   if (campo === 'consulente' && !puoAssegnareConsulente()) return;
 
   // Aggiorna in memoria
-  const riga = contatti.find(c => c._key === key);
+  const riga = getContattiCorrenti().find(c => c._key === key);
   let vecchioValore;
   const campiExtra = {};
   if (riga) {
     vecchioValore = riga[campo];
     riga[campo] = valore;
-    await registraEventoCruscotto(campo, valore, vecchioValore, riga);
+    if (sezioneCorrente !== 'bbc') await registraEventoCruscotto(campo, valore, vecchioValore, riga);
 
     // "Da non ricontattare" fa scattare in automatico "Bloccato" nello Stato di gestione
     if (campo === 'stato' && valore === 'Da non ricontattare' && riga.faseCliente !== 'Bloccato') {
       const vecchiaFase = riga.faseCliente;
       riga.faseCliente = 'Bloccato';
       campiExtra.faseCliente = 'Bloccato';
-      await registraEventoCruscotto('faseCliente', 'Bloccato', vecchiaFase, riga);
+      if (sezioneCorrente !== 'bbc') await registraEventoCruscotto('faseCliente', 'Bloccato', vecchiaFase, riga);
     }
 
     /* Data della assegnazione attualmente in vigore: usata dal grafico "Contatti assegnati"
@@ -3153,7 +3721,7 @@ async function aggiornaCampoRiga(key, campo, valore) {
 
   // Persiste il campo modificato (+ eventuale campo collegato, es. Bloccato automatico) nel documento cliente
   try {
-    await CF_CLIENTI().doc(sanitizeDocId(key)).update({ [campo]: valore, ...campiExtra });
+    await getCollezioneCorrente().doc(sanitizeDocId(key)).update({ [campo]: valore, ...campiExtra });
     showToast(campiExtra.faseCliente ? 'Modifica salvata — cliente segnato come Bloccato' : 'Modifica salvata');
   } catch(e) {
     console.error('[Clienti Fermi] Errore salvataggio campo cliente:', e);
@@ -3161,15 +3729,493 @@ async function aggiornaCampoRiga(key, campo, valore) {
   }
 }
 
+/* ===================== ORGANIGRAMMA ===================== */
+
+/* Carica la sottocollezione organigramma da Firestore */
+async function loadOrganigramma() {
+  try {
+    const snap = await CF_ORGANIGRAMMA().get();
+    organigrammaData = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch(e) {
+    console.error('[Organigramma] Errore caricamento:', e);
+    organigrammaData = [];
+  }
+}
+
+/* Popola il datalist con i nomi degli utenti registrati nel portale */
+function aggiornaDatalistOrg() {
+  const dl = document.getElementById('orgNomeDatalist');
+  if (!dl) return;
+  const utenti = getUtenti();
+  dl.innerHTML = utenti
+    .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''))
+    .map(u => '<option value="' + escapeHtml(u.nome) + '">')
+    .join('');
+}
+
+/* Popola la select "Riporta a" con i nodi esistenti, escludendo il nodo in modifica */
+function aggiornaSelectParentOrg(escludiId) {
+  const sel = document.getElementById('orgParentSelect');
+  if (!sel) return;
+  const valoreCorrente = sel.value;
+  sel.innerHTML = '<option value="">— Nessuno (vertice) —</option>';
+  organigrammaData
+    .filter(n => n.id !== escludiId)
+    .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''))
+    .forEach(function(n) {
+      const opt = document.createElement('option');
+      opt.value = n.id;
+      opt.textContent = n.nome + (n.ruolo ? ' (' + n.ruolo + ')' : '');
+      sel.appendChild(opt);
+    });
+  if (valoreCorrente && valoreCorrente !== escludiId) sel.value = valoreCorrente;
+}
+
+/* Resetta il form in modalità "Aggiungi" */
+function apriFormOrgAdd() {
+  orgEditingId = null;
+  const titleEl = document.getElementById('orgFormTitle');
+  if (titleEl) titleEl.textContent = 'Aggiungi persona';
+  const nomeEl = document.getElementById('orgNomeInput');
+  if (nomeEl) { nomeEl.value = ''; }
+  const ruoloEl = document.getElementById('orgRuoloInput');
+  if (ruoloEl) { ruoloEl.value = ''; }
+  aggiornaSelectParentOrg(null);
+  const parentSel = document.getElementById('orgParentSelect');
+  if (parentSel) parentSel.value = '';
+  const saveBtn = document.getElementById('orgSaveBtn');
+  if (saveBtn) saveBtn.textContent = '+ Aggiungi';
+  const editBtns = document.getElementById('orgEditBtns');
+  if (editBtns) editBtns.style.display = 'none';
+  document.querySelectorAll('.org-node').forEach(function(el) { el.classList.remove('org-node-selected'); });
+}
+
+/* Apre il form in modalità "Modifica" per il nodo con l'ID specificato */
+function apriFormOrgEdit(id) {
+  const node = organigrammaData.find(function(n) { return n.id === id; });
+  if (!node) return;
+  orgEditingId = id;
+  const titleEl = document.getElementById('orgFormTitle');
+  if (titleEl) titleEl.textContent = 'Modifica persona';
+  const nomeEl = document.getElementById('orgNomeInput');
+  if (nomeEl) nomeEl.value = node.nome || '';
+  const ruoloEl = document.getElementById('orgRuoloInput');
+  if (ruoloEl) ruoloEl.value = node.ruolo || '';
+  aggiornaSelectParentOrg(id); // esclude se stesso
+  const parentSel = document.getElementById('orgParentSelect');
+  if (parentSel) parentSel.value = node.parentId || '';
+  const saveBtn = document.getElementById('orgSaveBtn');
+  if (saveBtn) saveBtn.textContent = 'Salva modifiche';
+  const editBtns = document.getElementById('orgEditBtns');
+  if (editBtns) editBtns.style.display = 'flex';
+  // Evidenzia il nodo selezionato nell'albero
+  document.querySelectorAll('.org-node').forEach(function(el) {
+    el.classList.toggle('org-node-selected', el.dataset.id === id);
+  });
+  if (nomeEl) nomeEl.focus();
+  // Scrolla la card del form in cima se su mobile
+  const formCard = document.querySelector('.org-form-card');
+  if (formCard && window.innerWidth < 880) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* Annulla la modifica e torna alla modalità "Aggiungi" */
+function annullaEditOrg() {
+  apriFormOrgAdd();
+}
+
+/* Salva (aggiunge o aggiorna) un nodo nel Firestore */
+async function salvaNodeOrganigrammaUI() {
+  const nomeEl  = document.getElementById('orgNomeInput');
+  const ruoloEl = document.getElementById('orgRuoloInput');
+  const parentEl = document.getElementById('orgParentSelect');
+  const nome    = (nomeEl  ? nomeEl.value.trim()  : '');
+  const ruolo   = (ruoloEl ? ruoloEl.value.trim() : '');
+  const parentId = (parentEl ? parentEl.value : '');
+
+  if (!nome) {
+    showToast('Inserisci il nome della persona.');
+    if (nomeEl) nomeEl.focus();
+    return;
+  }
+
+  // Controllo ciclo: il nodo non può riportare a se stesso né a un suo discendente
+  if (orgEditingId && parentId) {
+    let curr = parentId;
+    while (curr) {
+      if (curr === orgEditingId) {
+        showToast('Errore: il nodo non può riportare a un suo discendente.');
+        return;
+      }
+      const parentNode = organigrammaData.find(function(n) { return n.id === curr; });
+      curr = parentNode ? (parentNode.parentId || '') : '';
+    }
+  }
+
+  const nodeData = { nome: nome, ruolo: ruolo, parentId: parentId };
+
+  try {
+    if (orgEditingId) {
+      await CF_ORGANIGRAMMA().doc(orgEditingId).set(nodeData);
+      const idx = organigrammaData.findIndex(function(n) { return n.id === orgEditingId; });
+      if (idx !== -1) organigrammaData[idx] = Object.assign({ id: orgEditingId }, nodeData);
+      showToast('Persona aggiornata.');
+    } else {
+      const ref = await CF_ORGANIGRAMMA().add(nodeData);
+      organigrammaData.push(Object.assign({ id: ref.id }, nodeData));
+      showToast('Persona aggiunta all\'organigramma.');
+    }
+  } catch(e) {
+    console.error('[Organigramma] Errore salvataggio:', e);
+    showToast('Errore di salvataggio. Riprova.');
+    return;
+  }
+
+  apriFormOrgAdd();
+  renderOrgTree();
+}
+
+/* Elimina il nodo in modifica; se ha subordinati, li promuove al livello del genitore */
+async function eliminaNodeOrgUI() {
+  if (!orgEditingId) return;
+  const node = organigrammaData.find(function(n) { return n.id === orgEditingId; });
+  if (!node) return;
+
+  const subordinati = organigrammaData.filter(function(n) { return n.parentId === orgEditingId; });
+  let nomeGenitore = 'vertice';
+  if (node.parentId) {
+    const genitore = organigrammaData.find(function(n) { return n.id === node.parentId; });
+    if (genitore) nomeGenitore = '"' + genitore.nome + '"';
+  }
+
+  let msg = 'Sei sicuro di voler eliminare "' + node.nome + '" dall\'organigramma?';
+  if (subordinati.length > 0) {
+    msg += '\n\nHa ' + subordinati.length + ' subordinato/i diretto/i: verranno spostati al livello di ' + nomeGenitore + '.';
+  }
+
+  if (!confirm(msg)) return;
+
+  try {
+    // Promuove i subordinati diretti al genitore del nodo eliminato
+    if (subordinati.length > 0) {
+      const batch = db.batch();
+      subordinati.forEach(function(sub) {
+        batch.update(CF_ORGANIGRAMMA().doc(sub.id), { parentId: node.parentId || '' });
+      });
+      await batch.commit();
+      organigrammaData.forEach(function(n) {
+        if (n.parentId === orgEditingId) n.parentId = node.parentId || '';
+      });
+    }
+    // Elimina il nodo
+    await CF_ORGANIGRAMMA().doc(orgEditingId).delete();
+    organigrammaData = organigrammaData.filter(function(n) { return n.id !== orgEditingId; });
+    showToast('Persona eliminata.');
+  } catch(e) {
+    console.error('[Organigramma] Errore eliminazione:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
+    return;
+  }
+
+  apriFormOrgAdd();
+  renderOrgTree();
+}
+
+/* Costruisce la struttura ad albero (array flat → nodi con .children) */
+function buildOrgTreeStruct(nodes, parentId) {
+  return nodes
+    .filter(function(n) { return (n.parentId || '') === (parentId || ''); })
+    .sort(function(a, b) { return (a.nome || '').localeCompare(b.nome || ''); })
+    .map(function(n) {
+      return Object.assign({}, n, { children: buildOrgTreeStruct(nodes, n.id) });
+    });
+}
+
+/* Genera l'HTML di un nodo e dei suoi figli, ricorsivamente */
+function renderOrgNodeHtml(node, isRoot) {
+  const isSelected = (node.id === orgEditingId);
+  const classes = [
+    'org-node',
+    isRoot ? 'org-node-root' : '',
+    isSelected ? 'org-node-selected' : ''
+  ].filter(Boolean).join(' ');
+
+  let html = '<li>';
+  html += '<div class="' + classes + '" data-id="' + escapeHtml(node.id) + '"'
+        + ' onclick="apriFormOrgEdit(\'' + escapeJs(node.id) + '\')">';
+  html += '<div class="org-node-nome" title="' + escapeHtml(node.nome) + '">' + escapeHtml(node.nome) + '</div>';
+  if (node.ruolo) {
+    html += '<div class="org-node-ruolo" title="' + escapeHtml(node.ruolo) + '">' + escapeHtml(node.ruolo) + '</div>';
+  }
+  html += '</div>';
+  if (node.children && node.children.length > 0) {
+    html += '<ul>' + node.children.map(function(c) { return renderOrgNodeHtml(c, false); }).join('') + '</ul>';
+  }
+  html += '</li>';
+  return html;
+}
+
+/* Renderizza l'intero albero nel contenitore */
+function renderOrgTree() {
+  const wrap = document.getElementById('orgTreeWrap');
+  if (!wrap) return;
+
+  if (!organigrammaData.length) {
+    wrap.innerHTML = '<div class="org-tree-empty">'
+      + '<div class="org-tree-empty-icon">🏢</div>'
+      + '<div style="font-weight:700; margin-bottom:6px;">Organigramma vuoto</div>'
+      + '<div>Aggiungi la prima persona usando il form a sinistra.</div>'
+      + '</div>';
+    return;
+  }
+
+  // Nodi radice: parentId = '' oppure vuoto/non impostato
+  const roots = buildOrgTreeStruct(organigrammaData, '');
+
+  // Se nessun nodo ha parentId vuoto (dati inconsistenti), mostrali tutti come radici
+  const nodi = roots.length ? roots : organigrammaData.map(function(n) {
+    return Object.assign({}, n, { children: [] });
+  });
+
+  const html = '<div class="org-tree"><ul>'
+    + nodi.map(function(r) { return renderOrgNodeHtml(r, true); }).join('')
+    + '</ul></div>';
+  wrap.innerHTML = html;
+}
+
+/* Inizializzazione della pagina organigramma (chiamata da showPage) */
+function inizializzaPaginaOrganigramma() {
+  aggiornaDatalistOrg();
+  aggiornaSelectParentOrg(null);
+  apriFormOrgAdd();
+  renderOrgTree();
+}
+
+/* ===================== BBC — FUNZIONI ===================== */
+
+function getContattiCorrenti() {
+  return sezioneCorrente === 'bbc' ? bbcContatti : contatti;
+}
+function getCollezioneCorrente() {
+  return sezioneCorrente === 'bbc' ? CF_BBC_CLIENTI() : CF_CLIENTI();
+}
+
+function aggiornaNvbarPerSezione(sezione) {
+  document.querySelectorAll('.nav-cf-only').forEach(el => {
+    el.style.display = sezione === 'cf' ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-bbc-only').forEach(el => {
+    el.style.display = sezione === 'bbc' ? '' : 'none';
+  });
+  // Bottone eventi BBC: solo per superadmin in sezione BBC
+  const btnEventi = document.getElementById('navBtnBbcEventi');
+  if (btnEventi) {
+    btnEventi.style.display = (sezione === 'bbc' && sessione && sessione.ruolo === 'superadmin') ? '' : 'none';
+  }
+}
+
+async function selezionaSezione(sezione) {
+  sezioneCorrente = sezione;
+  aggiornaUIPerRuolo();
+  showPage('mappa'); // rende page-mappa visibile (display:block) — da qui in avanti #map ha dimensioni reali
+  if (!map) {
+    // Prima volta: inizializza la mappa ora che il contenitore è visibile.
+    // fitBounds() funziona correttamente solo con dimensioni reali del contenitore.
+    await initMappa();
+  } else {
+    // Mappa già inizializzata (cambio sezione CF↔BBC): aggiorna solo le dimensioni
+    // in caso di resize, poi ridisegna i dati per la sezione corrente.
+    setTimeout(() => map.invalidateSize(), 150);
+  }
+  aggiornaStatsBar();
+}
+
+async function loadBbcData() {
+  try {
+    const [contattiSnap, eventiSnap] = await Promise.all([
+      CF_BBC_CLIENTI().get(),
+      CF_BBC_EVENTI_LIST().get()
+    ]);
+    bbcContatti = contattiSnap.docs.map(d => Object.assign({ _key: d.id }, d.data()));
+    bbcEventiList = eventiSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch(e) {
+    console.error('[BBC] Errore caricamento dati:', e);
+    bbcContatti = [];
+    bbcEventiList = [];
+  }
+}
+
+/* ---- Rendering eventi BBC ---- */
+function renderBbcEventi() {
+  if (!sessione || sessione.ruolo !== 'superadmin') return;
+  const wrap = document.getElementById('bbcEventiWrap');
+  if (!wrap) return;
+
+  if (!bbcEventiList.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗓️</div><div>Nessun evento BBC creato. Usa il form qui sopra per aggiungere il primo.</div></div>';
+    return;
+  }
+
+  wrap.innerHTML = bbcEventiList
+    .sort((a, b) => (b.data || '').localeCompare(a.data || ''))
+    .map(ev => {
+      return '<div class="bbc-evento-card">'
+        + '<div class="bbc-evento-header">'
+        + '<span class="bbc-evento-nome">' + escapeHtml(ev.nome) + '</span>'
+        + '<span class="bbc-evento-data">' + (ev.data ? formattaDataItaliana(ev.data) || escapeHtml(ev.data) : 'Data non specificata') + '</span>'
+        + '</div>'
+        + (ev.luogo ? '<div class="bbc-evento-luogo">📍 ' + escapeHtml(ev.luogo) + '</div>' : '')
+        + (ev.note ? '<div class="bbc-evento-note">' + escapeHtml(ev.note) + '</div>' : '')
+        + '<div class="bbc-evento-contatti">Contatti collegati: <strong>'
+        + bbcContatti.filter(c => c.eventoProvenienza === ev.id).length
+        + '</strong></div>'
+        + '<button class="btn btn-outline" style="margin-top:10px; color:var(--rosso); border-color:var(--rosso);" onclick="eliminaBbcEvento(\'' + escapeJs(ev.id) + '\')">🗑️ Elimina evento</button>'
+        + '</div>';
+    }).join('');
+}
+
+async function aggiungiBbcEvento() {
+  if (!sessione || sessione.ruolo !== 'superadmin') return;
+  const nome = (document.getElementById('bbcEventoNome').value || '').trim();
+  const data = (document.getElementById('bbcEventoData').value || '').trim();
+  const luogo = (document.getElementById('bbcEventoLuogo').value || '').trim();
+  const note = (document.getElementById('bbcEventoNote').value || '').trim();
+  if (!nome) { showToast('Inserisci il nome dell\'evento.'); return; }
+  const ev = { nome, data, luogo, note };
+  try {
+    const ref = await CF_BBC_EVENTI_LIST().add(ev);
+    bbcEventiList.push(Object.assign({ id: ref.id }, ev));
+    document.getElementById('bbcEventoNome').value = '';
+    document.getElementById('bbcEventoData').value = '';
+    document.getElementById('bbcEventoLuogo').value = '';
+    document.getElementById('bbcEventoNote').value = '';
+    renderBbcEventi();
+    // Aggiorna la select eventi nel form aggiungi contatto BBC
+    popolaSelectEventiBbc();
+    showToast('Evento BBC aggiunto.');
+  } catch(e) {
+    console.error('[BBC] Errore aggiunta evento:', e);
+    showToast('Errore durante l\'aggiunta dell\'evento. Riprova.');
+  }
+}
+
+async function eliminaBbcEvento(id) {
+  if (!confirm('Eliminare questo evento? I contatti collegati NON vengono eliminati, ma perderanno il collegamento all\'evento.')) return;
+  try {
+    await CF_BBC_EVENTI_LIST().doc(id).delete();
+    bbcEventiList = bbcEventiList.filter(e => e.id !== id);
+    renderBbcEventi();
+    popolaSelectEventiBbc();
+    showToast('Evento eliminato.');
+  } catch(e) {
+    console.error('[BBC] Errore eliminazione evento:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
+  }
+}
+
+/* ---- Form aggiunta contatto BBC ---- */
+function popolaSelectEventiBbc() {
+  const sel = document.getElementById('bbcEventoSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Nessun evento —</option>'
+    + bbcEventiList
+        .sort((a, b) => (b.data || '').localeCompare(a.data || ''))
+        .map(ev => '<option value="' + escapeHtml(ev.id) + '">' + escapeHtml(ev.nome) + (ev.data ? ' (' + (ev.data || '') + ')' : '') + '</option>')
+        .join('');
+}
+
+function popolaSelectConsulentiBbc() {
+  const wrap = document.getElementById('bbcConsulenteWrap');
+  const sel = document.getElementById('bbcConsulenteSelect');
+  if (!sel) return;
+  if (!puoAssegnareConsulente()) {
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  if (wrap) wrap.style.display = '';
+  const utenti = getUtenti().filter(u => u.ruolo === 'consulente');
+  sel.innerHTML = '<option value="">— Seleziona consulente —</option>'
+    + utenti.map(u => '<option value="' + escapeHtml(u.nome) + '">' + escapeHtml(u.nome) + '</option>').join('');
+}
+
+function inizializzaFormAggiuntaBbc() {
+  popolaSelectEventiBbc();
+  popolaSelectConsulentiBbc();
+}
+
+async function aggiungiBbcContatto() {
+  const ragioneSociale = (document.getElementById('bbcNomeAzienda').value || '').trim();
+  const referente = (document.getElementById('bbcReferente').value || '').trim();
+  const contattoTel = (document.getElementById('bbcContatto').value || '').trim();
+  const email = (document.getElementById('bbcEmail').value || '').trim();
+  const provincia = (document.getElementById('bbcProvincia').value || '').trim();
+  const comune = (document.getElementById('bbcComune').value || '').trim();
+  const eventoId = (document.getElementById('bbcEventoSelect').value || '').trim();
+
+  if (!ragioneSociale) { showToast('La ragione sociale / nome contatto è obbligatoria.'); return; }
+
+  // Determina consulente assegnato
+  let consulente = '';
+  if (puoAssegnareConsulente()) {
+    const sel = document.getElementById('bbcConsulenteSelect');
+    consulente = sel ? (sel.value || '') : '';
+  } else {
+    consulente = sessione ? sessione.nome : '';
+  }
+
+  // Risolvi provincia e comune tramite helper geografico
+  const provFeature = provincia ? risolviProvincia(provincia) : null;
+  const comuneRisolto = comune ? risolviComune(comune, provincia) : null;
+  const _provinciaMatch = provFeature ? provFeature.properties.prov_name : (provincia || null);
+  const _comuneMatch = comuneRisolto ? comuneRisolto[0] : (comune || null);
+
+  const nuovoContatto = {
+    ragioneSociale,
+    referente,
+    contatto: contattoTel,
+    email,
+    provincia,
+    comune,
+    consulente,
+    eventoProvenienza: eventoId || '',
+    dataAggiunta: oggiIso(),
+    _provinciaMatch,
+    _comuneMatch
+  };
+
+  try {
+    const ref = await CF_BBC_CLIENTI().add(nuovoContatto);
+    nuovoContatto._key = ref.id;
+    bbcContatti.push(nuovoContatto);
+    // Svuota form
+    ['bbcNomeAzienda','bbcReferente','bbcContatto','bbcEmail','bbcProvincia','bbcComune'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const selEv = document.getElementById('bbcEventoSelect');
+    if (selEv) selEv.value = '';
+    const selCons = document.getElementById('bbcConsulenteSelect');
+    if (selCons) selCons.value = '';
+    aggiornaStatsBar();
+    if (document.getElementById('page-database').classList.contains('active')) inizializzaPaginaDatabase();
+    showToast('Contatto BBC aggiunto con successo.');
+  } catch(e) {
+    console.error('[BBC] Errore aggiunta contatto:', e);
+    showToast('Errore durante l\'aggiunta del contatto. Riprova.');
+  }
+}
+
 /* ===================== AVVIO ===================== */
 async function avviaApp() {
   document.getElementById('navbar').style.display = 'flex';
   aggiornaUIPerRuolo();
-  showPage('mappa');
-  if (!map) await initMappa();
-  // contatti ed eventiLogCache sono già popolati da loadFromFirestore()
+  showPage('home');
+  // initMappa() NON viene chiamata qui: la pagina mappa è display:none in questo momento
+  // (la pagina attiva è 'home', il chooser). Se initMappa venisse eseguita ora, Leaflet
+  // calcolerebbe fitBounds su un contenitore 0x0, producendo una mappa vuota o mal posizionata.
+  // Viene chiamata invece in selezionaSezione(), dopo che showPage('mappa') rende la pagina visibile.
   if (contatti.length > 0) aggiornaStatsBar();
-  // Se c'è un URL CSV salvato, aggiorna i dati dal foglio Google
+  await loadOrganigramma();
+  await loadBbcData();
   if (cfState.csvUrl) await caricaDatiCsv();
 }
 
