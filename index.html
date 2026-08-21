@@ -212,6 +212,7 @@
 
   /* ===== SEZIONE GENERICA ===== */
   .section-wrap { max-width: 1300px; margin: 0 auto; padding: 40px 24px 60px; }
+  #page-database .section-wrap, #page-provincia .section-wrap { max-width: 100%; padding-left: 16px; padding-right: 16px; }
   .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
   .section-title {
     font-size: 1.5rem; font-weight: 800; color: var(--testo); display: flex; align-items: center; gap: 12px;
@@ -333,6 +334,10 @@
 
   .table-wrap { background: #fff; border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
   .table-scroll { overflow-x: auto; }
+  .scroll-slider {
+    display: block; width: 100%; margin: 0 0 10px; accent-color: var(--fucsia);
+    height: 18px; cursor: pointer;
+  }
   table { width: 100%; border-collapse: collapse; min-width: 1180px; }
   thead tr { background: var(--fucsia-light); border-bottom: 1px solid var(--fucsia-border); }
   th { padding: 13px 14px; text-align: left; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--fucsia-dark); white-space: nowrap; }
@@ -879,6 +884,63 @@
     * { box-shadow: none !important; }
     .section-header { display: block !important; }
   }
+
+  /* ===== ESITI CHIAMATA ===== */
+  .btn-esiti {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border);
+    color: var(--fucsia-dark); border-radius: 7px; padding: 5px 10px;
+    font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+    transition: all 0.18s; font-family: inherit;
+  }
+  .btn-esiti:hover { background: var(--fucsia); color: #fff; }
+  .esiti-panel-td { padding: 0 !important; background: var(--fucsia-light) !important; border-bottom: 2px solid var(--fucsia-border) !important; }
+  .esiti-panel {
+    padding: 14px 18px; display: grid; gap: 14px;
+    grid-template-columns: 1fr 1fr;
+    border-top: 2px solid var(--fucsia-border);
+  }
+  @media (max-width: 900px) { .esiti-panel { grid-template-columns: 1fr; } }
+  .esiti-panel-label {
+    font-size: 0.68rem; font-weight: 800; color: var(--fucsia-dark);
+    letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .esiti-storia {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 10px 14px; max-height: 200px; overflow-y: auto; font-size: 0.82rem;
+  }
+  .esiti-entry { padding: 8px 0; border-bottom: 1px solid #f0e6ef; }
+  .esiti-entry:last-child { border-bottom: none; }
+  .esiti-entry-meta { font-size: 0.72rem; color: var(--testo-muted); margin-bottom: 4px; }
+  .esiti-entry-meta b { color: var(--fucsia-dark); }
+  .btn-esiti-elimina {
+    background: none; border: none; color: var(--testo-muted); cursor: pointer;
+    font-size: 0.78rem; float: right; padding: 0 2px; line-height: 1;
+  }
+  .btn-esiti-elimina:hover { color: #c0392b; }
+  .btn-elimina-contatto {
+    background: none; border: 1px solid var(--card-border); border-radius: 6px;
+    cursor: pointer; font-size: 0.85rem; padding: 4px 8px;
+  }
+  .btn-elimina-contatto:hover { border-color: #c0392b; background: #fdf0ee; }
+  .esiti-entry-testo { font-size: 0.82rem; color: var(--testo); line-height: 1.5; white-space: pre-wrap; }
+  .esiti-empty { color: var(--testo-muted); font-size: 0.82rem; font-style: italic; padding: 6px 0; }
+  .esiti-form { display: flex; flex-direction: column; gap: 8px; }
+  .esiti-textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 8px;
+    font-size: 0.82rem; font-family: inherit; resize: vertical; min-height: 90px; outline: none;
+    color: var(--testo); background: #fff;
+  }
+  .esiti-textarea:focus { border-color: var(--fucsia); box-shadow: 0 0 0 2px rgba(179,70,141,0.12); }
+  .esiti-error {
+    background: var(--rosso-bg); color: var(--rosso); padding: 7px 12px;
+    border-radius: 7px; font-size: 0.78rem; font-weight: 600;
+  }
+  .btn-esiti-salva {
+    align-self: flex-start; background: var(--fucsia); color: #fff;
+    border: none; border-radius: 8px; padding: 8px 16px; font-size: 0.82rem;
+    font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.18s;
+  }
+  .btn-esiti-salva:hover { background: var(--fucsia-dark); }
 </style>
 </head>
 <body>
@@ -1177,6 +1239,7 @@
               <th>Stato</th>
               <th>Fase Cliente</th>
               <th>Ultimo Contatto</th>
+              <th>Esiti</th>
             </tr>
           </thead>
           <tbody id="tabellaProvinciaBody"></tbody>
@@ -1302,8 +1365,9 @@
       </div>
     </div>
 
+    <input type="range" id="dbScrollSlider" class="scroll-slider" min="0" max="0" value="0" step="1">
     <div class="table-wrap">
-      <div class="table-scroll">
+      <div class="table-scroll" id="dbTableScroll">
         <table id="tabellaDatabase">
           <thead>
             <tr>
@@ -1318,6 +1382,8 @@
               <th>Stato</th>
               <th>Fase Cliente</th>
               <th>Ultimo Contatto</th>
+              <th>Esiti</th>
+              <th class="th-bbc-only" id="thAzioniBbc" style="display:none;">Azioni</th>
             </tr>
           </thead>
           <tbody id="databaseBody"></tbody>
@@ -2641,7 +2707,7 @@ function elencoConsulentiPerSelect() {
 }
 
 /* Riga tabella condivisa tra pagina Provincia/Comune e pagina Database */
-function creaRigaHtml(c) {
+function creaRigaHtml(c, mostraAzioni) {
   const opzioniConsulenti = elencoConsulentiPerSelect();
   const elencoNomiConsulenti = nomiConsulenti();
   const statoClass = c.stato ? 'sel-stato-' + normalizza(c.stato).replace(/\s+/g, '') : '';
@@ -2674,6 +2740,12 @@ function creaRigaHtml(c) {
   const rigaBloccataClass = c.faseCliente === 'Bloccato' ? ' class="riga-bloccata"'
     : c.faseCliente === 'Fuori Zona' ? ' class="riga-fuorizona"' : '';
 
+  // Preparazione pannello esiti
+  const esiti = Array.isArray(c.esiti) ? c.esiti : [];
+  const nEsiti = esiti.length;
+  const hid = esitiKeyToHtmlId(c._key);
+  const storicoHtml = renderStoricoEsitiHtml(esiti, c._key);
+
   return `<tr${rigaBloccataClass}>
       <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
       <td>${escapeHtml(c.referente)}</td>
@@ -2686,6 +2758,24 @@ function creaRigaHtml(c) {
       <td><select class="td-select ${statoClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','stato', this.value)">${opzStato.join('')}</select></td>
       <td><select class="td-select ${faseClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','faseCliente', this.value)">${opzFase.join('')}</select>${checkAttivo}</td>
       <td><input type="date" class="td-date-input" value="${escapeHtml(c.ultimoContatto || '')}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','ultimoContatto', this.value)"></td>
+      <td><button class="btn-esiti" id="esiti-btn-${hid}" onclick="toggleEsitiPanel('${escapeJs(c._key)}')">${nEsiti > 0 ? 'Esiti (' + nEsiti + ')' : 'Esiti'}</button></td>
+      ${mostraAzioni ? `<td><button class="btn-elimina-contatto" title="Elimina questo contatto BBC" onclick="eliminaContattoBbc('${escapeJs(c._key)}')">🗑️</button></td>` : ''}
+    </tr>
+    <tr id="esiti-row-${hid}" style="display:none;">
+      <td colspan="${mostraAzioni ? 13 : 12}" class="esiti-panel-td">
+        <div class="esiti-panel">
+          <div>
+            <div class="esiti-panel-label">Storico esiti</div>
+            <div class="esiti-storia" id="esiti-storia-${hid}">${storicoHtml}</div>
+          </div>
+          <div class="esiti-form">
+            <div class="esiti-panel-label">Aggiungi esito</div>
+            <textarea class="esiti-textarea" id="esiti-textarea-${hid}" placeholder="Descrivi l'esito della chiamata&#10;PROSSIMO STEP: [azione concreta da compiere]"></textarea>
+            <div class="esiti-error" id="esiti-error-${hid}" style="display:none;"></div>
+            <button class="btn-esiti-salva" onclick="salvaEsito('${escapeJs(c._key)}')">Salva esito</button>
+          </div>
+        </div>
+      </td>
     </tr>`;
 }
 
@@ -2757,6 +2847,9 @@ function inizializzaPaginaDatabase() {
   const titoloEl = document.getElementById('databaseTitolo');
   if (titoloEl) titoloEl.textContent = sezioneCorrente === 'bbc' ? 'Database Bologna Business Club' : 'Database';
 
+  const thAzioni = document.getElementById('thAzioniBbc');
+  if (thAzioni) thAzioni.style.display = sezioneCorrente === 'bbc' ? '' : 'none';
+
   // Form BBC add-contact: visibile a tutti in BBC mode (consulente, DV, SA)
   const bbcCard = document.getElementById('bbcAddContactCard');
   if (bbcCard) {
@@ -2818,10 +2911,36 @@ function renderDatabase() {
   if (righe.length === 0) {
     body.innerHTML = '';
     emptyState.style.display = 'block';
+    aggiornaDbScrollSlider();
     return;
   }
   emptyState.style.display = 'none';
-  body.innerHTML = righe.map(c => creaRigaHtml(c)).join('');
+  body.innerHTML = righe.map(c => creaRigaHtml(c, sezioneCorrente === 'bbc')).join('');
+  aggiornaDbScrollSlider();
+}
+
+/* Slider orizzontale che duplica la barra di scorrimento della tabella Database
+   (evita di dover scendere in fondo a centinaia di righe per trovarla) */
+let dbScrollSliderInit = false;
+function aggiornaDbScrollSlider() {
+  const scrollEl = document.getElementById('dbTableScroll');
+  const slider = document.getElementById('dbScrollSlider');
+  if (!scrollEl || !slider) return;
+
+  const setSliderRange = () => {
+    const max = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+    slider.max = max;
+    slider.value = scrollEl.scrollLeft;
+    slider.style.display = max > 0 ? 'block' : 'none';
+  };
+  setSliderRange();
+
+  if (!dbScrollSliderInit) {
+    dbScrollSliderInit = true;
+    slider.addEventListener('input', () => { scrollEl.scrollLeft = Number(slider.value); });
+    scrollEl.addEventListener('scroll', () => { slider.value = scrollEl.scrollLeft; });
+    window.addEventListener('resize', setSliderRange);
+  }
 }
 
 /* ===================== UTENTI ===================== */
@@ -3992,6 +4111,24 @@ function inizializzaPaginaOrganigramma() {
 
 /* ===================== BBC — FUNZIONI ===================== */
 
+/* Elimina definitivamente un contatto BBC (solo sezione Database BBC) */
+async function eliminaContattoBbc(key) {
+  if (sezioneCorrente !== 'bbc') return;
+  const contatto = bbcContatti.find(c => c._key === key);
+  if (!contatto) return;
+  if (!confirm('Eliminare definitivamente il contatto "' + (contatto.ragioneSociale || contatto.referente || '') + '"? L\'operazione non è reversibile (inclusi gli esiti registrati).')) return;
+
+  try {
+    await CF_BBC_CLIENTI().doc(sanitizeDocId(key)).delete();
+    bbcContatti = bbcContatti.filter(c => c._key !== key);
+    renderDatabase();
+    showToast('Contatto BBC eliminato');
+  } catch(e) {
+    console.error('[BBC] Errore eliminazione contatto:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
+  }
+}
+
 function getContattiCorrenti() {
   return sezioneCorrente === 'bbc' ? bbcContatti : contatti;
 }
@@ -4201,6 +4338,118 @@ async function aggiungiBbcContatto() {
   } catch(e) {
     console.error('[BBC] Errore aggiunta contatto:', e);
     showToast('Errore durante l\'aggiunta del contatto. Riprova.');
+  }
+}
+
+/* ===================== ESITI CHIAMATA ===================== */
+
+/* Converte il _key di un contatto in un ID HTML sicuro (senza caratteri speciali) */
+function esitiKeyToHtmlId(key) {
+  return 'esiti_' + sanitizeDocId(key).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 200);
+}
+
+/* Genera l'HTML dello storico esiti con pulsante di eliminazione per ogni voce */
+function renderStoricoEsitiHtml(esiti, key) {
+  if (!Array.isArray(esiti) || !esiti.length) return '<div class="esiti-empty">Nessun esito registrato.</div>';
+  return esiti.map((e, i) =>
+    `<div class="esiti-entry">` +
+    `<div class="esiti-entry-meta">${escapeHtml(e.data || '')} — <b>${escapeHtml(e.consulente || '')}</b>` +
+    `<button class="btn-esiti-elimina" title="Elimina questo esito" onclick="eliminaEsito('${escapeJs(key)}', ${i})">✕</button>` +
+    `</div>` +
+    `<div class="esiti-entry-testo">${escapeHtml(e.testo || '').replace(/\n/g, '<br>')}</div>` +
+    `</div>`
+  ).join('');
+}
+
+/* Elimina un esito (per indice) previa conferma, riscrivendo l'array su Firestore */
+async function eliminaEsito(key, indice) {
+  const contatto = getContattiCorrenti().find(c => c._key === key);
+  if (!contatto || !Array.isArray(contatto.esiti) || !contatto.esiti[indice]) return;
+  if (!confirm('Eliminare definitivamente questo esito? L\'operazione non è reversibile.')) return;
+
+  const hid = esitiKeyToHtmlId(key);
+  const nuoviEsiti = contatto.esiti.slice();
+  nuoviEsiti.splice(indice, 1);
+
+  try {
+    await getCollezioneCorrente().doc(sanitizeDocId(key)).update({ esiti: nuoviEsiti });
+    contatto.esiti = nuoviEsiti;
+
+    const storiaEl = document.getElementById('esiti-storia-' + hid);
+    if (storiaEl) storiaEl.innerHTML = renderStoricoEsitiHtml(nuoviEsiti, key);
+    const btnEl = document.getElementById('esiti-btn-' + hid);
+    if (btnEl) btnEl.textContent = nuoviEsiti.length > 0 ? 'Esiti (' + nuoviEsiti.length + ')' : 'Esiti';
+
+    showToast('Esito eliminato');
+  } catch(e) {
+    console.error('[Esiti] Errore eliminazione:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
+  }
+}
+
+/* Mostra / nasconde il pannello esiti sotto la riga del contatto */
+function toggleEsitiPanel(key) {
+  const hid = esitiKeyToHtmlId(key);
+  const row = document.getElementById('esiti-row-' + hid);
+  if (!row) return;
+  const aperto = row.style.display !== 'none';
+  row.style.display = aperto ? 'none' : '';
+}
+
+/* Valida e salva un nuovo esito su Firestore (arrayUnion), poi aggiorna il DOM */
+async function salvaEsito(key) {
+  const hid      = esitiKeyToHtmlId(key);
+  const textarea = document.getElementById('esiti-textarea-' + hid);
+  const errEl    = document.getElementById('esiti-error-' + hid);
+  const storiaEl = document.getElementById('esiti-storia-' + hid);
+  const btnEl    = document.getElementById('esiti-btn-' + hid);
+  if (!textarea || !errEl || !storiaEl) return;
+
+  const testoTrim = textarea.value.trim();
+
+  /* Validazione: il testo deve contenere "PROSSIMO STEP" (case-insensitive)
+     seguito da almeno un carattere non vuoto */
+  const upper = testoTrim.toUpperCase();
+  const idx   = upper.indexOf('PROSSIMO STEP');
+  const dopoPs = idx >= 0 ? testoTrim.slice(idx + 'PROSSIMO STEP'.length).trim() : '';
+  if (idx < 0 || !dopoPs) {
+    errEl.textContent = 'Il testo deve contenere "PROSSIMO STEP" seguito da almeno un carattere (es. "PROSSIMO STEP: richiamare martedì").';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const nuovoEsito = {
+    data:       oggiIso(),
+    consulente: sessione ? (sessione.nome || sessione.email || '') : '',
+    testo:      testoTrim
+  };
+
+  try {
+    await getCollezioneCorrente().doc(sanitizeDocId(key)).update({
+      esiti: firebase.firestore.FieldValue.arrayUnion(nuovoEsito)
+    });
+
+    /* Aggiorna in memoria */
+    const contatto = getContattiCorrenti().find(c => c._key === key);
+    if (contatto) {
+      if (!Array.isArray(contatto.esiti)) contatto.esiti = [];
+      contatto.esiti.push(nuovoEsito);
+    }
+    const esitiAggiornati = contatto ? contatto.esiti : [nuovoEsito];
+
+    /* Aggiorna lo storico nel DOM senza ri-renderizzare l'intera tabella */
+    storiaEl.innerHTML = renderStoricoEsitiHtml(esitiAggiornati, key);
+
+    /* Aggiorna il contatore nel bottone della riga */
+    if (btnEl) btnEl.textContent = 'Esiti (' + esitiAggiornati.length + ')';
+
+    textarea.value = '';
+    showToast('Esito salvato');
+  } catch(e) {
+    console.error('[Esiti] Errore salvataggio:', e);
+    errEl.textContent = 'Errore durante il salvataggio. Riprova.';
+    errEl.style.display = 'block';
   }
 }
 
