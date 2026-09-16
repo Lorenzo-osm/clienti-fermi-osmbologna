@@ -371,6 +371,8 @@
   .badge-fase-riattivato { background: var(--verde-bg); color: var(--verde); }
   .badge-fase-gestitodaunaltroconsulente { background: var(--blu-bg); color: var(--blu); }
   .badge-fase-fuorizona { background: var(--viola-bg); color: var(--viola); }
+  .badge-fase-backend { background: var(--blu-bg); color: var(--blu); }
+  .badge-fase-abbonamento { background: #dbeafe; color: #1d4ed8; }
 
   /* Riga evidenziata quando il cliente è Bloccato */
   tr.riga-bloccata td { background: var(--rosso-bg) !important; }
@@ -401,6 +403,21 @@
   .td-select.sel-fase-riattivato { color: var(--verde); }
   .td-select.sel-fase-gestitodaunaltroconsulente { color: var(--blu); }
   .td-select.sel-fase-fuorizona { color: var(--viola); font-weight: 700; }
+  .td-select.sel-fase-backend { color: var(--blu); }
+  .td-select.sel-fase-abbonamento { color: #1d4ed8; }
+  /* Input campagna marketing e valore € in tabella BBC */
+  .td-campagna-select {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 6px 9px; border-radius: 8px; font-size: 0.78rem; outline: none;
+    cursor: pointer; min-width: 140px; font-family: inherit;
+  }
+  .td-campagna-select:focus { border-color: var(--fucsia); }
+  .td-valore-input {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 6px 9px; border-radius: 8px; font-size: 0.8rem; outline: none;
+    font-family: inherit; width: 90px;
+  }
+  .td-valore-input:focus { border-color: var(--fucsia); }
   .td-vecchio-consulente { color: var(--testo-muted); font-size: 0.82rem; }
   .td-date-input {
     background: #fff; border: 1px solid var(--card-border); color: var(--testo);
@@ -450,6 +467,7 @@
   .td-ruolo-superadmin { background: var(--fucsia-badge-bg); color: var(--fucsia-dark); }
   .td-ruolo-direzione { background: var(--blu-bg); color: var(--blu); }
   .td-ruolo-consulente { background: var(--verde-bg); color: var(--verde); }
+  .td-ruolo-marketing { background: #dbeafe; color: #1d4ed8; }
   .td-password-input {
     background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 6px;
     padding: 5px 8px; font-size: 0.8rem; width: 130px; font-family: Consolas, monospace;
@@ -639,28 +657,32 @@
     gap: 14px; margin-bottom: 16px;
   }
   /* ===== BBC EVENTI ===== */
-  .bbc-eventi-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px; margin-top: 20px;
+  .bbc-eventi-list {
+    display: flex; flex-direction: column; gap: 10px; margin-top: 20px;
   }
-  .bbc-evento-card {
-    background: #fff; border: 1px solid var(--card-border); border-radius: 14px;
-    padding: 18px 20px; box-shadow: var(--card-shadow);
-    display: flex; flex-direction: column; gap: 6px; position: relative;
+  .bbc-evento-row {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
+    box-shadow: var(--card-shadow); position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
   }
-  .bbc-evento-card::before {
+  .bbc-evento-row::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, #1baf7a, #0e8a5c); border-radius: 14px 14px 0 0;
+    background: linear-gradient(90deg, #1baf7a, #0e8a5c);
   }
-  .bbc-evento-nome { font-weight: 800; font-size: 0.92rem; color: var(--testo); }
+  .bbc-evento-row-main {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 17px 20px 14px;
+  }
+  .bbc-evento-info { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 3px; }
+  .bbc-evento-nome { font-weight: 800; font-size: 0.95rem; color: var(--testo); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .bbc-evento-data { font-size: 0.76rem; color: var(--testo-muted); font-weight: 600; }
-  .bbc-evento-note { font-size: 0.8rem; color: var(--testo); line-height: 1.5; }
-  .bbc-evento-del {
-    position: absolute; top: 12px; right: 12px;
-    background: transparent; border: 1px solid var(--card-border); border-radius: 6px;
-    cursor: pointer; padding: 3px 7px; font-size: 0.78rem; transition: all 0.15s;
+  .bbc-evento-luogo-row { font-size: 0.8rem; color: var(--testo-muted); }
+  .bbc-evento-note { font-size: 0.78rem; color: var(--grigio); line-height: 1.5; }
+  .bbc-evento-counters {
+    display: flex; gap: 14px; align-items: center; font-size: 0.82rem; color: var(--testo-muted);
+    white-space: nowrap; flex-shrink: 0;
   }
-  .bbc-evento-del:hover { background: var(--rosso-bg); border-color: var(--rosso); color: var(--rosso); }
+  .bbc-evento-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
   .bbc-eventi-empty { text-align: center; padding: 40px 20px; color: var(--testo-muted); font-size: 0.85rem; }
 
   /* ===== ORGANIGRAMMA ===== */
@@ -828,15 +850,7 @@
     gap: 14px; margin-bottom: 16px;
   }
   .bbc-add-card { border-left: 3px solid var(--fucsia); }
-  .bbc-evento-card {
-    background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
-    padding: 16px 20px; margin-bottom: 12px; box-shadow: var(--card-shadow);
-  }
-  .bbc-evento-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
-  .bbc-evento-nome { font-weight: 700; font-size: 1rem; color: var(--testo); }
-  .bbc-evento-data { font-size: 0.8rem; color: var(--testo-muted); font-weight: 600; }
-  .bbc-evento-luogo { font-size: 0.82rem; color: var(--testo-muted); margin-bottom: 4px; }
-  .bbc-evento-note { font-size: 0.8rem; color: var(--grigio); margin-bottom: 6px; }
+  /* ===== BBC eventi — stili residui ===== */
   .bbc-evento-contatti { font-size: 0.82rem; color: var(--testo-muted); }
 
   /* ===== CHECKBOX CLIENTE ATTIVO (nelle righe tabella) ===== */
@@ -941,6 +955,92 @@
     font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.18s;
   }
   .btn-esiti-salva:hover { background: var(--fucsia-dark); }
+
+  /* ===== BBC SOCI ===== */
+  .bbc-soci-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; align-items: flex-end; }
+  .bbc-soci-edit-form { display: none; }
+  .bbc-soci-edit-form.open { display: block; }
+
+  /* ===== BBC EVENTI — FILTRI E DISTINZIONE PASSATO/FUTURO ===== */
+  .bbc-eventi-filtri { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; }
+  .bbc-eventi-section-label {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--testo-muted); padding: 8px 0 6px; border-bottom: 1px solid var(--card-border);
+    margin-bottom: 14px; margin-top: 8px;
+  }
+  .bbc-evento-row.passato { opacity: 0.75; }
+  .bbc-evento-row.passato::before { background: linear-gradient(90deg, var(--grigio), #6a6a6a); }
+  .bbc-evento-badge-futuro {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+    font-size: 0.68rem; font-weight: 700; background: var(--verde-bg); color: var(--verde);
+    border: 1px solid #c0e8d5; margin-left: 6px; vertical-align: middle;
+  }
+  .bbc-evento-badge-passato {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+    font-size: 0.68rem; font-weight: 700; background: var(--grigio-bg); color: var(--grigio);
+    border: 1px solid #d0d0d0; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* ===== BBC PARTECIPANTI EVENTO ===== */
+  .bbc-partecipanti-panel {
+    border-top: 1px solid var(--card-border); padding: 14px 20px 18px;
+    display: none;
+  }
+  .bbc-partecipanti-panel.open { display: block; }
+  .bbc-partecipanti-title {
+    font-size: 0.8rem; font-weight: 800; color: var(--testo); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bbc-partecipanti-add-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end;
+  }
+  .bbc-partecipanti-add-row select, .bbc-partecipanti-add-row .settings-input {
+    flex: 1; min-width: 160px;
+  }
+  .bbc-partecipanti-list { display: flex; flex-direction: column; gap: 6px; }
+  .bbc-partecipante-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 8px;
+    padding: 7px 12px; font-size: 0.82rem;
+  }
+  .bbc-partecipante-row .nome-azienda { font-weight: 700; color: var(--testo); }
+  .bbc-partecipante-row .stato-badge { font-size: 0.7rem; }
+  .badge-partecipato { background: var(--verde-bg); color: var(--verde); }
+  .badge-previsto { background: var(--arancio-bg); color: var(--arancio); }
+  .bbc-part-del {
+    background: transparent; border: 1px solid var(--card-border); border-radius: 5px;
+    cursor: pointer; padding: 2px 6px; font-size: 0.75rem; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .bbc-part-del:hover { background: var(--rosso-bg); border-color: var(--rosso); color: var(--rosso); }
+  .bbc-partecipanti-empty { font-size: 0.82rem; color: var(--testo-muted); font-style: italic; padding: 4px 0; }
+
+  /* ===== BBC PARTECIPANTI — tabella con tel/email (punto 1) ===== */
+  .bbc-part-table { width:100%; border-collapse:collapse; font-size:0.81rem; margin-top:4px; }
+  .bbc-part-table th { background:var(--fucsia-light); color:var(--fucsia-dark); font-size:0.66rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; padding:7px 10px; border-bottom:1px solid var(--fucsia-border); text-align:left; white-space:nowrap; }
+  .bbc-part-table td { padding:7px 10px; border-bottom:1px solid #f3ecf1; vertical-align:middle; }
+  .bbc-part-table tr:last-child td { border-bottom:none; }
+  .bbc-part-table tr:hover td { background:#fdf6fb; }
+  .bbc-part-filtro { width:100%; padding:7px 12px; border:1px solid var(--card-border); border-radius:8px; font-size:0.82rem; outline:none; margin-bottom:10px; background:#fff; color:var(--testo); font-family:inherit; }
+  .bbc-part-filtro:focus { border-color:var(--fucsia); }
+
+  /* ===== LINKED CONTACT SEARCH nel form Soci (punto 3) ===== */
+  .bbc-linked-contact-wrap { margin-bottom:14px; padding:12px 14px; background:var(--fucsia-light); border:1px solid var(--fucsia-border); border-radius:10px; }
+  .bbc-linked-badge { display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--fucsia-border); border-radius:20px; padding:4px 12px; font-size:0.8rem; font-weight:600; color:var(--fucsia-dark); }
+  .bbc-linked-badge button { background:none; border:none; cursor:pointer; color:var(--fucsia-dark); font-size:0.9rem; line-height:1; padding:0 2px; }
+
+  /* ===== BBC STORICO SOCIO (drawer inline) ===== */
+  .bbc-socio-storico-panel {
+    margin-top: 10px; border-top: 1px solid var(--card-border); padding-top: 10px;
+    display: none; background: var(--fucsia-light); border-radius: 0 0 12px 12px;
+    padding: 12px 16px;
+  }
+  .bbc-socio-storico-panel.open { display: block; }
+  .bbc-socio-storico-item {
+    display: flex; align-items: center; gap: 10px; padding: 6px 0;
+    border-bottom: 1px solid var(--fucsia-border); font-size: 0.82rem;
+  }
+  .bbc-socio-storico-item:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
@@ -964,6 +1064,7 @@
   <button class="nav-btn nav-bbc-only" data-nav="cruscotto" onclick="showPage('cruscotto')" style="display:none;">Cruscotto BBC</button>
   <button class="nav-btn nav-bbc-only" data-nav="riassunto" onclick="showPage('riassunto')" style="display:none;">Riassunto BBC</button>
   <button class="nav-btn nav-bbc-only" data-nav="bbc-eventi" onclick="showPage('bbc-eventi')" id="navBtnBbcEventi" style="display:none;">Eventi BBC</button>
+  <button class="nav-btn nav-bbc-only" data-nav="bbc-soci" onclick="showPage('bbc-soci')" id="navBtnBbcSoci" style="display:none;">Soci BBC</button>
   <!-- Sempre visibili -->
   <div class="nav-section-sep"></div>
   <button class="nav-cambio-sezione" onclick="showPage('home')">&#8644; Cambia sezione</button>
@@ -1063,7 +1164,7 @@
     </div>
 
     <!-- Form aggiungi evento (solo Super Admin) -->
-    <div class="card">
+    <div class="card" id="bbcEventiAddCard">
       <div class="settings-label" style="margin-bottom:12px;">Aggiungi nuovo evento</div>
       <div class="bbc-add-grid">
         <div class="settings-field">
@@ -1092,7 +1193,150 @@
         <div class="section-title" style="font-size:1rem;">Lista eventi</div>
       </div>
     </div>
+
+    <!-- Filtri calendario -->
+    <div class="bbc-eventi-filtri">
+      <div class="filter-group">
+        <label class="filter-label">Anno</label>
+        <select class="filter-select" id="bbcEventiFiltroAnno" onchange="renderBbcEventi()" style="min-width:120px;">
+          <option value="">Tutti</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Periodo</label>
+        <select class="filter-select" id="bbcEventiFiltroTipo" onchange="renderBbcEventi()">
+          <option value="">Tutti</option>
+          <option value="futuri">Futuri / In corso</option>
+          <option value="passati">Passati</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;">
+        <label class="filter-label">Cerca nome</label>
+        <input type="text" class="filter-input" id="bbcEventiFiltroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderBbcEventi()">
+      </div>
+    </div>
+
     <div id="bbcEventiWrap"></div>
+  </div>
+</div>
+
+<!-- ===== PAGINA BBC SOCI ===== -->
+<div class="page" id="page-bbc-soci">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Anagrafica Soci BBC</span></div>
+        <div class="section-subtitle">Registro dei soci iscritti al Bologna Business Club — distinto dai contatti/lead</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary" id="btnToggleFormSocio" onclick="toggleFormAggiuntaSocio()">+ Aggiungi socio</button>
+        <button class="btn btn-outline" onclick="esportaTuttiSociBbc()" title="Esporta CSV con tutti i Soci BBC visibili">📤 Esporta CSV</button>
+      </div>
+    </div>
+
+    <!-- Form aggiungi/modifica socio -->
+    <div class="card bbc-soci-edit-form" id="bbcSociAddCard">
+      <div class="settings-label" style="margin-bottom:12px;" id="bbcSociFormTitle">Aggiungi nuovo socio</div>
+
+      <!-- Punto 3: Collega a un contatto esistente -->
+      <div class="bbc-linked-contact-wrap" id="bbcSocioLinkedWrap">
+        <div class="settings-label" style="margin-bottom:8px;">Collega a un contatto esistente (opzionale)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select class="settings-input" id="bbcSocioLinkedSelect" style="flex:1;min-width:200px;" onchange="applicaContattoLinked(this.value)">
+            <option value="">— Cerca per ragione sociale o referente —</option>
+          </select>
+          <button type="button" class="btn btn-outline" onclick="scollegaContattoLinked()" id="bbcSocioLinkedClearBtn" style="display:none;white-space:nowrap;">✕ Scollega</button>
+        </div>
+        <div id="bbcSocioLinkedBadge" style="margin-top:8px;display:none;"></div>
+        <div style="font-size:0.72rem;color:var(--testo-muted);margin-top:6px;">Se selezioni un contatto, i campi anagrafici vengono precompilati e restano sincronizzati.</div>
+      </div>
+      <input type="hidden" id="bbcSocioContattoLinkedId" value="">
+
+      <div class="bbc-add-grid">
+        <div class="settings-field">
+          <label class="settings-label">Nome e Cognome Referente *</label>
+          <input type="text" class="settings-input" id="bbcSocioNome" placeholder="Es. Mario Rossi">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Nome Azienda</label>
+          <input type="text" class="settings-input" id="bbcSocioAzienda" placeholder="Es. Rossi Srl">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Telefono</label>
+          <input type="tel" class="settings-input" id="bbcSocioTelefono" placeholder="Es. 051 123456">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Email</label>
+          <input type="email" class="settings-input" id="bbcSocioEmail" placeholder="mario@azienda.it">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Evento di inizio partecipazione al Club</label>
+          <select class="settings-input" id="bbcSocioEventoInizio">
+            <option value="">— Seleziona evento —</option>
+          </select>
+        </div>
+        <div class="settings-field" id="bbcSocioConsulenteWrap" style="display:none;">
+          <label class="settings-label">Assegna a consulente</label>
+          <select class="settings-input" id="bbcSocioConsulenteSelect">
+            <option value="">— Seleziona consulente —</option>
+          </select>
+        </div>
+      </div>
+      <!-- Accompagnatori fissi del socio -->
+      <div style="margin-top:14px;">
+        <div class="settings-label" style="margin-bottom:8px;">Accompagnatori fissi (presenti ad ogni evento)</div>
+        <div id="bbcSocioAccompList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:24px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="text" class="settings-input" id="bbcSocioAccompInput" placeholder="Nome Cognome" style="flex:1;min-width:160px;">
+          <button class="btn btn-outline" type="button" onclick="aggiungiAccompagnatoreSocioForm()" style="white-space:nowrap;">+ Aggiungi</button>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+        <button class="btn btn-primary" onclick="salvaFormSocio()">Salva</button>
+        <button class="btn btn-outline" onclick="chiudiFormSocio()">Annulla</button>
+      </div>
+      <input type="hidden" id="bbcSocioEditId" value="">
+    </div>
+
+    <!-- Filtri -->
+    <div class="bbc-soci-filters">
+      <div class="filter-group">
+        <label class="filter-label">Evento di provenienza</label>
+        <select class="filter-select" id="bbcSociFiltroEvento" onchange="renderBbcSoci()">
+          <option value="">Tutti</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;">
+        <label class="filter-label">Cerca nome / azienda</label>
+        <input type="text" class="filter-input" id="bbcSociFiltroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderBbcSoci()">
+      </div>
+    </div>
+
+    <!-- Tabella soci -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="tabellaBbcSoci" style="min-width:1100px;">
+          <thead>
+            <tr>
+              <th>Nome Referente</th>
+              <th>Azienda</th>
+              <th>Telefono</th>
+              <th>Email</th>
+              <th>Evento Inizio</th>
+              <th>Cons. Precedente</th>
+              <th>Consulente Assegnato</th>
+              <th>Storico</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="bbcSociBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="bbcSociEmpty" style="display:none;">
+        <div class="empty-state-icon">🤝</div>
+        <div>Nessun socio registrato. Usa il pulsante "Aggiungi socio" per iniziare.</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1261,6 +1505,7 @@
         <div class="section-title"><span id="databaseTitolo">Database</span></div>
         <div class="section-subtitle" id="databaseContatore">Tutti i contatti</div>
       </div>
+      <button class="btn btn-outline" id="btnEsportaDatabaseBbc" onclick="esportaTuttiBbcDatabase()" title="Esporta CSV soci + contatti BBC visibili" style="display:none;">📤 Esporta CSV</button>
     </div>
 
     <!-- Form aggiungi contatto BBC (nascosto in CF mode) -->
@@ -1299,6 +1544,12 @@
           <label class="settings-label">Evento di provenienza (opzionale)</label>
           <select class="settings-input" id="bbcEventoSelect">
             <option value="">— Nessun evento —</option>
+          </select>
+        </div>
+        <div class="settings-field" id="bbcCampagnaWrap" style="display:none;">
+          <label class="settings-label">Campagna Marketing (opzionale)</label>
+          <select class="settings-input" id="bbcCampagnaSelect">
+            <option value="">— Nessuna campagna —</option>
           </select>
         </div>
       </div>
@@ -1383,6 +1634,8 @@
               <th>Fase Cliente</th>
               <th>Ultimo Contatto</th>
               <th>Esiti</th>
+              <th class="th-bbc-mkt-only" id="thCampagnaMarketing" style="display:none;">Campagna Mktg</th>
+              <th class="th-bbc-mkt-only" id="thValoreEuro" style="display:none;">Valore €</th>
               <th class="th-bbc-only" id="thAzioniBbc" style="display:none;">Azioni</th>
             </tr>
           </thead>
@@ -1905,6 +2158,8 @@ const STATI_VALIDI = ["Non risponde", "Appuntamento fissato", "Non interessato",
 /* Fase Cliente = Stato di gestione: elenco unico (assorbe i vecchi "Riattivato" e
    "In contatto con altro consulente", ora "Gestito da un altro consulente") */
 const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente", "Fuori Zona"];
+/* Fasi aggiuntive per la sezione BBC (non usate in CF — non interferiscono con i dati esistenti) */
+const FASI_VALIDE_BBC = [...FASI_VALIDE, "Back-End", "Abbonamento"];
 
 /* Palette categorica per identificare i consulenti nei grafici (ordine fisso, non ciclato
    per i primi 8 slot — validata per distinguibilità anche in caso di daltonismo). */
@@ -1988,9 +2243,22 @@ let orgEditingId    = null; // ID nodo in modifica; null = modalità aggiungi
 /* ===================== BBC — Bologna Business Club ===================== */
 const CF_BBC_CLIENTI    = () => db.collection('portali').doc('clienti-fermi').collection('bbc-clienti');
 const CF_BBC_EVENTI_LIST = () => db.collection('portali').doc('clienti-fermi').collection('bbc-eventi');
+const CF_BBC_SOCI       = () => db.collection('portali').doc('clienti-fermi').collection('bbc-soci');
+const CF_BBC_EVENTO_PARTECIPANTI = (eventoId) => db.collection('portali').doc('clienti-fermi').collection('bbc-eventi').doc(eventoId).collection('partecipanti');
+/* Collection campagne del portale Marketing BBC (documento separato, stesso progetto Firebase) */
+const CF_MARKETING_CAMPAGNE = () => db.collection('portali').doc('marketing-bbc').collection('campagne');
 let bbcContatti  = [];         // contatti della sezione BBC
 let bbcEventiList = [];        // eventi fisici BBC (serate networking, ecc.)
+let bbcSoci = [];              // soci iscritti al Bologna Business Club
+let bbcPartecipantiCache = {}; // eventoId -> array di oggetti partecipante
+let campagneMarketingCache = []; // campagne caricate dal portale Marketing BBC
 let sezioneCorrente = 'cf';    // 'cf' oppure 'bbc'
+
+/* ===================== LISTENER REALTIME ===================== */
+let _cfUnsubscribe  = null;    // unsubscribe function del listener CF
+let _bbcUnsubscribe = null;    // unsubscribe function del listener BBC
+let _cfRealtimeAttivo  = false; // true dopo il primo snapshot CF  (per saltare il batch iniziale)
+let _bbcRealtimeAttivo = false; // true dopo il primo snapshot BBC
 
 /* ===================== HELPER MIGRAZIONE ===================== */
 /* Scrive un array di righe (già con overlay applicato) nella sottocollezione clienti,
@@ -2234,19 +2502,33 @@ async function salvaUtenti(lista) {
 }
 
 function ruoloCorrente() { return sessione ? sessione.ruolo : null; }
-function puoAssegnareConsulente() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoAssegnareConsulente() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing'); }
 function puoVedereImpostazioni() { return sessione && sessione.ruolo === 'superadmin'; }
-function puoVedereUtenti() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
-function puoVedereCruscotto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
+function puoVedereUtenti() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing'); }
+function puoVedereCruscotto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing'); }
 function puoVedereTutorial() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente'); }
-function puoVedereRiassunto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
-function puoVedereOrganigramma() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione'); }
-/* Super Admin gestisce tutti gli account, Direzione Vendite solo quelli con ruolo Consulente */
+function puoVedereRiassunto() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing'); }
+function puoVedereOrganigramma() { return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing'); }
+/* BBC — visibilità completa su soci ed eventi: solo superadmin e direzione.
+   Marketing e consulente vedono solo i propri record (scoping per proprietario). */
+function puoVedereTuttiSociEdEventiBbc() {
+  return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione');
+}
+/* BBC — può modificare il campo "Consulente Assegnato" sui Soci.
+   Usare SOLO per quella select specifica — non per nessun altro permesso. */
+function puoModificareConsulenteAssegnatoSocio() {
+  return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing');
+}
+/* Super Admin gestisce tutti gli account, Direzione Vendite e Marketing solo quelli con ruolo Consulente */
 function puoGestireUtente(utente) {
   if (!sessione) return false;
   if (sessione.ruolo === 'superadmin') return true;
-  if (sessione.ruolo === 'direzione') return utente.ruolo === 'consulente';
+  if (sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing') return utente.ruolo === 'consulente';
   return false;
+}
+/* Campi Campagna Marketing e Valore €: visibili solo a SA, Direzione Vendite e Marketing — mai al Consulente */
+function puoVedereCampiMarketing() {
+  return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing');
 }
 
 /* Il ruolo Consulente vede solo i propri clienti, ovunque nel portale */
@@ -2329,6 +2611,11 @@ async function eseguiLogin() {
 }
 
 async function eseguiLogout() {
+  // Ferma i listener realtime prima di disconnettersi
+  if (_cfUnsubscribe)  { _cfUnsubscribe();  _cfUnsubscribe  = null; }
+  if (_bbcUnsubscribe) { _bbcUnsubscribe(); _bbcUnsubscribe = null; }
+  _cfRealtimeAttivo  = false;
+  _bbcRealtimeAttivo = false;
   try { await _fbAuth.signOut(); } catch(e) {}
   sessione = null;
   sessionStorage.removeItem('cf_sessione');
@@ -2340,7 +2627,7 @@ async function eseguiLogout() {
 }
 
 function aggiornaUIPerRuolo() {
-  const etichette = { superadmin: 'Super Admin', direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  const etichette = { superadmin: 'Super Admin', direzione: 'Direzione Vendite', consulente: 'Consulente', marketing: 'Marketing' };
   document.getElementById('roleBadge').textContent = etichette[sessione.ruolo] + (sessione.nome ? ' · ' + sessione.nome : '');
   // Prima imposta la sezione (CF/BBC): rende visibili tutti i bottoni della sezione attiva,
   // nasconde quelli dell'altra sezione. Deve venire PRIMA dei controlli permesso.
@@ -2446,6 +2733,7 @@ function showPage(name) {
   if (name === 'database') inizializzaPaginaDatabase();
   if (name === 'organigramma') inizializzaPaginaOrganigramma();
   if (name === 'bbc-eventi') renderBbcEventi();
+  if (name === 'bbc-soci') inizializzaPaginaBbcSoci();
   if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
 }
 
@@ -2730,7 +3018,7 @@ function creaRigaHtml(c, mostraAzioni) {
   const opzStato = ['<option value="">—</option>'].concat(
     STATI_VALIDI.map(s => `<option value="${s}" ${c.stato === s ? 'selected' : ''}>${s}</option>`));
   const opzFase = ['<option value="">—</option>'].concat(
-    FASI_VALIDE.map(f => `<option value="${f}" ${c.faseCliente === f ? 'selected' : ''}>${f}</option>`));
+    (sezioneCorrente === 'bbc' ? FASI_VALIDE_BBC : FASI_VALIDE).map(f => `<option value="${f}" ${c.faseCliente === f ? 'selected' : ''}>${f}</option>`));
 
   const checkAttivo = `<label class="check-attivo-label">
       <input type="checkbox" ${c.clienteAttivo ? 'checked' : ''} onchange="aggiornaCampoRiga('${escapeJs(c._key)}','clienteAttivo',this.checked)">
@@ -2746,7 +3034,7 @@ function creaRigaHtml(c, mostraAzioni) {
   const hid = esitiKeyToHtmlId(c._key);
   const storicoHtml = renderStoricoEsitiHtml(esiti, c._key);
 
-  return `<tr${rigaBloccataClass}>
+  return `<tr data-cf-key="${escapeHtml(c._key)}"${rigaBloccataClass}>
       <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
       <td>${escapeHtml(c.referente)}</td>
       <td>${c.contatto ? '<a href="tel:'+escapeHtml(c.contatto)+'">'+escapeHtml(c.contatto)+'</a>' : ''}</td>
@@ -2757,12 +3045,25 @@ function creaRigaHtml(c, mostraAzioni) {
       <td>${celleConsulente}</td>
       <td><select class="td-select ${statoClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','stato', this.value)">${opzStato.join('')}</select></td>
       <td><select class="td-select ${faseClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','faseCliente', this.value)">${opzFase.join('')}</select>${checkAttivo}</td>
-      <td><input type="date" class="td-date-input" value="${escapeHtml(c.ultimoContatto || '')}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','ultimoContatto', this.value)"></td>
+      <td><input type="text" class="td-date-input" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10" value="${escapeHtml(formattaDataItaliana(c.ultimoContatto) || '')}" oninput="mascheraDataInput(this)" onchange="salvaDataContatto(this,'${escapeJs(c._key)}')"></td>
       <td><button class="btn-esiti" id="esiti-btn-${hid}" onclick="toggleEsitiPanel('${escapeJs(c._key)}')">${nEsiti > 0 ? 'Esiti (' + nEsiti + ')' : 'Esiti'}</button></td>
-      ${mostraAzioni ? `<td><button class="btn-elimina-contatto" title="Elimina questo contatto BBC" onclick="eliminaContattoBbc('${escapeJs(c._key)}')">🗑️</button></td>` : ''}
+      ${mostraAzioni && puoVedereCampiMarketing() ? `<td>
+        <select class="td-campagna-select" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','campagnaMarketing',this.value)">
+          <option value="">—</option>
+          ${campagneMarketingCache.map(camp => `<option value="${escapeHtml(camp.id)}" ${c.campagnaMarketing === camp.id ? 'selected' : ''}>${escapeHtml(camp.nome || camp.id)}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <input type="number" class="td-valore-input" min="0" step="0.01" placeholder="0.00"
+          value="${c.valoreEuro != null && c.valoreEuro !== '' ? escapeHtml(String(c.valoreEuro)) : ''}"
+          onchange="aggiornaCampoRiga('${escapeJs(c._key)}','valoreEuro',this.value===''?'':parseFloat(this.value)||0)">
+      </td>` : ''}
+      ${mostraAzioni ? `<td>
+        <button class="btn-elimina-contatto" title="Elimina questo contatto BBC" onclick="eliminaContattoBbc('${escapeJs(c._key)}')">🗑️</button>
+      </td>` : ''}
     </tr>
     <tr id="esiti-row-${hid}" style="display:none;">
-      <td colspan="${mostraAzioni ? 13 : 12}" class="esiti-panel-td">
+      <td colspan="${mostraAzioni ? (13 + (puoVedereCampiMarketing() ? 2 : 0)) : 12}" class="esiti-panel-td">
         <div class="esiti-panel">
           <div>
             <div class="esiti-panel-label">Storico esiti</div>
@@ -2774,9 +3075,49 @@ function creaRigaHtml(c, mostraAzioni) {
             <div class="esiti-error" id="esiti-error-${hid}" style="display:none;"></div>
             <button class="btn-esiti-salva" onclick="salvaEsito('${escapeJs(c._key)}')">Salva esito</button>
           </div>
+          ${mostraAzioni ? `<div class="esiti-form" style="border-left:2px solid var(--fucsia-border); padding-left:14px;">
+            <div class="esiti-panel-label">Accompagnatori fissi</div>
+            <div id="accomp-list-bbc-${hid}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">${renderAccompagnatoriChip((c.accompagnatori||[]),'bbc',escapeJs(c._key),hid)}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <input type="text" class="settings-input" id="accomp-input-bbc-${hid}" placeholder="Nome Cognome" style="flex:1;min-width:160px;padding:7px 10px;font-size:0.83rem;">
+              <button class="btn-esiti-salva" onclick="aggiungiAccompagnatoreContatto('${escapeJs(c._key)}','${hid}')">+ Aggiungi</button>
+            </div>
+            <div class="esiti-panel-label" style="margin-top:14px;">Storico eventi BBC</div>
+            <div id="storico-contatto-bbc-${hid}" style="margin-top:4px;">${renderStoricoContattoBbcHtml(c._key)}</div>
+          </div>` : ''}
         </div>
       </td>
     </tr>`;
+}
+
+/* Riga per i Soci BBC nel Database BBC (con edit button per SA/DIR, punto 4) */
+function creaRigaSocioHtml(s) {
+  const nomeCella = '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;margin-right:4px;vertical-align:middle;">Socio BBC</span>'
+    + escapeHtml(s.nome || '—')
+    + (s.azienda ? ' <span style="font-weight:400;color:var(--testo-muted);">— ' + escapeHtml(s.azienda) + '</span>' : '');
+  const mktCols = puoVedereCampiMarketing() ? '<td>—</td><td>—</td>' : '';
+  /* Punto 4: pulsante Modifica visibile solo a superadmin/direzione */
+  const btnModifica = puoVedereTuttiSociEdEventiBbc()
+    ? '<button class="icon-btn" title="Modifica socio" onclick="modificaSocioDaDatabase(\'' + escapeJs(s.id) + '\')">✏️</button>'
+    : '';
+  /* Punto 6: consulente precedente nel campo td-vecchio-consulente */
+  const consPrec = s.consulentePrecedente ? escapeHtml(s.consulentePrecedente) : '<span style="color:var(--testo-muted);">—</span>';
+  return '<tr style="opacity:0.82;" title="Socio BBC">'
+    + '<td class="ragione-sociale">' + nomeCella + '</td>'
+    + '<td>' + escapeHtml(s.azienda || '') + '</td>'
+    + '<td>' + (s.telefono ? '<a href="tel:' + escapeHtml(s.telefono) + '">' + escapeHtml(s.telefono) + '</a>' : '—') + '</td>'
+    + '<td>' + (s.email ? '<a href="mailto:' + escapeHtml(s.email) + '">' + escapeHtml(s.email) + '</a>' : '—') + '</td>'
+    + '<td>—</td>'
+    + '<td>—</td>'
+    + '<td class="td-vecchio-consulente">' + consPrec + '</td>'
+    + '<td>' + escapeHtml(s.consulente || '—') + '</td>'
+    + '<td>—</td>'
+    + '<td>—</td>'
+    + '<td>—</td>'
+    + '<td>—</td>'
+    + mktCols
+    + '<td>' + btnModifica + '</td>'
+    + '</tr>';
 }
 
 function escapeHtml(str) {
@@ -2849,12 +3190,21 @@ function inizializzaPaginaDatabase() {
 
   const thAzioni = document.getElementById('thAzioniBbc');
   if (thAzioni) thAzioni.style.display = sezioneCorrente === 'bbc' ? '' : 'none';
+  const btnDbExport = document.getElementById('btnEsportaDatabaseBbc');
+  if (btnDbExport) btnDbExport.style.display = sezioneCorrente === 'bbc' ? '' : 'none';
+  const _bbcMkt = sezioneCorrente === 'bbc' && puoVedereCampiMarketing();
+  const thCamp = document.getElementById('thCampagnaMarketing');
+  const thVal = document.getElementById('thValoreEuro');
+  if (thCamp) thCamp.style.display = _bbcMkt ? '' : 'none';
+  if (thVal) thVal.style.display = _bbcMkt ? '' : 'none';
 
-  // Form BBC add-contact: visibile a tutti in BBC mode (consulente, DV, SA)
+  // Form BBC add-contact: visibile in BBC mode solo per chi può assegnare consulenti
+  // (superadmin, direzione, marketing) — il ruolo consulente vede il database ma non può aggiungere contatti
   const bbcCard = document.getElementById('bbcAddContactCard');
   if (bbcCard) {
-    bbcCard.style.display = sezioneCorrente === 'bbc' ? 'block' : 'none';
-    if (sezioneCorrente === 'bbc') inizializzaFormAggiuntaBbc();
+    const mostraFormBbc = sezioneCorrente === 'bbc' && puoAssegnareConsulente();
+    bbcCard.style.display = mostraFormBbc ? 'block' : 'none';
+    if (mostraFormBbc) inizializzaFormAggiuntaBbc();
   }
 
   const selProv = document.getElementById('dbFiltroProvincia');
@@ -2908,14 +3258,32 @@ function renderDatabase() {
 
   const body = document.getElementById('databaseBody');
   const emptyState = document.getElementById('databaseEmptyState');
-  if (righe.length === 0) {
+  // In BBC mode: mostra anche i Soci BBC come righe aggiuntive read-only (Point 3)
+  let sociDbHtml = '';
+  let sociDbCount = 0;
+  if (sezioneCorrente === 'bbc') {
+    const sociVisibili = puoVedereTuttiSociEdEventiBbc()
+      ? bbcSoci
+      : bbcSoci.filter(s => s.consulente && s.consulente === (sessione ? sessione.nome : ''));
+    const sociDb = filtroTesto
+      ? sociVisibili.filter(s => normalizza(s.nome || '').includes(filtroTesto) || normalizza(s.azienda || '').includes(filtroTesto))
+      : sociVisibili;
+    sociDbCount = sociDb.length;
+    if (sociDbCount) {
+      sociDbHtml = sociDb.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).map(s => creaRigaSocioHtml(s)).join('');
+    }
+    const totaleBbc = righe.length + sociDbCount;
+    document.getElementById('databaseContatore').textContent = totaleBbc + (totaleBbc === 1 ? ' record BBC' : ' record BBC') + ' (' + righe.length + ' contatti + ' + sociDbCount + ' soci)';
+  }
+
+  if (righe.length === 0 && sociDbCount === 0) {
     body.innerHTML = '';
     emptyState.style.display = 'block';
     aggiornaDbScrollSlider();
     return;
   }
   emptyState.style.display = 'none';
-  body.innerHTML = righe.map(c => creaRigaHtml(c, sezioneCorrente === 'bbc')).join('');
+  body.innerHTML = righe.map(c => creaRigaHtml(c, sezioneCorrente === 'bbc')).join('') + sociDbHtml;
   aggiornaDbScrollSlider();
 }
 
@@ -2960,7 +3328,7 @@ function opzioniDvHtml(selezionato) {
 }
 
 function aggiornaVisibilitaDvNuovoUtente() {
-  const ruolo = sessione.ruolo === 'direzione' ? 'consulente' : document.getElementById('nuovoUtenteRuolo').value;
+  const ruolo = (sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing') ? 'consulente' : document.getElementById('nuovoUtenteRuolo').value;
   const dvWrap = document.getElementById('nuovoUtenteDvWrap');
   dvWrap.style.display = ruolo === 'consulente' ? '' : 'none';
   if (ruolo === 'consulente') document.getElementById('nuovoUtenteDv').innerHTML = opzioniDvHtml('');
@@ -2971,24 +3339,24 @@ function renderConsulenti() {
 
   const ruoloSelect = document.getElementById('nuovoUtenteRuolo');
   const ruoloWrap = document.getElementById('nuovoUtenteRuoloWrap');
-  if (sessione.ruolo === 'direzione') {
+  if (sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing') {
     ruoloSelect.innerHTML = '<option value="consulente">Consulente</option>';
     ruoloWrap.style.display = 'none';
   } else {
-    ruoloSelect.innerHTML = '<option value="direzione">Direzione Vendite</option><option value="consulente">Consulente</option>';
+    ruoloSelect.innerHTML = '<option value="direzione">Direzione Vendite</option><option value="consulente">Consulente</option><option value="marketing">Marketing</option>';
     ruoloWrap.style.display = '';
   }
   aggiornaVisibilitaDvNuovoUtente();
 
   let visibili = [];
   if (sessione.ruolo === 'superadmin') visibili = getUtenti();
-  else if (sessione.ruolo === 'direzione') visibili = getUtenti().filter(u => u.ruolo === 'consulente');
+  else if (sessione.ruolo === 'direzione' || sessione.ruolo === 'marketing') visibili = getUtenti().filter(u => u.ruolo === 'consulente');
 
   document.getElementById('utentiSubtitle').textContent = sessione.ruolo === 'superadmin'
     ? 'Tutti gli account di accesso al portale'
     : 'I tuoi consulenti';
 
-  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente', marketing: 'Marketing' };
   const body = document.getElementById('utentiBody');
   const empty = document.getElementById('utentiEmptyState');
   if (!visibili.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
@@ -3001,10 +3369,17 @@ function renderConsulenti() {
     const cellaAccesso = u.uid
       ? `<button class="icon-btn" title="Invia email per reimpostare la password" onclick="inviaResetPasswordUtente('${u.id}')">🔑 Reset password</button>`
       : `<button class="icon-btn" title="Attiva l'accesso sicuro per questo account, riusando la password già in uso" onclick="migraUtenteAdAuth('${u.id}')" style="color:var(--arancio);">⚠️ Migra ad Authentication</button>`;
+    const cellaRuolo = sessione.ruolo === 'superadmin'
+      ? `<select class="td-select" style="min-width:140px" onchange="cambiaRuoloUtente('${u.id}',this.value)">
+          <option value="consulente"${u.ruolo==='consulente'?' selected':''}>Consulente</option>
+          <option value="direzione"${u.ruolo==='direzione'?' selected':''}>Direzione Vendite</option>
+          <option value="marketing"${u.ruolo==='marketing'?' selected':''}>Marketing</option>
+        </select>`
+      : `<span class="td-ruolo-badge td-ruolo-${u.ruolo}">${etichette[u.ruolo] || u.ruolo}</span>`;
     return `<tr>
       <td class="ragione-sociale">${escapeHtml(u.nome)}</td>
       <td>${escapeHtml(u.email)}</td>
-      <td><span class="td-ruolo-badge td-ruolo-${u.ruolo}">${etichette[u.ruolo] || u.ruolo}</span></td>
+      <td>${cellaRuolo}</td>
       <td>${cellaDv}</td>
       <td>${cellaAccesso}</td>
       <td>
@@ -3021,6 +3396,32 @@ async function modificaDvUtente(id, dvId) {
   u.dvAssegnato = dvId || null;
   await salvaUtenti(utenti);
   showToast('DV a carico aggiornato');
+}
+
+async function cambiaRuoloUtente(id, nuovoRuolo) {
+  if (!sessione || sessione.ruolo !== 'superadmin') return;
+  const ruoliValidi = ['consulente', 'direzione', 'marketing'];
+  if (!ruoliValidi.includes(nuovoRuolo)) return;
+  const utenti = getUtenti();
+  const u = utenti.find(x => x.id === id);
+  if (!u) return;
+  if (u.ruolo === nuovoRuolo) return;
+  const vecchioRuolo = u.ruolo;
+  u.ruolo = nuovoRuolo;
+  // dvAssegnato è rilevante solo per il ruolo consulente:
+  // se si cambia ruolo in qualsiasi direzione, si azzera (verrà riassegnato se necessario)
+  u.dvAssegnato = null;
+  try {
+    await salvaUtenti(utenti);
+    renderConsulenti();
+    showToast('Ruolo aggiornato a "' + (nuovoRuolo === 'direzione' ? 'Direzione Vendite' : nuovoRuolo.charAt(0).toUpperCase() + nuovoRuolo.slice(1)) + '"');
+  } catch(e) {
+    // Ripristina in caso di errore
+    u.ruolo = vecchioRuolo;
+    u.dvAssegnato = vecchioRuolo === 'consulente' ? null : null;
+    renderConsulenti();
+    showToast('Errore nel salvataggio del ruolo', 'err');
+  }
 }
 
 async function aggiungiUtente() {
@@ -3118,7 +3519,7 @@ async function migraUtenteAdAuth(id) {
    il messaggio già pronto (destinatario, oggetto, testo con nome e password) da spedire con un click.
    La password va passata esplicitamente: non viene più salvata da nessuna parte dopo la creazione. */
 function apriEmailCredenziali(u, password) {
-  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente' };
+  const etichette = { direzione: 'Direzione Vendite', consulente: 'Consulente', marketing: 'Marketing' };
   const oggetto = 'Le tue credenziali di accesso - Clienti Fermi OSM';
   const corpo = 'Ciao ' + u.nome + ',\n\n' +
     'Ecco le tue credenziali per accedere al portale Clienti Fermi OSM:\n\n' +
@@ -3145,6 +3546,37 @@ function formattaDataItaliana(dataIso) {
   const d = new Date(dataIso + 'T00:00:00');
   if (isNaN(d.getTime())) return null;
   return d.toLocaleDateString('it-IT');
+}
+
+/* Inserisce automaticamente gli slash mentre si digita gg/mm/aaaa (sostituisce
+   il vecchio input type="date", che su alcuni browser impedisce di digitare
+   l'anno per intero) */
+function mascheraDataInput(el) {
+  const soloCifre = el.value.replace(/\D/g, '').slice(0, 8);
+  let formattato = soloCifre.slice(0, 2);
+  if (soloCifre.length > 2) formattato += '/' + soloCifre.slice(2, 4);
+  if (soloCifre.length > 4) formattato += '/' + soloCifre.slice(4, 8);
+  el.value = formattato;
+}
+
+/* Valida la data gg/mm/aaaa digitata e la salva in formato ISO (aaaa-mm-gg) */
+function salvaDataContatto(el, key) {
+  const testo = el.value.trim();
+  if (!testo) { aggiornaCampoRiga(key, 'ultimoContatto', ''); return; }
+
+  const m = testo.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) {
+    showToast('Data non valida: usa il formato gg/mm/aaaa (es. 21/08/2026).');
+    return;
+  }
+  const gg = parseInt(m[1], 10), mm = parseInt(m[2], 10), aaaa = parseInt(m[3], 10);
+  const d = new Date(aaaa, mm - 1, gg);
+  if (d.getFullYear() !== aaaa || d.getMonth() !== mm - 1 || d.getDate() !== gg) {
+    showToast('Data non valida: controlla giorno e mese.');
+    return;
+  }
+  const iso = aaaa + '-' + String(mm).padStart(2, '0') + '-' + String(gg).padStart(2, '0');
+  aggiornaCampoRiga(key, 'ultimoContatto', iso);
 }
 
 function calcolaStatisticheCruscotto() {
@@ -3792,6 +4224,7 @@ async function registraEventoCruscotto(campo, valore, vecchioValore, riga) {
 
 async function aggiornaCampoRiga(key, campo, valore) {
   if (campo === 'consulente' && !puoAssegnareConsulente()) return;
+  if ((campo === 'campagnaMarketing' || campo === 'valoreEuro') && !puoVedereCampiMarketing()) return;
 
   // Aggiorna in memoria
   const riga = getContattiCorrenti().find(c => c._key === key);
@@ -3845,6 +4278,24 @@ async function aggiornaCampoRiga(key, campo, valore) {
   } catch(e) {
     console.error('[Clienti Fermi] Errore salvataggio campo cliente:', e);
     showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
+    return;
+  }
+
+  /* Punto 5: sincronizzazione Contatto → Socio collegato (solo in sezione BBC) */
+  if (sezioneCorrente === 'bbc' && ['ragioneSociale','referente','contatto','email'].includes(campo)) {
+    const MAPPA_BBC_SOCIO = { ragioneSociale: 'azienda', referente: 'nome', contatto: 'telefono', email: 'email' };
+    const campSocio = MAPPA_BBC_SOCIO[campo];
+    if (campSocio) {
+      const sociCollegati = bbcSoci.filter(s => s.contattoLinkedId === key);
+      for (const s of sociCollegati) {
+        try {
+          await CF_BBC_SOCI().doc(s.id).update({ [campSocio]: valore });
+          s[campSocio] = valore;
+        } catch(se) {
+          console.error('[BBC Soci] Errore sincronizzazione Contatto→Socio per socio ' + s.id + ':', se);
+        }
+      }
+    }
   }
 }
 
@@ -4143,16 +4594,36 @@ function aggiornaNvbarPerSezione(sezione) {
   document.querySelectorAll('.nav-bbc-only').forEach(el => {
     el.style.display = sezione === 'bbc' ? '' : 'none';
   });
-  // Bottone eventi BBC: solo per superadmin in sezione BBC
+  // Bottone eventi BBC: visibile a superadmin e consulenti in sezione BBC
+  // (i consulenti vedono gli eventi in sola lettura: nessun form di aggiunta, nessun eliminazione)
   const btnEventi = document.getElementById('navBtnBbcEventi');
   if (btnEventi) {
-    btnEventi.style.display = (sezione === 'bbc' && sessione && sessione.ruolo === 'superadmin') ? '' : 'none';
+    btnEventi.style.display = (sezione === 'bbc' && sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente')) ? '' : 'none';
   }
+  // Bottone soci BBC: visibile a tutti in sezione BBC
+  const btnSoci = document.getElementById('navBtnBbcSoci');
+  if (btnSoci) {
+    btnSoci.style.display = (sezione === 'bbc') ? '' : 'none';
+  }
+}
+
+/* Aggiorna le select filtro Fase Cliente per includere le fasi BBC extra quando si è in BBC mode */
+function aggiornafiltroFasiBbc() {
+  const fasi = sezioneCorrente === 'bbc' ? FASI_VALIDE_BBC : FASI_VALIDE;
+  ['dbFiltroFase', 'filtroFase'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Tutte</option>'
+      + fasi.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join('');
+    if (fasi.includes(current)) sel.value = current;
+  });
 }
 
 async function selezionaSezione(sezione) {
   sezioneCorrente = sezione;
   aggiornaUIPerRuolo();
+  aggiornafiltroFasiBbc();
   showPage('mappa'); // rende page-mappa visibile (display:block) — da qui in avanti #map ha dimensioni reali
   if (!map) {
     // Prima volta: inizializza la mappa ora che il contenitore è visibile.
@@ -4168,46 +4639,239 @@ async function selezionaSezione(sezione) {
 
 async function loadBbcData() {
   try {
-    const [contattiSnap, eventiSnap] = await Promise.all([
+    const [contattiSnap, eventiSnap, sociSnap] = await Promise.all([
       CF_BBC_CLIENTI().get(),
-      CF_BBC_EVENTI_LIST().get()
+      CF_BBC_EVENTI_LIST().get(),
+      CF_BBC_SOCI().get()
     ]);
     bbcContatti = contattiSnap.docs.map(d => Object.assign({ _key: d.id }, d.data()));
     bbcEventiList = eventiSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    bbcSoci = sociSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
   } catch(e) {
     console.error('[BBC] Errore caricamento dati:', e);
     bbcContatti = [];
     bbcEventiList = [];
+    bbcSoci = [];
+  }
+  // Carica anche le campagne marketing (non bloccante)
+  await caricaCampagneMarketing();
+}
+
+async function caricaCampagneMarketing() {
+  try {
+    const snap = await CF_MARKETING_CAMPAGNE().get();
+    campagneMarketingCache = snap.docs.map(d => Object.assign({ id: d.id }, d.data()))
+      .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  } catch(e) {
+    // Non critico: il portale Marketing BBC potrebbe non esistere ancora
+    campagneMarketingCache = [];
   }
 }
 
-/* ---- Rendering eventi BBC ---- */
+function popolaSelectCampagnaBbc() {
+  const sel = document.getElementById('bbcCampagnaSelect');
+  const wrap = document.getElementById('bbcCampagnaWrap');
+  if (!sel || !wrap) return;
+  if (!puoVedereCampiMarketing()) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  sel.innerHTML = '<option value="">— Nessuna campagna —</option>'
+    + campagneMarketingCache.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome || c.id)}</option>`).join('');
+}
+
+/* ===================== BBC — EXPORT CSV (Punto 2) ===================== */
+
+/* Escaping campo CSV: racchiude tra virgolette se necessario, raddoppia eventuali virgolette interne */
+function csvEscape(val) {
+  const s = (val == null ? '' : String(val));
+  if (s.includes(';') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+/* Scarica un file CSV con BOM UTF-8 (compatibilità Excel IT) */
+function scaricaCsv(nomeFile, intestazioni, righe) {
+  const bom = '﻿';
+  const csv = bom + [intestazioni, ...righe].map(r => r.map(csvEscape).join(';')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeFile;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* Genera slug da una stringa (per il nome file) */
+function csvSlug(str) {
+  return (str || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '').substring(0, 60);
+}
+
+/* Export partecipanti di un singolo evento */
+async function esportaPartecipantiEvento(eventoId) {
+  const ev = bbcEventiList.find(e => e.id === eventoId);
+  /* Carica i partecipanti se non già in cache */
+  if (!bbcPartecipantiCache[eventoId]) {
+    try {
+      const snap = await CF_BBC_EVENTO_PARTECIPANTI(eventoId).get();
+      bbcPartecipantiCache[eventoId] = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    } catch(e) {
+      showToast('Errore caricamento partecipanti: ' + (e.message || e.code || 'errore'));
+      return;
+    }
+  }
+  const parts = bbcPartecipantiCache[eventoId] || [];
+  if (!parts.length) { showToast('Nessun partecipante per questo evento.'); return; }
+  const header = ['Nome', 'Azienda', 'Telefono', 'Email', 'Tipo', 'Stato'];
+  const righe = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).map(p => {
+    let tel = '', mail = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const s = bbcSoci.find(x => x.id === p.socioId);
+      if (s) { tel = s.telefono || ''; mail = s.email || ''; }
+    } else if (p.tipo === 'contatto' && p.contattoId) {
+      const c = bbcContatti.find(x => x._key === p.contattoId);
+      if (c) { tel = c.contatto || ''; mail = c.email || ''; }
+    }
+    return [p.nome || '', p.azienda || '', tel, mail, p.tipo === 'contatto' ? 'Lead/Contatto' : 'Socio', p.stato || ''];
+  });
+  const slug = csvSlug((ev ? ev.nome : eventoId));
+  const data = oggiIso().replace(/-/g, '');
+  scaricaCsv('partecipanti_' + slug + '_' + data + '.csv', header, righe);
+  showToast('CSV esportato: ' + righe.length + ' partecipanti.');
+}
+
+/* Export tutti soci + contatti BBC visibili all'utente (rispetta scoping) */
+function esportaTuttiSociBbc() {
+  const header = ['Nome / Referente', 'Azienda / Rag.Soc.', 'Telefono', 'Email', 'Tipo', 'Consulente Precedente', 'Consulente Assegnato'];
+  const righe = [];
+  /* Soci */
+  const sociVisibili = vediTuttiSociBbcPerExport();
+  sociVisibili.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).forEach(s => {
+    righe.push([s.nome || '', s.azienda || '', s.telefono || '', s.email || '', 'Socio', s.consulentePrecedente || '', s.consulente || '']);
+  });
+  if (!righe.length) { showToast('Nessun socio da esportare.'); return; }
+  scaricaCsv('soci_bbc_' + oggiIso().replace(/-/g, '') + '.csv', header, righe);
+  showToast('CSV esportato: ' + righe.length + ' soci.');
+}
+
+/* Export tutti (soci + contatti) nella Database BBC */
+function esportaTuttiBbcDatabase() {
+  const header = ['Nome / Referente', 'Azienda / Rag.Soc.', 'Telefono', 'Email', 'Tipo', 'Consulente Assegnato'];
+  const righe = [];
+  /* Contatti */
+  const contattiVis = applicaVisibilitaRuolo(bbcContatti);
+  contattiVis.forEach(c => {
+    righe.push([c.referente || '', c.ragioneSociale || '', c.contatto || '', c.email || '', 'Lead/Contatto', c.consulente || '']);
+  });
+  /* Soci */
+  vediTuttiSociBbcPerExport().forEach(s => {
+    righe.push([s.nome || '', s.azienda || '', s.telefono || '', s.email || '', 'Socio', s.consulente || '']);
+  });
+  if (!righe.length) { showToast('Nessun record da esportare.'); return; }
+  righe.sort((a, b) => (a[0] || '').localeCompare(b[0] || ''));
+  scaricaCsv('database_bbc_' + oggiIso().replace(/-/g, '') + '.csv', header, righe);
+  showToast('CSV esportato: ' + righe.length + ' record.');
+}
+
+/* Helper scoping soci per export */
+function vediTuttiSociBbcPerExport() {
+  if (puoVedereTuttiSociEdEventiBbc() || (sessione && sessione.ruolo === 'marketing')) return bbcSoci;
+  return bbcSoci.filter(s => s.consulente && s.consulente === (sessione ? sessione.nome : ''));
+}
+
+/* ---- Rendering eventi BBC — versione calendario potenziata ---- */
 function renderBbcEventi() {
-  if (!sessione || sessione.ruolo !== 'superadmin') return;
+  // Visibile a superadmin (lettura+scrittura) e consulenti (sola lettura)
+  if (!sessione || (sessione.ruolo !== 'superadmin' && sessione.ruolo !== 'consulente')) return;
+  const isSuperAdmin = sessione.ruolo === 'superadmin';
+  // Mostra/nascondi il form di aggiunta evento
+  const addCard = document.getElementById('bbcEventiAddCard');
+  if (addCard) addCard.style.display = isSuperAdmin ? '' : 'none';
+
   const wrap = document.getElementById('bbcEventiWrap');
   if (!wrap) return;
 
+  /* Aggiorna select anno con tutti gli anni presenti */
+  const selAnno = document.getElementById('bbcEventiFiltroAnno');
+  if (selAnno) {
+    const anni = [...new Set(bbcEventiList.map(ev => (ev.data || '').substring(0, 4)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+    const annoCorrente = selAnno.value;
+    selAnno.innerHTML = '<option value="">Tutti</option>' + anni.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+    if (anni.includes(annoCorrente)) selAnno.value = annoCorrente;
+  }
+
   if (!bbcEventiList.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗓️</div><div>Nessun evento BBC creato. Usa il form qui sopra per aggiungere il primo.</div></div>';
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗓️</div><div>'
+      + (isSuperAdmin ? 'Nessun evento BBC creato. Usa il form qui sopra per aggiungere il primo.' : 'Nessun evento BBC disponibile.')
+      + '</div></div>';
     return;
   }
 
-  wrap.innerHTML = bbcEventiList
-    .sort((a, b) => (b.data || '').localeCompare(a.data || ''))
-    .map(ev => {
-      return '<div class="bbc-evento-card">'
-        + '<div class="bbc-evento-header">'
-        + '<span class="bbc-evento-nome">' + escapeHtml(ev.nome) + '</span>'
-        + '<span class="bbc-evento-data">' + (ev.data ? formattaDataItaliana(ev.data) || escapeHtml(ev.data) : 'Data non specificata') + '</span>'
-        + '</div>'
-        + (ev.luogo ? '<div class="bbc-evento-luogo">📍 ' + escapeHtml(ev.luogo) + '</div>' : '')
-        + (ev.note ? '<div class="bbc-evento-note">' + escapeHtml(ev.note) + '</div>' : '')
-        + '<div class="bbc-evento-contatti">Contatti collegati: <strong>'
-        + bbcContatti.filter(c => c.eventoProvenienza === ev.id).length
-        + '</strong></div>'
-        + '<button class="btn btn-outline" style="margin-top:10px; color:var(--rosso); border-color:var(--rosso);" onclick="eliminaBbcEvento(\'' + escapeJs(ev.id) + '\')">🗑️ Elimina evento</button>'
-        + '</div>';
-    }).join('');
+  const oggi = oggiIso();
+  const filtroAnno = (document.getElementById('bbcEventiFiltroAnno') || {}).value || '';
+  const filtroTipo = (document.getElementById('bbcEventiFiltroTipo') || {}).value || '';
+  const filtroTesto = ((document.getElementById('bbcEventiFiltroTesto') || {}).value || '').toLowerCase().trim();
+
+  let lista = bbcEventiList.slice();
+
+  /* Applica filtri */
+  if (filtroAnno) lista = lista.filter(ev => (ev.data || '').startsWith(filtroAnno));
+  if (filtroTipo === 'futuri') lista = lista.filter(ev => !ev.data || ev.data >= oggi);
+  if (filtroTipo === 'passati') lista = lista.filter(ev => ev.data && ev.data < oggi);
+  if (filtroTesto) lista = lista.filter(ev => (ev.nome || '').toLowerCase().includes(filtroTesto) || (ev.luogo || '').toLowerCase().includes(filtroTesto));
+
+  if (!lista.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><div>Nessun evento corrisponde ai filtri selezionati.</div></div>';
+    return;
+  }
+
+  /* Ordina cronologicamente: futuri/senza data prima (per data ASC), poi passati (per data DESC) */
+  const futuri = lista.filter(ev => !ev.data || ev.data >= oggi).sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999'));
+  const passati = lista.filter(ev => ev.data && ev.data < oggi).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+
+  function renderCard(ev) {
+    const isPassato = ev.data && ev.data < oggi;
+    const badgeTipo = isPassato
+      ? '<span class="bbc-evento-badge-passato">Passato</span>'
+      : '<span class="bbc-evento-badge-futuro">In programma</span>';
+    const nContattiCollegati = bbcContatti.filter(c => c.eventoProvenienza === ev.id).length;
+    const nPartecipanti = (bbcPartecipantiCache[ev.id] || []).length;
+    return '<div class="bbc-evento-row' + (isPassato ? ' passato' : '') + '" id="card-evento-' + escapeHtml(ev.id) + '">'
+      + '<div class="bbc-evento-row-main">'
+      + '<div class="bbc-evento-info">'
+      + '<div class="bbc-evento-nome">' + escapeHtml(ev.nome) + '&nbsp;' + badgeTipo + '</div>'
+      + '<div class="bbc-evento-data">' + (ev.data ? (formattaDataItaliana(ev.data) || escapeHtml(ev.data)) : 'Data non specificata') + '</div>'
+      + (ev.luogo ? '<div class="bbc-evento-luogo-row">📍 ' + escapeHtml(ev.luogo) + '</div>' : '')
+      + (ev.note ? '<div class="bbc-evento-note">' + escapeHtml(ev.note) + '</div>' : '')
+      + '</div>'
+      + '<div class="bbc-evento-counters">'
+      + '<span>Lead: <strong>' + nContattiCollegati + '</strong></span>'
+      + '<span>Partecipanti: <strong id="cnt-part-' + escapeHtml(ev.id) + '">' + nPartecipanti + '</strong></span>'
+      + '</div>'
+      + '<div class="bbc-evento-actions">'
+      + '<button class="btn btn-outline" style="font-size:0.78rem;" onclick="togglePartecipantiPanel(\'' + escapeJs(ev.id) + '\')">👥 Partecipanti</button>'
+      + '<button class="btn btn-outline" style="font-size:0.78rem;" onclick="esportaPartecipantiEvento(\'' + escapeJs(ev.id) + '\')">📤 Esporta</button>'
+      + (isSuperAdmin ? '<button class="btn btn-outline" style="font-size:0.78rem; color:var(--rosso); border-color:var(--rosso);" onclick="eliminaBbcEvento(\'' + escapeJs(ev.id) + '\')">🗑️ Elimina</button>' : '')
+      + '</div>'
+      + '</div>'
+      + renderPartecipantiPanelHtml(ev.id)
+      + '</div>';
+  }
+
+  let html = '';
+  if (futuri.length) {
+    html += '<div class="bbc-eventi-section-label">In programma e futuri (' + futuri.length + ')</div>';
+    html += '<div class="bbc-eventi-list">' + futuri.map(renderCard).join('') + '</div>';
+  }
+  if (passati.length) {
+    html += '<div class="bbc-eventi-section-label" style="margin-top:28px;">Passati (' + passati.length + ')</div>';
+    html += '<div class="bbc-eventi-list">' + passati.map(renderCard).join('') + '</div>';
+  }
+  wrap.innerHTML = html;
 }
 
 async function aggiungiBbcEvento() {
@@ -4231,7 +4895,7 @@ async function aggiungiBbcEvento() {
     showToast('Evento BBC aggiunto.');
   } catch(e) {
     console.error('[BBC] Errore aggiunta evento:', e);
-    showToast('Errore durante l\'aggiunta dell\'evento. Riprova.');
+    showToast('Errore aggiunta evento: ' + (e.message || e.code || 'errore sconosciuto'));
   }
 }
 
@@ -4245,7 +4909,7 @@ async function eliminaBbcEvento(id) {
     showToast('Evento eliminato.');
   } catch(e) {
     console.error('[BBC] Errore eliminazione evento:', e);
-    showToast('Errore durante l\'eliminazione. Riprova.');
+    showToast('Errore eliminazione evento: ' + (e.message || e.code || 'errore sconosciuto'));
   }
 }
 
@@ -4277,6 +4941,7 @@ function popolaSelectConsulentiBbc() {
 function inizializzaFormAggiuntaBbc() {
   popolaSelectEventiBbc();
   popolaSelectConsulentiBbc();
+  popolaSelectCampagnaBbc();
 }
 
 async function aggiungiBbcContatto() {
@@ -4287,6 +4952,7 @@ async function aggiungiBbcContatto() {
   const provincia = (document.getElementById('bbcProvincia').value || '').trim();
   const comune = (document.getElementById('bbcComune').value || '').trim();
   const eventoId = (document.getElementById('bbcEventoSelect').value || '').trim();
+  const campagnaId = puoVedereCampiMarketing() ? ((document.getElementById('bbcCampagnaSelect') || {}).value || '').trim() : '';
 
   if (!ragioneSociale) { showToast('La ragione sociale / nome contatto è obbligatoria.'); return; }
 
@@ -4314,6 +4980,7 @@ async function aggiungiBbcContatto() {
     comune,
     consulente,
     eventoProvenienza: eventoId || '',
+    campagnaMarketing: campagnaId || '',
     dataAggiunta: oggiIso(),
     _provinciaMatch,
     _comuneMatch
@@ -4332,13 +4999,829 @@ async function aggiungiBbcContatto() {
     if (selEv) selEv.value = '';
     const selCons = document.getElementById('bbcConsulenteSelect');
     if (selCons) selCons.value = '';
+    const selCamp = document.getElementById('bbcCampagnaSelect');
+    if (selCamp) selCamp.value = '';
     aggiornaStatsBar();
     if (document.getElementById('page-database').classList.contains('active')) inizializzaPaginaDatabase();
     showToast('Contatto BBC aggiunto con successo.');
   } catch(e) {
     console.error('[BBC] Errore aggiunta contatto:', e);
-    showToast('Errore durante l\'aggiunta del contatto. Riprova.');
+    showToast('Errore aggiunta contatto BBC: ' + (e.message || e.code || 'errore sconosciuto'));
   }
+}
+
+/* ===================== BBC — SOCI ===================== */
+
+async function loadBbcSoci() {
+  try {
+    const snap = await CF_BBC_SOCI().get();
+    bbcSoci = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  } catch(e) {
+    console.error('[BBC Soci] Errore caricamento:', e);
+    bbcSoci = [];
+  }
+}
+
+/* Riempie la select eventi per il form soci */
+function popolaSelectEventiSoci() {
+  const sel = document.getElementById('bbcSocioEventoInizio');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Seleziona evento —</option>'
+    + bbcEventiList
+        .slice()
+        .sort((a, b) => (a.data || '').localeCompare(b.data || ''))
+        .map(ev => '<option value="' + escapeHtml(ev.id) + '">' + escapeHtml(ev.nome) + (ev.data ? ' (' + (ev.data || '') + ')' : '') + '</option>')
+        .join('');
+}
+
+/* Riempie la select filtro evento nella pagina soci */
+function popolaFiltroEventoSoci() {
+  const sel = document.getElementById('bbcSociFiltroEvento');
+  if (!sel) return;
+  const corrente = sel.value;
+  sel.innerHTML = '<option value="">Tutti</option>'
+    + bbcEventiList
+        .slice()
+        .sort((a, b) => (a.data || '').localeCompare(b.data || ''))
+        .map(ev => '<option value="' + escapeHtml(ev.id) + '">' + escapeHtml(ev.nome) + '</option>')
+        .join('');
+  if (corrente) sel.value = corrente;
+}
+
+function inizializzaPaginaBbcSoci() {
+  popolaSelectEventiSoci();
+  popolaFiltroEventoSoci();
+  renderBbcSoci();
+}
+
+function _popolaSelectConsulenteFormSocio(valoreCorrente) {
+  const consuWrap = document.getElementById('bbcSocioConsulenteWrap');
+  if (!consuWrap) return;
+  /* Punto 6: select visibile a SA, direzione, marketing */
+  const mostra = puoModificareConsulenteAssegnatoSocio();
+  consuWrap.style.display = mostra ? '' : 'none';
+  if (mostra) {
+    const sel = document.getElementById('bbcSocioConsulenteSelect');
+    if (sel) {
+      const consulenti = getUtenti().filter(u => u.ruolo === 'consulente');
+      sel.innerHTML = '<option value="">— Seleziona consulente —</option>'
+        + consulenti.map(u => '<option value="' + escapeHtml(u.nome) + '"' + (valoreCorrente === u.nome ? ' selected' : '') + '>' + escapeHtml(u.nome) + '</option>').join('');
+    }
+  }
+}
+
+function _popolaLinkedContactSelect(linkedId) {
+  const sel = document.getElementById('bbcSocioLinkedSelect');
+  if (!sel) return;
+  const correnti = bbcContatti.slice().sort((a, b) => (a.ragioneSociale || a.referente || '').localeCompare(b.ragioneSociale || b.referente || ''));
+  sel.innerHTML = '<option value="">— Cerca per ragione sociale o referente —</option>'
+    + correnti.map(c => '<option value="' + escapeHtml(c._key) + '"' + (c._key === linkedId ? ' selected' : '') + '>'
+        + escapeHtml(c.ragioneSociale || c.referente || '—')
+        + (c.referente && c.ragioneSociale ? ' (' + escapeHtml(c.referente) + ')' : '')
+        + '</option>').join('');
+  const badge = document.getElementById('bbcSocioLinkedBadge');
+  const clearBtn = document.getElementById('bbcSocioLinkedClearBtn');
+  if (linkedId) {
+    const c = bbcContatti.find(x => x._key === linkedId);
+    if (badge) { badge.style.display = ''; badge.innerHTML = '<span class="bbc-linked-badge">🔗 ' + escapeHtml(c ? (c.ragioneSociale || c.referente || linkedId) : linkedId) + '</span>'; }
+    if (clearBtn) clearBtn.style.display = '';
+  } else {
+    if (badge) { badge.style.display = 'none'; badge.innerHTML = ''; }
+    if (clearBtn) clearBtn.style.display = 'none';
+  }
+}
+
+function applicaContattoLinked(contattoId) {
+  const hiddenId = document.getElementById('bbcSocioContattoLinkedId');
+  if (hiddenId) hiddenId.value = contattoId || '';
+  if (!contattoId) { _popolaLinkedContactSelect(''); return; }
+  const c = bbcContatti.find(x => x._key === contattoId);
+  if (!c) return;
+  /* Precompila i campi anagrafici (restano modificabili) */
+  const nomeEl = document.getElementById('bbcSocioNome');
+  const azEl = document.getElementById('bbcSocioAzienda');
+  const telEl = document.getElementById('bbcSocioTelefono');
+  const mailEl = document.getElementById('bbcSocioEmail');
+  if (nomeEl) nomeEl.value = c.referente || '';
+  if (azEl) azEl.value = c.ragioneSociale || '';
+  if (telEl) telEl.value = c.contatto || '';
+  if (mailEl) mailEl.value = c.email || '';
+  _popolaLinkedContactSelect(contattoId);
+}
+
+function scollegaContattoLinked() {
+  const hiddenId = document.getElementById('bbcSocioContattoLinkedId');
+  if (hiddenId) hiddenId.value = '';
+  const sel = document.getElementById('bbcSocioLinkedSelect');
+  if (sel) sel.value = '';
+  _popolaLinkedContactSelect('');
+}
+
+function toggleFormAggiuntaSocio() {
+  const card = document.getElementById('bbcSociAddCard');
+  if (!card) return;
+  /* Punto 6: marketing non può aggiungere/modificare soci via form completo */
+  if (sessione && sessione.ruolo === 'marketing') {
+    showToast('Il ruolo Marketing può solo riassegnare il consulente tramite la tabella.');
+    return;
+  }
+  const isOpen = card.classList.contains('open');
+  if (isOpen) {
+    chiudiFormSocio();
+  } else {
+    card.classList.add('open');
+    document.getElementById('bbcSocioEditId').value = '';
+    document.getElementById('bbcSocioContattoLinkedId').value = '';
+    document.getElementById('bbcSociFormTitle').textContent = 'Aggiungi nuovo socio';
+    ['bbcSocioNome','bbcSocioAzienda','bbcSocioTelefono','bbcSocioEmail'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('bbcSocioEventoInizio').value = '';
+    _popolaSelectConsulenteFormSocio('');
+    _popolaLinkedContactSelect('');
+    // Reset accompagnatori
+    _bbcSocioAccompagnatori = [];
+    renderAccompagnatoriChipForm();
+    document.getElementById('btnToggleFormSocio').textContent = '× Chiudi form';
+  }
+}
+
+function chiudiFormSocio() {
+  const card = document.getElementById('bbcSociAddCard');
+  if (card) card.classList.remove('open');
+  const btn = document.getElementById('btnToggleFormSocio');
+  if (btn) btn.textContent = '+ Aggiungi socio';
+  // Reset accompagnatori in memoria
+  _bbcSocioAccompagnatori = [];
+}
+
+async function salvaFormSocio() {
+  const editId = (document.getElementById('bbcSocioEditId').value || '').trim();
+  const nome = (document.getElementById('bbcSocioNome').value || '').trim();
+  const azienda = (document.getElementById('bbcSocioAzienda').value || '').trim();
+  const telefono = (document.getElementById('bbcSocioTelefono').value || '').trim();
+  const email = (document.getElementById('bbcSocioEmail').value || '').trim();
+  const eventoInizio = (document.getElementById('bbcSocioEventoInizio').value || '').trim();
+
+  if (!nome) { showToast('Il nome del referente è obbligatorio.'); return; }
+
+  // Punto 3: contattoLinkedId
+  const contattoLinkedId = (document.getElementById('bbcSocioContattoLinkedId').value || '').trim();
+
+  // Determina il consulente proprietario del socio
+  let consulenteSocio = '';
+  if (puoModificareConsulenteAssegnatoSocio()) {
+    const selC = document.getElementById('bbcSocioConsulenteSelect');
+    consulenteSocio = selC ? (selC.value || '') : '';
+  } else {
+    // Consulente: il socio appartiene automaticamente all'utente corrente
+    consulenteSocio = sessione ? sessione.nome : '';
+  }
+
+  const payload = { nome, azienda, telefono, email, eventoInizio, accompagnatori: _bbcSocioAccompagnatori.slice(), consulente: consulenteSocio };
+  if (contattoLinkedId) payload.contattoLinkedId = contattoLinkedId;
+
+  try {
+    if (editId) {
+      /* Modifica esistente */
+      await CF_BBC_SOCI().doc(editId).update(payload);
+      const idx = bbcSoci.findIndex(s => s.id === editId);
+      if (idx >= 0) bbcSoci[idx] = Object.assign({}, bbcSoci[idx], payload);
+      showToast('Socio aggiornato.');
+      /* Punto 5: sincronizzazione Socio → Contatto collegato */
+      if (contattoLinkedId) {
+        try {
+          await CF_BBC_CLIENTI().doc(sanitizeDocId(contattoLinkedId)).update({
+            referente: nome, ragioneSociale: azienda, contatto: telefono, email: email
+          });
+          const cIdx = bbcContatti.findIndex(c => c._key === contattoLinkedId);
+          if (cIdx >= 0) {
+            bbcContatti[cIdx].referente = nome;
+            bbcContatti[cIdx].ragioneSociale = azienda;
+            bbcContatti[cIdx].contatto = telefono;
+            bbcContatti[cIdx].email = email;
+          }
+        } catch(se) {
+          console.error('[BBC Soci] Errore sincronizzazione Socio→Contatto:', se);
+        }
+      }
+    } else {
+      /* Aggiunta nuovo: punto 6 — scrive consulentePrecedente UNA VOLTA SOLA */
+      payload.dataIscrizione = oggiIso();
+      payload.consulentePrecedente = consulenteSocio;
+      const ref = await CF_BBC_SOCI().add(payload);
+      bbcSoci.push(Object.assign({ id: ref.id }, payload));
+      showToast('Socio aggiunto con successo.');
+    }
+    chiudiFormSocio();
+    renderBbcSoci();
+  } catch(e) {
+    console.error('[BBC Soci] Errore salvataggio:', e);
+    showToast('Errore salvataggio socio: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+function apriModificaBbcSocio(id) {
+  const socio = bbcSoci.find(s => s.id === id);
+  if (!socio) return;
+  const card = document.getElementById('bbcSociAddCard');
+  if (card) card.classList.add('open');
+  document.getElementById('bbcSocioEditId').value = id;
+  document.getElementById('bbcSociFormTitle').textContent = 'Modifica socio';
+  document.getElementById('bbcSocioNome').value = socio.nome || '';
+  document.getElementById('bbcSocioAzienda').value = socio.azienda || '';
+  document.getElementById('bbcSocioTelefono').value = socio.telefono || '';
+  document.getElementById('bbcSocioEmail').value = socio.email || '';
+  document.getElementById('bbcSocioEventoInizio').value = socio.eventoInizio || '';
+  // Select consulente: visibile a superadmin, direzione, marketing (punto 6)
+  _popolaSelectConsulenteFormSocio(socio.consulente || '');
+  // Aggiunge eventuale opzione "orfana" se il consulente non è in lista
+  if (socio.consulente && puoModificareConsulenteAssegnatoSocio()) {
+    const selM = document.getElementById('bbcSocioConsulenteSelect');
+    if (selM && !getUtenti().find(u => u.ruolo === 'consulente' && u.nome === socio.consulente)) {
+      selM.innerHTML += '<option value="' + escapeHtml(socio.consulente) + '" selected>' + escapeHtml(socio.consulente) + '</option>';
+    }
+  }
+  // Punto 3: linked contact
+  document.getElementById('bbcSocioContattoLinkedId').value = socio.contattoLinkedId || '';
+  _popolaLinkedContactSelect(socio.contattoLinkedId || '');
+  // Popola accompagnatori
+  _bbcSocioAccompagnatori = Array.isArray(socio.accompagnatori) ? socio.accompagnatori.slice() : [];
+  renderAccompagnatoriChipForm();
+  document.getElementById('btnToggleFormSocio').textContent = '× Chiudi form';
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function eliminaBbcSocio(id) {
+  const socio = bbcSoci.find(s => s.id === id);
+  if (!socio) return;
+  if (!confirm('Eliminare definitivamente il socio "' + (socio.nome || '') + '"? L\'operazione non è reversibile.')) return;
+  try {
+    await CF_BBC_SOCI().doc(id).delete();
+    bbcSoci = bbcSoci.filter(s => s.id !== id);
+    renderBbcSoci();
+    showToast('Socio eliminato.');
+  } catch(e) {
+    console.error('[BBC Soci] Errore eliminazione:', e);
+    showToast('Errore eliminazione socio: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+/* Punto 4: apre il form di modifica nella pagina Soci BBC navigando prima alla pagina */
+function modificaSocioDaDatabase(id) {
+  showPage('bbc-soci');
+  inizializzaPaginaBbcSoci();
+  apriModificaBbcSocio(id);
+}
+
+/* Punto 6: aggiornamento inline del consulente assegnato (select nella tabella Soci BBC) */
+async function aggiornaCounsulenteSocioInline(socioId, nuovoConsulente) {
+  if (!puoModificareConsulenteAssegnatoSocio()) return;
+  const socio = bbcSoci.find(s => s.id === socioId);
+  if (!socio) return;
+  const vecchioConsulente = socio.consulente;
+  if (vecchioConsulente === nuovoConsulente) return;
+  socio.consulente = nuovoConsulente;
+  try {
+    await CF_BBC_SOCI().doc(socioId).update({ consulente: nuovoConsulente });
+    showToast('Consulente aggiornato.');
+  } catch(e) {
+    socio.consulente = vecchioConsulente; // rollback in memoria
+    console.error('[BBC Soci] Errore aggiornamento consulente:', e);
+    showToast('Errore aggiornamento consulente: ' + (e.message || e.code || 'errore sconosciuto'));
+    renderBbcSoci();
+  }
+}
+
+function renderBbcSoci() {
+  const tbody = document.getElementById('bbcSociBody');
+  const empty = document.getElementById('bbcSociEmpty');
+  if (!tbody) return;
+
+  const filtroEvento = (document.getElementById('bbcSociFiltroEvento') || {}).value || '';
+  const filtroTesto = ((document.getElementById('bbcSociFiltroTesto') || {}).value || '').toLowerCase().trim();
+
+  let lista = bbcSoci.slice();
+
+  /* Scoping per proprietario: consulente vede solo i propri;
+     superadmin, direzione, marketing vedono tutto (marketing per poter riassegnare).
+     I soci "orfani" (senza campo consulente) sono visibili solo a chi ha piena visibilità. */
+  const vediTuttiSoci = puoVedereTuttiSociEdEventiBbc() || (sessione && sessione.ruolo === 'marketing');
+  if (!vediTuttiSoci) {
+    lista = lista.filter(s => s.consulente && s.consulente === (sessione ? sessione.nome : ''));
+  }
+
+  if (filtroEvento) lista = lista.filter(s => s.eventoInizio === filtroEvento);
+  if (filtroTesto) lista = lista.filter(s =>
+    (s.nome || '').toLowerCase().includes(filtroTesto) ||
+    (s.azienda || '').toLowerCase().includes(filtroTesto)
+  );
+
+  /* Ordina alfabeticamente per nome */
+  lista.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+  if (!lista.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  tbody.innerHTML = lista.map(s => {
+    const evNome = bbcEventiList.find(ev => ev.id === s.eventoInizio);
+    // Compatibilità: i partecipanti creati prima dell'aggiornamento non hanno il campo tipo
+    const storPart = (Object.values(bbcPartecipantiCache).flat().filter(p => (p.tipo === 'socio' || !p.tipo) && p.socioId === s.id) || []);
+    const nPart = storPart.length;
+    const nAccomp = Array.isArray(s.accompagnatori) ? s.accompagnatori.length : 0;
+    /* Punto 6: consulente precedente (storico, mai modificato dopo la creazione) */
+    const cellConsPrec = s.consulentePrecedente
+      ? escapeHtml(s.consulentePrecedente)
+      : '<span style="color:var(--testo-muted);font-style:italic;">—</span>';
+    /* Punto 6: consulente assegnato — select interattiva per SA/DIR/marketing, testo per consulenti */
+    let cellConsulenteAssegnato;
+    if (puoModificareConsulenteAssegnatoSocio()) {
+      const consulenti = getUtenti().filter(u => u.ruolo === 'consulente');
+      const optsConsulente = '<option value="">— Non assegnato —</option>'
+        + consulenti.map(u => '<option value="' + escapeHtml(u.nome) + '"' + (s.consulente === u.nome ? ' selected' : '') + '>' + escapeHtml(u.nome) + '</option>').join('');
+      cellConsulenteAssegnato = '<select class="td-select" style="min-width:140px;" onchange="aggiornaCounsulenteSocioInline(\'' + escapeJs(s.id) + '\',this.value)">' + optsConsulente + '</select>';
+    } else {
+      cellConsulenteAssegnato = s.consulente
+        ? escapeHtml(s.consulente)
+        : '<span style="color:var(--testo-muted);font-style:italic;">Non assegnato</span>';
+    }
+    /* Bottoni azioni: SA/DIR = modifica + elimina; consulente = solo propri; marketing = nessuno (solo select consulente) */
+    const isMarketing = sessione && sessione.ruolo === 'marketing';
+    const puoModificare = !isMarketing && (puoVedereTuttiSociEdEventiBbc() || (sessione && s.consulente === sessione.nome));
+    const azioniHtml = puoModificare
+      ? '<button class="icon-btn" title="Modifica" onclick="apriModificaBbcSocio(\'' + escapeJs(s.id) + '\')">✏️</button>'
+        + '<button class="icon-btn danger" title="Elimina" onclick="eliminaBbcSocio(\'' + escapeJs(s.id) + '\')">🗑️</button>'
+      : '<span style="color:var(--testo-muted);font-size:0.8rem;">—</span>';
+    return '<tr data-socio-id="' + escapeHtml(s.id) + '">'
+      + '<td class="ragione-sociale">' + escapeHtml(s.nome) + '</td>'
+      + '<td>' + escapeHtml(s.azienda || '—') + '</td>'
+      + '<td>' + (s.telefono ? '<a href="tel:' + escapeHtml(s.telefono) + '">' + escapeHtml(s.telefono) + '</a>' : '—') + '</td>'
+      + '<td>' + (s.email ? '<a href="mailto:' + escapeHtml(s.email) + '">' + escapeHtml(s.email) + '</a>' : '—') + '</td>'
+      + '<td>' + (evNome ? escapeHtml(evNome.nome) : (s.eventoInizio ? escapeHtml(s.eventoInizio) : '—')) + '</td>'
+      + '<td>' + cellConsPrec + '</td>'
+      + '<td>' + cellConsulenteAssegnato + '</td>'
+      + '<td><button class="btn-esiti" onclick="toggleStoricoSocio(\'' + escapeJs(s.id) + '\')">'
+      + 'Storico' + (nPart > 0 ? ' (' + nPart + ')' : '') + '</button>'
+      + (nAccomp > 0 ? ' <span class="badge" style="background:var(--fucsia-badge-bg);color:var(--fucsia-dark);font-size:0.65rem;" title="Accompagnatori fissi">' + nAccomp + ' accomp.</span>' : '')
+      + '</td>'
+      + '<td>' + azioniHtml + '</td>'
+      + '</tr>'
+      + '<tr id="storico-row-' + escapeHtml(s.id) + '" style="display:none;">'
+      + '<td colspan="9" style="padding:0;">'
+      + '<div class="bbc-socio-storico-panel open" id="storico-panel-' + escapeHtml(s.id) + '">'
+      + renderStoricoSocioHtml(s.id)
+      + (nAccomp > 0 ? renderAccompagnatoriSocioInfoHtml(s) : '')
+      + '</div>'
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function toggleStoricoSocio(socioId) {
+  const row = document.getElementById('storico-row-' + socioId);
+  if (!row) return;
+  const aperto = row.style.display !== 'none';
+  row.style.display = aperto ? 'none' : '';
+}
+
+function renderStoricoSocioHtml(socioId) {
+  /* Raccoglie tutti gli eventi in cui il socio compare come partecipante
+     (compatibile con documenti privi del campo tipo, creati prima dell'aggiornamento) */
+  const entries = [];
+  Object.entries(bbcPartecipantiCache).forEach(([eventoId, parts]) => {
+    const part = parts.find(p => (p.tipo === 'socio' || !p.tipo) && p.socioId === socioId);
+    if (!part) return;
+    const ev = bbcEventiList.find(e => e.id === eventoId);
+    entries.push({ ev, part, eventoId });
+  });
+
+  if (!entries.length) {
+    return '<div style="font-size:0.82rem; color:var(--testo-muted); font-style:italic;">Nessun evento registrato per questo socio.</div>';
+  }
+
+  /* Ordina per data evento */
+  entries.sort((a, b) => ((b.ev && b.ev.data) || '').localeCompare((a.ev && a.ev.data) || ''));
+
+  return '<div style="font-size:0.8rem; font-weight:800; color:var(--fucsia-dark); margin-bottom:8px;">Storico eventi:</div>'
+    + entries.map(({ ev, part }) => {
+      const isPartecipato = part.stato === 'Partecipato';
+      const badge = isPartecipato
+        ? '<span class="badge badge-partecipato">Partecipato</span>'
+        : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+      return '<div class="bbc-socio-storico-item">'
+        + badge
+        + '<span style="font-weight:700;">' + escapeHtml(ev ? ev.nome : 'Evento sconosciuto') + '</span>'
+        + '<span style="color:var(--testo-muted);">' + (ev && ev.data ? formattaDataItaliana(ev.data) || ev.data : '') + '</span>'
+        + '</div>';
+    }).join('');
+}
+
+/* ===================== BBC — PARTECIPANTI EVENTO ===================== */
+
+function renderPartecipantiPanelHtml(eventoId) {
+  const parts = bbcPartecipantiCache[eventoId] || [];
+  const isSuperAdmin = sessione && sessione.ruolo === 'superadmin';
+  const isConsulente = sessione && sessione.ruolo === 'consulente';
+  const puoModificare = isSuperAdmin || isConsulente;
+
+  // Opzioni soci: scoping per consulente (vede solo i propri); superadmin/direzione vedono tutti
+  const sociVisibili = puoVedereTuttiSociEdEventiBbc()
+    ? bbcSoci
+    : bbcSoci.filter(s => s.consulente && s.consulente === (sessione ? sessione.nome : ''));
+  const opzioniSoci = sociVisibili
+    .slice()
+    .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''))
+    .map(s => '<option value="' + escapeHtml(s.id) + '">' + escapeHtml(s.nome) + (s.azienda ? ' — ' + s.azienda : '') + '</option>')
+    .join('');
+
+  // Opzioni contatti: il consulente vede solo i propri, gli altri vedono tutti
+  const contattiVisibili = isConsulente
+    ? bbcContatti.filter(c => c.consulente === sessione.nome)
+    : bbcContatti;
+  const opzioniContatti = contattiVisibili
+    .slice()
+    .sort((a, b) => (a.ragioneSociale || a.referente || '').localeCompare(b.ragioneSociale || b.referente || ''))
+    .map(c => '<option value="' + escapeHtml(c._key) + '">' + escapeHtml(c.ragioneSociale || c.referente || '—') + (c.referente && c.ragioneSociale ? ' (' + escapeHtml(c.referente) + ')' : '') + '</option>')
+    .join('');
+
+  /* Punto 1: tabella con tel/email, filtro rapido se > 10 partecipanti */
+  const partOrdinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  const filtroHtml = parts.length > 10
+    ? '<input type="text" class="bbc-part-filtro" id="filtro-part-' + escapeHtml(eventoId) + '" placeholder="Filtra per nome, azienda o email..." oninput="filtraPartecipantiTabella(\'' + escapeJs(eventoId) + '\',this.value)">'
+    : '';
+  const listaHtml = parts.length
+    ? filtroHtml + '<table class="bbc-part-table" id="tbl-part-' + escapeHtml(eventoId) + '">'
+        + '<thead><tr><th>Nome</th><th>Azienda</th><th>Telefono</th><th>Email</th><th>Tipo</th><th>Stato</th>' + (puoModificare ? '<th></th>' : '') + '</tr></thead>'
+        + '<tbody>' + partOrdinati.map(p => {
+          let tel = '', mail = '';
+          if (p.tipo === 'socio' && p.socioId) {
+            const s = bbcSoci.find(x => x.id === p.socioId);
+            if (s) { tel = s.telefono || ''; mail = s.email || ''; }
+          } else if (p.tipo === 'contatto' && p.contattoId) {
+            const c = bbcContatti.find(x => x._key === p.contattoId);
+            if (c) { tel = c.contatto || ''; mail = c.email || ''; }
+          }
+          const badge = p.stato === 'Partecipato'
+            ? '<span class="badge badge-partecipato">Partecipato</span>'
+            : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+          const tipoBadge = (p.tipo === 'contatto')
+            ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
+            : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
+          const delBtn = puoModificare
+            ? '<td><button class="bbc-part-del" onclick="rimuoviPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(p.id) + '\')">✕</button></td>'
+            : '';
+          let accompTxt = '';
+          if (p.tipo === 'socio' && p.socioId) {
+            const sr = bbcSoci.find(x => x.id === p.socioId);
+            if (sr && Array.isArray(sr.accompagnatori) && sr.accompagnatori.length) accompTxt = '<br><span style="font-size:0.75em;color:var(--testo-muted);">+ ' + escapeHtml(sr.accompagnatori.join(', ')) + '</span>';
+          }
+          return '<tr data-nome="' + escapeHtml((p.nome || '') + ' ' + (p.azienda || '') + ' ' + mail).toLowerCase() + '">'
+            + '<td class="ragione-sociale">' + escapeHtml(p.nome || '—') + accompTxt + '</td>'
+            + '<td>' + escapeHtml(p.azienda || '—') + '</td>'
+            + '<td>' + (tel ? '<a href="tel:' + escapeHtml(tel) + '">' + escapeHtml(tel) + '</a>' : '—') + '</td>'
+            + '<td>' + (mail ? '<a href="mailto:' + escapeHtml(mail) + '">' + escapeHtml(mail) + '</a>' : '—') + '</td>'
+            + '<td>' + tipoBadge + '</td>'
+            + '<td>' + badge + '</td>'
+            + delBtn
+            + '</tr>';
+        }).join('') + '</tbody></table>'
+    : '<div class="bbc-partecipanti-empty">Nessun partecipante registrato per questo evento.</div>';
+
+  // Form di aggiunta (solo per chi può modificare)
+  const addFormHtml = puoModificare
+    ? '<div class="bbc-partecipanti-add-row">'
+    + '<div class="filter-group">'
+    + '<label class="filter-label">Tipo</label>'
+    + '<select class="settings-input" id="sel-part-tipo-' + escapeHtml(eventoId) + '" onchange="aggiornaSelezionePartecipante(\'' + escapeJs(eventoId) + '\')" style="min-width:110px;">'
+    + '<option value="socio">Socio</option>'
+    + '<option value="contatto">Lead/Contatto</option>'
+    + '</select>'
+    + '</div>'
+    + '<div class="filter-group" style="flex:2;" id="wrap-part-socio-' + escapeHtml(eventoId) + '">'
+    + '<label class="filter-label">Seleziona socio</label>'
+    + '<select class="settings-input" id="sel-part-socio-' + escapeHtml(eventoId) + '"><option value="">— Scegli socio —</option>' + opzioniSoci + '</select>'
+    + '</div>'
+    + '<div class="filter-group" style="flex:2;display:none;" id="wrap-part-contatto-' + escapeHtml(eventoId) + '">'
+    + '<label class="filter-label">Seleziona lead/contatto</label>'
+    + '<select class="settings-input" id="sel-part-contatto-' + escapeHtml(eventoId) + '"><option value="">— Scegli contatto —</option>' + opzioniContatti + '</select>'
+    + '</div>'
+    + '<div class="filter-group">'
+    + '<label class="filter-label">Stato</label>'
+    + '<select class="settings-input" id="sel-part-stato-' + escapeHtml(eventoId) + '">'
+    + '<option value="Iscritto/Previsto">Iscritto/Previsto</option>'
+    + '<option value="Partecipato">Partecipato</option>'
+    + '</select>'
+    + '</div>'
+    + '<div class="filter-group" style="align-self:flex-end;">'
+    + '<button class="btn btn-primary" style="font-size:0.82rem;" onclick="aggiungiPartecipante(\'' + escapeJs(eventoId) + '\')">+ Aggiungi</button>'
+    + '</div>'
+    + '</div>'
+    : '';
+
+  return '<div class="bbc-partecipanti-panel" id="parti-panel-' + escapeHtml(eventoId) + '">'
+    + '<div class="bbc-partecipanti-title">👥 Partecipanti <span style="font-weight:400;font-size:0.75rem;color:var(--testo-muted);">(ordine alfabetico)</span></div>'
+    + addFormHtml
+    + '<div class="bbc-partecipanti-list" id="lista-part-' + escapeHtml(eventoId) + '">' + listaHtml + '</div>'
+    + '</div>';
+}
+
+/* Aggiorna la visibilità dei wrapper socio/contatto nel form partecipanti */
+function aggiornaSelezionePartecipante(eventoId) {
+  const tipo = (document.getElementById('sel-part-tipo-' + eventoId) || {}).value || 'socio';
+  const wrapSocio = document.getElementById('wrap-part-socio-' + eventoId);
+  const wrapContatto = document.getElementById('wrap-part-contatto-' + eventoId);
+  if (wrapSocio) wrapSocio.style.display = tipo === 'socio' ? '' : 'none';
+  if (wrapContatto) wrapContatto.style.display = tipo === 'contatto' ? '' : 'none';
+}
+
+function togglePartecipantiPanel(eventoId) {
+  const panel = document.getElementById('parti-panel-' + eventoId);
+  if (!panel) return;
+  panel.classList.toggle('open');
+  /* Se appena aperto e non abbiamo ancora i dati, li carichiamo */
+  if (panel.classList.contains('open') && !bbcPartecipantiCache[eventoId]) {
+    caricaPartecipantiEvento(eventoId);
+  }
+}
+
+async function caricaPartecipantiEvento(eventoId) {
+  try {
+    const snap = await CF_BBC_EVENTO_PARTECIPANTI(eventoId).get();
+    bbcPartecipantiCache[eventoId] = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    aggiornaListaPartecipantiDom(eventoId);
+  } catch(e) {
+    console.error('[BBC Part] Errore caricamento partecipanti:', e);
+  }
+}
+
+function aggiornaListaPartecipantiDom(eventoId) {
+  const listaEl = document.getElementById('lista-part-' + eventoId);
+  const cntEl = document.getElementById('cnt-part-' + eventoId);
+  const parts = bbcPartecipantiCache[eventoId] || [];
+
+  if (cntEl) cntEl.textContent = parts.length;
+
+  if (!listaEl) return;
+  if (!parts.length) {
+    listaEl.innerHTML = '<div class="bbc-partecipanti-empty">Nessun partecipante registrato per questo evento.</div>';
+    return;
+  }
+
+  const puoModificare = sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente');
+  const partOrdinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  const filtroHtml = parts.length > 10
+    ? '<input type="text" class="bbc-part-filtro" id="filtro-part-' + escapeHtml(eventoId) + '" placeholder="Filtra per nome, azienda o email..." oninput="filtraPartecipantiTabella(\'' + escapeJs(eventoId) + '\',this.value)">'
+    : '';
+  const righe = partOrdinati.map(p => {
+    let tel = '', mail = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const s = bbcSoci.find(x => x.id === p.socioId);
+      if (s) { tel = s.telefono || ''; mail = s.email || ''; }
+    } else if (p.tipo === 'contatto' && p.contattoId) {
+      const c = bbcContatti.find(x => x._key === p.contattoId);
+      if (c) { tel = c.contatto || ''; mail = c.email || ''; }
+    }
+    const badge = p.stato === 'Partecipato'
+      ? '<span class="badge badge-partecipato">Partecipato</span>'
+      : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+    const tipoBadge = (p.tipo === 'contatto')
+      ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
+      : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
+    const delBtn = puoModificare
+      ? '<td><button class="bbc-part-del" onclick="rimuoviPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(p.id) + '\')">✕</button></td>'
+      : '';
+    let accompTxt = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const sr = bbcSoci.find(x => x.id === p.socioId);
+      if (sr && Array.isArray(sr.accompagnatori) && sr.accompagnatori.length) accompTxt = '<br><span style="font-size:0.75em;color:var(--testo-muted);">+ ' + escapeHtml(sr.accompagnatori.join(', ')) + '</span>';
+    }
+    return '<tr data-nome="' + escapeHtml((p.nome || '') + ' ' + (p.azienda || '') + ' ' + mail).toLowerCase() + '">'
+      + '<td class="ragione-sociale">' + escapeHtml(p.nome || '—') + accompTxt + '</td>'
+      + '<td>' + escapeHtml(p.azienda || '—') + '</td>'
+      + '<td>' + (tel ? '<a href="tel:' + escapeHtml(tel) + '">' + escapeHtml(tel) + '</a>' : '—') + '</td>'
+      + '<td>' + (mail ? '<a href="mailto:' + escapeHtml(mail) + '">' + escapeHtml(mail) + '</a>' : '—') + '</td>'
+      + '<td>' + tipoBadge + '</td>'
+      + '<td>' + badge + '</td>'
+      + delBtn
+      + '</tr>';
+  }).join('');
+
+  listaEl.innerHTML = filtroHtml
+    + '<table class="bbc-part-table" id="tbl-part-' + escapeHtml(eventoId) + '">'
+    + '<thead><tr><th>Nome</th><th>Azienda</th><th>Telefono</th><th>Email</th><th>Tipo</th><th>Stato</th>' + (puoModificare ? '<th></th>' : '') + '</tr></thead>'
+    + '<tbody>' + righe + '</tbody></table>';
+
+  /* Aggiorna anche lo storico nella pagina soci (se aperta) */
+  if (document.getElementById('page-bbc-soci') && document.getElementById('page-bbc-soci').classList.contains('active')) {
+    renderBbcSoci();
+  }
+}
+
+/* Filtro inline tabella partecipanti (Punto 1) */
+function filtraPartecipantiTabella(eventoId, testo) {
+  const tbl = document.getElementById('tbl-part-' + eventoId);
+  if (!tbl) return;
+  const q = (testo || '').toLowerCase().trim();
+  tbl.querySelectorAll('tbody tr').forEach(tr => {
+    const haystack = (tr.getAttribute('data-nome') || '').toLowerCase();
+    tr.style.display = (!q || haystack.includes(q)) ? '' : 'none';
+  });
+}
+
+async function aggiungiPartecipante(eventoId) {
+  const selTipo = document.getElementById('sel-part-tipo-' + eventoId);
+  const selStato = document.getElementById('sel-part-stato-' + eventoId);
+  if (!selStato) return;
+
+  const tipo = selTipo ? (selTipo.value || 'socio') : 'socio';
+  const stato = (selStato.value || '').trim();
+  let payload = null;
+
+  if (tipo === 'socio') {
+    const selSocio = document.getElementById('sel-part-socio-' + eventoId);
+    if (!selSocio) return;
+    const socioId = (selSocio.value || '').trim();
+    if (!socioId) { showToast('Seleziona un socio da aggiungere.'); return; }
+    /* Evita duplicati */
+    const giàPresente = (bbcPartecipantiCache[eventoId] || []).find(p => (p.tipo === 'socio' || !p.tipo) && p.socioId === socioId);
+    if (giàPresente) { showToast('Questo socio è già presente nell\'elenco partecipanti.'); return; }
+    const socio = bbcSoci.find(s => s.id === socioId);
+    if (!socio) { showToast('Socio non trovato. Ricarica la pagina.'); return; }
+    payload = { tipo: 'socio', socioId, stato, nome: socio.nome || '', azienda: socio.azienda || '', ts: oggiIso() };
+    selSocio.value = '';
+  } else {
+    const selContatto = document.getElementById('sel-part-contatto-' + eventoId);
+    if (!selContatto) return;
+    const contattoId = (selContatto.value || '').trim();
+    if (!contattoId) { showToast('Seleziona un contatto/lead da aggiungere.'); return; }
+    /* Evita duplicati */
+    const giàPresente = (bbcPartecipantiCache[eventoId] || []).find(p => p.tipo === 'contatto' && p.contattoId === contattoId);
+    if (giàPresente) { showToast('Questo contatto è già presente nell\'elenco partecipanti.'); return; }
+    const contatto = bbcContatti.find(c => c._key === contattoId);
+    if (!contatto) { showToast('Contatto non trovato. Ricarica la pagina.'); return; }
+    payload = { tipo: 'contatto', contattoId, stato, nome: contatto.ragioneSociale || contatto.referente || '', azienda: contatto.referente || '', ts: oggiIso() };
+    selContatto.value = '';
+  }
+
+  try {
+    const ref = await CF_BBC_EVENTO_PARTECIPANTI(eventoId).add(payload);
+    if (!bbcPartecipantiCache[eventoId]) bbcPartecipantiCache[eventoId] = [];
+    bbcPartecipantiCache[eventoId].push(Object.assign({ id: ref.id }, payload));
+    aggiornaListaPartecipantiDom(eventoId);
+    showToast('Partecipante aggiunto.');
+  } catch(e) {
+    console.error('[BBC Part] Errore aggiunta partecipante:', e);
+    showToast('Errore aggiunta partecipante: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+async function rimuoviPartecipante(eventoId, partecipanteId) {
+  if (!confirm('Rimuovere questo partecipante dall\'evento?')) return;
+  try {
+    await CF_BBC_EVENTO_PARTECIPANTI(eventoId).doc(partecipanteId).delete();
+    if (bbcPartecipantiCache[eventoId]) {
+      bbcPartecipantiCache[eventoId] = bbcPartecipantiCache[eventoId].filter(p => p.id !== partecipanteId);
+    }
+    aggiornaListaPartecipantiDom(eventoId);
+    showToast('Partecipante rimosso.');
+  } catch(e) {
+    console.error('[BBC Part] Errore rimozione partecipante:', e);
+    showToast('Errore rimozione partecipante: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+/* ===================== BBC — ACCOMPAGNATORI ===================== */
+
+/* Variabile di supporto per la lista accompagnatori nel form soci (modifiche in-memory) */
+let _bbcSocioAccompagnatori = []; // array di stringhe "Nome Cognome"
+
+/* Genera le chip visuali per gli accompagnatori di un socio nel form */
+function renderAccompagnatoriChipForm() {
+  const container = document.getElementById('bbcSocioAccompList');
+  if (!container) return;
+  if (!_bbcSocioAccompagnatori.length) {
+    container.innerHTML = '<span style="font-size:0.78rem;color:var(--testo-muted);font-style:italic;">Nessun accompagnatore</span>';
+    return;
+  }
+  container.innerHTML = _bbcSocioAccompagnatori.map((a, i) =>
+    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--fucsia-badge-bg);color:var(--fucsia-dark);border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:600;">'
+    + escapeHtml(a)
+    + '<button type="button" onclick="rimuoviAccompagnatoreSocioForm(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--fucsia-dark);font-size:0.9rem;line-height:1;padding:0 2px;">✕</button>'
+    + '</span>'
+  ).join('');
+}
+
+function aggiungiAccompagnatoreSocioForm() {
+  const input = document.getElementById('bbcSocioAccompInput');
+  if (!input) return;
+  const val = (input.value || '').trim();
+  if (!val) { showToast('Inserisci nome e cognome dell\'accompagnatore.'); return; }
+  if (_bbcSocioAccompagnatori.includes(val)) { showToast('Questo accompagnatore è già presente.'); input.value = ''; return; }
+  _bbcSocioAccompagnatori.push(val);
+  input.value = '';
+  renderAccompagnatoriChipForm();
+}
+
+function rimuoviAccompagnatoreSocioForm(indice) {
+  _bbcSocioAccompagnatori.splice(indice, 1);
+  renderAccompagnatoriChipForm();
+}
+
+/* Genera le chip HTML per la visualizzazione (read-only) nella riga storico */
+function renderAccompagnatoriSocioInfoHtml(socio) {
+  const list = Array.isArray(socio.accompagnatori) ? socio.accompagnatori : [];
+  if (!list.length) return '';
+  return '<div style="margin-top:10px;font-size:0.8rem;font-weight:800;color:var(--fucsia-dark);">Accompagnatori fissi:</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;">'
+    + list.map(a => '<span style="background:var(--fucsia-badge-bg);color:var(--fucsia-dark);border-radius:20px;padding:2px 9px;font-size:0.76rem;font-weight:600;">' + escapeHtml(a) + '</span>').join('')
+    + '</div>';
+}
+
+/* ---- Accompagnatori per CONTATTI BBC (gestiti dentro il pannello esiti) ---- */
+
+/* Genera le chip per un contatto BBC passato come oggetto */
+function renderAccompagnatoriChip(accompList, prefisso, keyJs, hid) {
+  const list = Array.isArray(accompList) ? accompList : [];
+  if (!list.length) return '<span style="font-size:0.78rem;color:var(--testo-muted);font-style:italic;">Nessun accompagnatore</span>';
+  return list.map((a, i) =>
+    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--fucsia-badge-bg);color:var(--fucsia-dark);border-radius:20px;padding:3px 10px;font-size:0.78rem;font-weight:600;">'
+    + escapeHtml(a)
+    + '<button type="button" onclick="rimuoviAccompagnatoreContatto(\'' + keyJs + '\',\'' + hid + '\',' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--fucsia-dark);font-size:0.9rem;line-height:1;padding:0 2px;">✕</button>'
+    + '</span>'
+  ).join('');
+}
+
+async function aggiungiAccompagnatoreContatto(key, hid) {
+  const input = document.getElementById('accomp-input-bbc-' + hid);
+  if (!input) return;
+  const val = (input.value || '').trim();
+  if (!val) { showToast('Inserisci nome e cognome dell\'accompagnatore.'); return; }
+
+  const contatto = bbcContatti.find(c => c._key === key);
+  if (!contatto) { showToast('Contatto non trovato.'); return; }
+  const lista = Array.isArray(contatto.accompagnatori) ? contatto.accompagnatori.slice() : [];
+  if (lista.includes(val)) { showToast('Questo accompagnatore è già presente.'); input.value = ''; return; }
+  lista.push(val);
+
+  try {
+    await CF_BBC_CLIENTI().doc(sanitizeDocId(key)).update({ accompagnatori: lista });
+    contatto.accompagnatori = lista;
+    input.value = '';
+    const listEl = document.getElementById('accomp-list-bbc-' + hid);
+    if (listEl) listEl.innerHTML = renderAccompagnatoriChip(lista, 'bbc', escapeJs(key), hid);
+    showToast('Accompagnatore aggiunto.');
+  } catch(e) {
+    console.error('[BBC Accomp] Errore aggiunta:', e);
+    showToast('Errore aggiunta accompagnatore: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+async function rimuoviAccompagnatoreContatto(key, hid, indice) {
+  const contatto = bbcContatti.find(c => c._key === key);
+  if (!contatto) return;
+  const lista = Array.isArray(contatto.accompagnatori) ? contatto.accompagnatori.slice() : [];
+  lista.splice(indice, 1);
+
+  try {
+    await CF_BBC_CLIENTI().doc(sanitizeDocId(key)).update({ accompagnatori: lista });
+    contatto.accompagnatori = lista;
+    const listEl = document.getElementById('accomp-list-bbc-' + hid);
+    if (listEl) listEl.innerHTML = renderAccompagnatoriChip(lista, 'bbc', escapeJs(key), hid);
+    showToast('Accompagnatore rimosso.');
+  } catch(e) {
+    console.error('[BBC Accomp] Errore rimozione:', e);
+    showToast('Errore rimozione accompagnatore: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
+
+/* ---- Storico eventi BBC per un contatto ---- */
+function renderStoricoContattoBbcHtml(contattoKey) {
+  const entries = [];
+  Object.entries(bbcPartecipantiCache).forEach(([eventoId, parts]) => {
+    const part = parts.find(p => p.tipo === 'contatto' && p.contattoId === contattoKey);
+    if (!part) return;
+    const ev = bbcEventiList.find(e => e.id === eventoId);
+    entries.push({ ev, part, eventoId });
+  });
+
+  if (!entries.length) {
+    return '<div style="font-size:0.82rem;color:var(--testo-muted);font-style:italic;">Nessun evento registrato per questo contatto.</div>';
+  }
+
+  entries.sort((a, b) => ((b.ev && b.ev.data) || '').localeCompare((a.ev && a.ev.data) || ''));
+  return entries.map(({ ev, part }) => {
+    const isPartecipato = part.stato === 'Partecipato';
+    const badge = isPartecipato
+      ? '<span class="badge badge-partecipato">Partecipato</span>'
+      : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+    return '<div class="bbc-socio-storico-item">'
+      + badge
+      + '<span style="font-weight:700;">' + escapeHtml(ev ? ev.nome : 'Evento sconosciuto') + '</span>'
+      + '<span style="color:var(--testo-muted);">' + (ev && ev.data ? formattaDataItaliana(ev.data) || ev.data : '') + '</span>'
+      + '</div>';
+  }).join('');
 }
 
 /* ===================== ESITI CHIAMATA ===================== */
@@ -4465,7 +5948,256 @@ async function avviaApp() {
   if (contatti.length > 0) aggiornaStatsBar();
   await loadOrganigramma();
   await loadBbcData();
+  await loadBbcSoci();
   if (cfState.csvUrl) await caricaDatiCsv();
+  avviaListenerRealtime();
+}
+
+/* ===================== SINCRONIZZAZIONE REALTIME =====================
+   Listener onSnapshot su CF_CLIENTI() e CF_BBC_CLIENTI().
+   Si attacca DOPO loadFromFirestore() + loadBbcData() per non interferire
+   con le migrazioni one-shot già eseguite al caricamento iniziale.
+
+   Strategia per il primo snapshot:
+   – onSnapshot invia subito un batch con type='added' per TUTTI i documenti esistenti.
+   – Quel batch viene intercettato dalla guardia _cfRealtimeAttivo / _bbcRealtimeAttivo.
+   – Se il batch è composto interamente da 'added' (= batch iniziale puro), viene saltato.
+   – Se contiene 'modified' o 'removed' (cambio avvenuto nell'istante tra .get() e .onSnapshot()),
+     quei soli cambiamenti vengono elaborati — nessun dato va perso.
+
+   Strategia per le righe DOM (vincolo "non perdere testo non salvato"):
+   – 'modified': aggiornamento mirato riga per riga (aggiornaDomRiga).
+     Se il pannello Esiti della riga è aperto E la textarea ha testo non salvato,
+     l'aggiornamento visivo di quella specifica riga viene saltato (i dati restano
+     comunque aggiornati in memoria). Tutte le altre righe vengono aggiornate normalmente.
+   – 'removed': rimozione mirata della sola riga interessata (rimuoviDomRiga).
+   – 'added':   se nessun pannello Esiti ha testo non salvato, ri-renderizza la tabella
+     visibile (già filtrata). Se c'è testo non salvato, aggiorna solo i contatori/stats
+     e rinvia il re-render al prossimo showPage.                                           */
+
+/* Cerca una <tr data-cf-key="..."> nel tbody dato senza problemi di escaping CSS */
+function trovaTrPerKey(tbody, key) {
+  const trs = tbody.querySelectorAll('tr[data-cf-key]');
+  for (const tr of trs) {
+    if (tr.getAttribute('data-cf-key') === key) return tr;
+  }
+  return null;
+}
+
+/* Restituisce true se almeno un pannello Esiti è aperto con testo non salvato */
+function haEsitiConTestoNonSalvato() {
+  const textareas = document.querySelectorAll('textarea[id^="esiti-textarea-"]');
+  for (const ta of textareas) {
+    if (ta.value.trim() === '') continue;
+    const hidPart = ta.id.slice('esiti-textarea-'.length);
+    const panelRow = document.getElementById('esiti-row-' + hidPart);
+    if (panelRow && panelRow.style.display !== 'none') return true;
+  }
+  return false;
+}
+
+/* Aggiorna la singola riga nel DOM (nelle tabelle Database e Provincia, se presenti).
+   Se il pannello Esiti di quella riga è aperto E la textarea ha testo non salvato,
+   salta l'aggiornamento visivo di quella riga per non cancellare il testo. */
+function aggiornaDomRiga(key, nuovoDato, isBbc) {
+  const hid = esitiKeyToHtmlId(key);
+  const panelRow   = document.getElementById('esiti-row-'     + hid);
+  const textareaEl = document.getElementById('esiti-textarea-' + hid);
+  const panelAperto      = panelRow   && panelRow.style.display !== 'none';
+  const haTestoNonSalvato = textareaEl && textareaEl.value.trim() !== '';
+
+  // Protezione testo non salvato: skip visivo per questa riga specifica
+  if (panelAperto && haTestoNonSalvato) return;
+
+  const tbodyIds = ['databaseBody', 'tabellaProvinciaBody'];
+  tbodyIds.forEach(tbodyId => {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    const trPrincipale = trovaTrPerKey(tbody, key);
+    if (!trPrincipale) return;
+
+    const trEsitiVecchio = trPrincipale.nextElementSibling;
+
+    // Genera il nuovo HTML (due <tr>: principale + pannello esiti)
+    const nuovoHtml = creaRigaHtml(nuovoDato, isBbc);
+    const temp = document.createElement('tbody');
+    temp.innerHTML = nuovoHtml;
+    const nuovaTrPrincipale = temp.firstElementChild;
+    const nuovaTrEsiti      = temp.children[1];
+
+    // Se il pannello era aperto (ma senza testo non salvato), lo teniamo aperto
+    if (panelAperto && nuovaTrEsiti) {
+      nuovaTrEsiti.style.display = '';
+    }
+
+    if (nuovaTrPrincipale) trPrincipale.replaceWith(nuovaTrPrincipale);
+    if (trEsitiVecchio && nuovaTrEsiti) trEsitiVecchio.replaceWith(nuovaTrEsiti);
+  });
+}
+
+/* Rimuove le due righe di una riga dal DOM (sia in Database che in Provincia) */
+function rimuoviDomRiga(key) {
+  const hid = esitiKeyToHtmlId(key);
+  const tbodyIds = ['databaseBody', 'tabellaProvinciaBody'];
+  tbodyIds.forEach(tbodyId => {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    const trPrincipale = trovaTrPerKey(tbody, key);
+    if (!trPrincipale) return;
+    const trEsiti = trPrincipale.nextElementSibling;
+    if (trEsiti && trEsiti.id === 'esiti-row-' + hid) trEsiti.remove();
+    trPrincipale.remove();
+  });
+  // Aggiorna i contatori visibili
+  _aggiornaCont();
+}
+
+function _aggiornaCont() {
+  if (document.getElementById('page-database') && document.getElementById('page-database').classList.contains('active')) {
+    const n = (document.getElementById('databaseBody').querySelectorAll('tr[data-cf-key]') || []).length;
+    const lbl1 = sezioneCorrente === 'bbc' ? 'contatto BBC' : 'cliente fermo';
+    const lblN = sezioneCorrente === 'bbc' ? 'contatti BBC' : 'clienti fermi';
+    document.getElementById('databaseContatore').textContent = n + ' ' + (n === 1 ? lbl1 : lblN);
+  }
+  if (document.getElementById('page-provincia') && document.getElementById('page-provincia').classList.contains('active')) {
+    const n = (document.getElementById('tabellaProvinciaBody').querySelectorAll('tr[data-cf-key]') || []).length;
+    document.getElementById('provinciaContatore').textContent = n + ' client' + (n === 1 ? 'e' : 'i') + ' fermi';
+  }
+}
+
+/* Elabora una singola modifica (added/modified/removed) sulla collezione CF */
+function _processaCfChange(change) {
+  const docData = change.doc.data();
+  const key = docData._key || change.doc.id;
+
+  if (change.type === 'added') {
+    if (!contatti.find(c => c._key === key)) contatti.push(docData);
+    // Se il doc era già in memoria (batch iniziale) non duplichiamo
+  } else if (change.type === 'modified') {
+    const idx = contatti.findIndex(c => c._key === key);
+    if (idx >= 0) contatti[idx] = docData; else contatti.push(docData);
+    aggiornaDomRiga(key, docData, false);
+  } else if (change.type === 'removed') {
+    contatti = contatti.filter(c => c._key !== key);
+    rimuoviDomRiga(key);
+  }
+}
+
+/* Elabora una singola modifica sulla collezione BBC */
+function _processaBbcChange(change) {
+  const docData = Object.assign({ _key: change.doc.id }, change.doc.data());
+  const key = docData._key;
+
+  if (change.type === 'added') {
+    if (!bbcContatti.find(c => c._key === key)) bbcContatti.push(docData);
+  } else if (change.type === 'modified') {
+    const idx = bbcContatti.findIndex(c => c._key === key);
+    if (idx >= 0) bbcContatti[idx] = docData; else bbcContatti.push(docData);
+    if (sezioneCorrente === 'bbc') aggiornaDomRiga(key, docData, true);
+  } else if (change.type === 'removed') {
+    bbcContatti = bbcContatti.filter(c => c._key !== key);
+    if (sezioneCorrente === 'bbc') rimuoviDomRiga(key);
+  }
+}
+
+/* Aggiorna la UI dopo aver elaborato un batch di cambiamenti.
+   'haAddedOrRemoved': se true, numero di righe cambiato → potrebbe servire un re-render.
+   'sezione': 'cf' o 'bbc' — indica quale collezione ha generato le modifiche. */
+function _refreshUiDopoChanges(sezione, haAddedOrRemoved) {
+  aggiornaStatsBar();
+
+  if (!haAddedOrRemoved) return; // solo modifiche: già gestite riga per riga
+
+  // Re-render completo delle tabelle, solo se la sezione coincide con quella corrente
+  const sezioneCoincide = (sezione === sezioneCorrente);
+  if (!sezioneCoincide) return;
+
+  // Se c'è testo non salvato in un pannello aperto, differisce il re-render
+  if (haEsitiConTestoNonSalvato()) {
+    // Aggiorna solo stats bar (già fatto sopra) — l'utente vedrà il re-render al prossimo showPage
+    return;
+  }
+
+  if (document.getElementById('page-database') && document.getElementById('page-database').classList.contains('active')) {
+    inizializzaPaginaDatabase();
+  }
+  if (document.getElementById('page-provincia') && document.getElementById('page-provincia').classList.contains('active')) {
+    popolaFiltroConsulenti();
+    renderTabellaProvincia();
+  }
+  if (document.getElementById('page-cruscotto') && document.getElementById('page-cruscotto').classList.contains('active')) {
+    renderCruscotto();
+  }
+}
+
+/* Attacca i listener realtime su CF_CLIENTI() e CF_BBC_CLIENTI().
+   Da chiamare SOLO dopo che loadFromFirestore() e loadBbcData() sono completati. */
+function avviaListenerRealtime() {
+  // Ferma eventuali listener precedenti (es. ri-login senza reload)
+  if (_cfUnsubscribe)  { _cfUnsubscribe();  _cfUnsubscribe  = null; }
+  if (_bbcUnsubscribe) { _bbcUnsubscribe(); _bbcUnsubscribe = null; }
+  _cfRealtimeAttivo  = false;
+  _bbcRealtimeAttivo = false;
+
+  /* ---- Listener CF ---- */
+  _cfUnsubscribe = CF_CLIENTI().onSnapshot((snapshot) => {
+    const changes = snapshot.docChanges();
+
+    if (!_cfRealtimeAttivo) {
+      _cfRealtimeAttivo = true;
+      // Il primo batch contiene tutti i documenti esistenti come 'added'.
+      // Se è un batch puro di 'added' (= caricamento iniziale echeggiato), lo saltiamo.
+      // Se contiene 'modified' o 'removed', significa che qualcosa è cambiato nell'istante
+      // tra il .get() e l'aggancio del listener: elaboriamo solo quei cambiamenti.
+      const soloAdded = changes.every(c => c.type === 'added');
+      if (soloAdded) return;
+      let haAR = false;
+      changes.filter(c => c.type !== 'added').forEach(change => {
+        if (change.type === 'removed') haAR = true;
+        _processaCfChange(change);
+      });
+      _refreshUiDopoChanges('cf', haAR);
+      return;
+    }
+
+    let haAddedOrRemoved = false;
+    changes.forEach(change => {
+      if (change.type === 'added' || change.type === 'removed') haAddedOrRemoved = true;
+      _processaCfChange(change);
+    });
+    _refreshUiDopoChanges('cf', haAddedOrRemoved);
+
+  }, (err) => {
+    console.error('[Realtime CF] Errore listener onSnapshot:', err);
+  });
+
+  /* ---- Listener BBC ---- */
+  _bbcUnsubscribe = CF_BBC_CLIENTI().onSnapshot((snapshot) => {
+    const changes = snapshot.docChanges();
+
+    if (!_bbcRealtimeAttivo) {
+      _bbcRealtimeAttivo = true;
+      const soloAdded = changes.every(c => c.type === 'added');
+      if (soloAdded) return;
+      let haAR = false;
+      changes.filter(c => c.type !== 'added').forEach(change => {
+        if (change.type === 'removed') haAR = true;
+        _processaBbcChange(change);
+      });
+      _refreshUiDopoChanges('bbc', haAR);
+      return;
+    }
+
+    let haAddedOrRemoved = false;
+    changes.forEach(change => {
+      if (change.type === 'added' || change.type === 'removed') haAddedOrRemoved = true;
+      _processaBbcChange(change);
+    });
+    _refreshUiDopoChanges('bbc', haAddedOrRemoved);
+
+  }, (err) => {
+    console.error('[Realtime BBC] Errore listener onSnapshot:', err);
+  });
 }
 
 (function avvio() {
