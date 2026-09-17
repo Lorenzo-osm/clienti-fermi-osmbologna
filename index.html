@@ -1246,7 +1246,7 @@
 
       <!-- Punto 3: Collega a un contatto esistente -->
       <div class="bbc-linked-contact-wrap" id="bbcSocioLinkedWrap">
-        <div class="settings-label" style="margin-bottom:8px;">Collega a un contatto esistente (opzionale)</div>
+        <div class="settings-label" style="margin-bottom:8px;">Collega a un Cliente Fermo esistente (opzionale)</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <select class="settings-input" id="bbcSocioLinkedSelect" style="flex:1;min-width:200px;" onchange="applicaContattoLinked(this.value)">
             <option value="">— Cerca per ragione sociale o referente —</option>
@@ -4352,20 +4352,28 @@ async function aggiornaCampoRiga(key, campo, valore) {
     return;
   }
 
-  /* Punto 5: sincronizzazione Contatto → Socio collegato (solo in sezione BBC) */
-  if (sezioneCorrente === 'bbc' && ['ragioneSociale','referente','contatto','email'].includes(campo)) {
-    const MAPPA_BBC_SOCIO = { ragioneSociale: 'azienda', referente: 'nome', contatto: 'telefono', email: 'email' };
-    const campSocio = MAPPA_BBC_SOCIO[campo];
-    if (campSocio) {
-      const sociCollegati = bbcSoci.filter(s => s.contattoLinkedId === key);
-      for (const s of sociCollegati) {
-        try {
-          await CF_BBC_SOCI().doc(s.id).update({ [campSocio]: valore });
-          s[campSocio] = valore;
-        } catch(se) {
-          console.error('[BBC Soci] Errore sincronizzazione Contatto→Socio per socio ' + s.id + ':', se);
+  /* Punto 5: sincronizzazione Cliente Fermo → Socio BBC collegato.
+     Scatta sia in sezione BBC (modifica Contatto BBC) sia in sezione CF (modifica Cliente Fermo).
+     La modifica su Firestore e in memoria del cliente CF è già avvenuta sopra (riga ~4347):
+     questo blocco aggiunge SOLO una scrittura supplementare e silenziosa verso i Soci collegati. */
+  if ((sezioneCorrente === 'bbc' || sezioneCorrente === 'cf') && ['ragioneSociale','referente','contatto','email'].includes(campo)) {
+    try {
+      const MAPPA_BBC_SOCIO = { ragioneSociale: 'azienda', referente: 'nome', contatto: 'telefono', email: 'email' };
+      const campSocio = MAPPA_BBC_SOCIO[campo];
+      if (campSocio) {
+        const sociCollegati = bbcSoci.filter(s => s.contattoLinkedId === key);
+        for (const s of sociCollegati) {
+          try {
+            await CF_BBC_SOCI().doc(s.id).update({ [campSocio]: valore });
+            s[campSocio] = valore;
+          } catch(se) {
+            console.error('[BBC Soci] Errore sincronizzazione ClienteFermo→Socio per socio ' + s.id + ':', se);
+          }
         }
       }
+    } catch(syncErr) {
+      /* Errore nella sincronizzazione verso i Soci: non blocca né mostra errori al salvataggio CF */
+      console.error('[BBC Soci] Errore blocco sincronizzazione CF→Socio:', syncErr);
     }
   }
 }
@@ -5144,16 +5152,21 @@ function _popolaSelectConsulenteFormSocio(valoreCorrente) {
 function _popolaLinkedContactSelect(linkedId) {
   const sel = document.getElementById('bbcSocioLinkedSelect');
   if (!sel) return;
-  const correnti = bbcContatti.slice().sort((a, b) => (a.ragioneSociale || a.referente || '').localeCompare(b.ragioneSociale || b.referente || ''));
+  /* Sorgente: Clienti Fermi (array globale `contatti`), con scoping per ruolo consulente */
+  let sorgente = contatti.slice();
+  if (sessione && sessione.ruolo === 'consulente') {
+    sorgente = sorgente.filter(c => c.consulente === sessione.nome);
+  }
+  sorgente.sort((a, b) => (a.ragioneSociale || a.referente || '').localeCompare(b.ragioneSociale || b.referente || ''));
   sel.innerHTML = '<option value="">— Cerca per ragione sociale o referente —</option>'
-    + correnti.map(c => '<option value="' + escapeHtml(c._key) + '"' + (c._key === linkedId ? ' selected' : '') + '>'
+    + sorgente.map(c => '<option value="' + escapeHtml(c._key) + '"' + (c._key === linkedId ? ' selected' : '') + '>'
         + escapeHtml(c.ragioneSociale || c.referente || '—')
         + (c.referente && c.ragioneSociale ? ' (' + escapeHtml(c.referente) + ')' : '')
         + '</option>').join('');
   const badge = document.getElementById('bbcSocioLinkedBadge');
   const clearBtn = document.getElementById('bbcSocioLinkedClearBtn');
   if (linkedId) {
-    const c = bbcContatti.find(x => x._key === linkedId);
+    const c = contatti.find(x => x._key === linkedId);
     if (badge) { badge.style.display = ''; badge.innerHTML = '<span class="bbc-linked-badge">🔗 ' + escapeHtml(c ? (c.ragioneSociale || c.referente || linkedId) : linkedId) + '</span>'; }
     if (clearBtn) clearBtn.style.display = '';
   } else {
@@ -5166,7 +5179,7 @@ function applicaContattoLinked(contattoId) {
   const hiddenId = document.getElementById('bbcSocioContattoLinkedId');
   if (hiddenId) hiddenId.value = contattoId || '';
   if (!contattoId) { _popolaLinkedContactSelect(''); return; }
-  const c = bbcContatti.find(x => x._key === contattoId);
+  const c = contatti.find(x => x._key === contattoId);
   if (!c) return;
   /* Precompila i campi anagrafici (restano modificabili) */
   const nomeEl = document.getElementById('bbcSocioNome');
@@ -5257,21 +5270,21 @@ async function salvaFormSocio() {
       const idx = bbcSoci.findIndex(s => s.id === editId);
       if (idx >= 0) bbcSoci[idx] = Object.assign({}, bbcSoci[idx], payload);
       showToast('Socio aggiornato.');
-      /* Punto 5: sincronizzazione Socio → Contatto collegato */
+      /* Punto 5: sincronizzazione Socio → Cliente Fermo collegato */
       if (contattoLinkedId) {
         try {
-          await CF_BBC_CLIENTI().doc(sanitizeDocId(contattoLinkedId)).update({
+          await CF_CLIENTI().doc(sanitizeDocId(contattoLinkedId)).update({
             referente: nome, ragioneSociale: azienda, contatto: telefono, email: email
           });
-          const cIdx = bbcContatti.findIndex(c => c._key === contattoLinkedId);
+          const cIdx = contatti.findIndex(c => c._key === contattoLinkedId);
           if (cIdx >= 0) {
-            bbcContatti[cIdx].referente = nome;
-            bbcContatti[cIdx].ragioneSociale = azienda;
-            bbcContatti[cIdx].contatto = telefono;
-            bbcContatti[cIdx].email = email;
+            contatti[cIdx].referente = nome;
+            contatti[cIdx].ragioneSociale = azienda;
+            contatti[cIdx].contatto = telefono;
+            contatti[cIdx].email = email;
           }
         } catch(se) {
-          console.error('[BBC Soci] Errore sincronizzazione Socio→Contatto:', se);
+          console.error('[BBC Soci] Errore sincronizzazione Socio→ClienteFermo:', se);
         }
       }
     } else {
