@@ -54,7 +54,12 @@
     display: flex; align-items: center; padding: 0 28px;
     z-index: 1000; gap: 10px;
     box-shadow: 0 2px 12px rgba(179,70,141,0.06);
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: thin; scrollbar-color: var(--fucsia-border) transparent;
   }
+  .navbar::-webkit-scrollbar { height: 3px; }
+  .navbar::-webkit-scrollbar-track { background: transparent; }
+  .navbar::-webkit-scrollbar-thumb { background: var(--fucsia-border); border-radius: 2px; }
   .navbar-brand {
     font-size: 1.05rem; font-weight: 800; color: var(--fucsia);
     letter-spacing: 0.04em; text-transform: uppercase;
@@ -72,6 +77,7 @@
     color: var(--testo-muted); padding: 7px 15px; border-radius: 7px;
     font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
     letter-spacing: 0.03em; font-weight: 600;
+    flex-shrink: 0; white-space: nowrap;
   }
   .nav-btn:hover, .nav-btn.active {
     background: var(--fucsia-light); border-color: var(--fucsia-border); color: var(--fucsia-dark);
@@ -3090,18 +3096,82 @@ function creaRigaHtml(c, mostraAzioni) {
     </tr>`;
 }
 
-/* Riga per i Soci BBC nel Database BBC (con edit button per SA/DIR, punto 4) */
+/* Riga per i Soci BBC nel Database BBC.
+   Stato, Fase Cliente, Ultimo Contatto ed Esiti sono interattivi per chi può modificare
+   (proprietario consulente o superadmin/direzione), sola lettura per gli altri.
+   Provincia e Comune rimangono "—" (i Soci non hanno questi campi in anagrafica). */
 function creaRigaSocioHtml(s) {
+  /* Calcolo permesso di modifica: stessa logica usata in renderBbcSoci */
+  const isMarketing  = sessione && sessione.ruolo === 'marketing';
+  const puoModificare = !isMarketing && (puoVedereTuttiSociEdEventiBbc() || (sessione && s.consulente === sessione.nome));
+
   const nomeCella = '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;margin-right:4px;vertical-align:middle;">Socio BBC</span>'
     + escapeHtml(s.nome || '—')
     + (s.azienda ? ' <span style="font-weight:400;color:var(--testo-muted);">— ' + escapeHtml(s.azienda) + '</span>' : '');
+
   const mktCols = puoVedereCampiMarketing() ? '<td>—</td><td>—</td>' : '';
+
   /* Punto 4: pulsante Modifica visibile solo a superadmin/direzione */
   const btnModifica = puoVedereTuttiSociEdEventiBbc()
     ? '<button class="icon-btn" title="Modifica socio" onclick="modificaSocioDaDatabase(\'' + escapeJs(s.id) + '\')">✏️</button>'
     : '';
+
   /* Punto 6: consulente precedente nel campo td-vecchio-consulente */
   const consPrec = s.consulentePrecedente ? escapeHtml(s.consulentePrecedente) : '<span style="color:var(--testo-muted);">—</span>';
+
+  /* Preparazione celle interattive / sola lettura */
+  const esiti    = Array.isArray(s.esiti) ? s.esiti : [];
+  const nEsiti   = esiti.length;
+  const socioHid = 'socio_' + s.id;
+  const storicoHtml = renderStoricoEsitiSocioHtml(esiti, s.id, puoModificare);
+
+  let cellStato, cellFase, cellData, cellEsiti;
+
+  if (puoModificare) {
+    const opzStato = ['<option value="">—</option>'].concat(
+      STATI_VALIDI.map(st => '<option value="' + escapeHtml(st) + '"' + (s.stato === st ? ' selected' : '') + '>' + escapeHtml(st) + '</option>'));
+    const opzFase = ['<option value="">—</option>'].concat(
+      FASI_VALIDE_BBC.map(f => '<option value="' + escapeHtml(f) + '"' + (s.faseCliente === f ? ' selected' : '') + '>' + escapeHtml(f) + '</option>'));
+    cellStato = '<select class="td-select" onchange="aggiornaCampoSocio(\'' + escapeJs(s.id) + '\',\'stato\',this.value)">' + opzStato.join('') + '</select>';
+    cellFase  = '<select class="td-select" onchange="aggiornaCampoSocio(\'' + escapeJs(s.id) + '\',\'faseCliente\',this.value)">' + opzFase.join('') + '</select>';
+    cellData  = '<input type="text" class="td-date-input" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10"'
+      + ' value="' + escapeHtml(formattaDataItaliana(s.ultimoContatto) || '') + '"'
+      + ' oninput="mascheraDataInput(this)" onchange="salvaDataContattoSocio(this,\'' + escapeJs(s.id) + '\')">';
+    cellEsiti = '<button class="btn-esiti" id="esiti-socio-btn-' + socioHid + '" onclick="toggleEsitiPanelSocio(\'' + escapeJs(s.id) + '\')">'
+      + (nEsiti > 0 ? 'Esiti (' + nEsiti + ')' : 'Esiti') + '</button>';
+  } else {
+    cellStato = escapeHtml(s.stato) || '—';
+    cellFase  = escapeHtml(s.faseCliente) || '—';
+    cellData  = escapeHtml(formattaDataItaliana(s.ultimoContatto)) || '—';
+    /* Storico in sola lettura se ci sono esiti (bottone toggle, niente form salva) */
+    cellEsiti = nEsiti > 0
+      ? '<button class="btn-esiti" id="esiti-socio-btn-' + socioHid + '" onclick="toggleEsitiPanelSocio(\'' + escapeJs(s.id) + '\')">Esiti (' + nEsiti + ')</button>'
+      : '<span style="color:var(--testo-muted);">—</span>';
+  }
+
+  /* Colspan identico a quello usato per i Contatti in BBC mode */
+  const colspan = 13 + (puoVedereCampiMarketing() ? 2 : 0);
+
+  /* Riga pannello esiti (sempre presente per permettere toggle) */
+  const esitiPanel = '<tr id="esiti-row-socio-' + escapeHtml(s.id) + '" style="display:none;">'
+    + '<td colspan="' + colspan + '" class="esiti-panel-td">'
+    + '<div class="esiti-panel">'
+    + '<div>'
+    + '<div class="esiti-panel-label">Storico esiti</div>'
+    + '<div class="esiti-storia" id="esiti-socio-storia-' + socioHid + '">' + storicoHtml + '</div>'
+    + '</div>'
+    + (puoModificare
+      ? '<div class="esiti-form">'
+        + '<div class="esiti-panel-label">Aggiungi esito</div>'
+        + '<textarea class="esiti-textarea" id="esiti-socio-textarea-' + socioHid + '" placeholder="Descrivi l\'esito della chiamata&#10;PROSSIMO STEP: [azione concreta da compiere]"></textarea>'
+        + '<div class="esiti-error" id="esiti-socio-error-' + socioHid + '" style="display:none;"></div>'
+        + '<button class="btn-esiti-salva" onclick="salvaEsitoSocio(\'' + escapeJs(s.id) + '\')">Salva esito</button>'
+        + '</div>'
+      : '<div class="esiti-form"><div class="esiti-panel-label" style="color:var(--testo-muted);font-style:italic;">Sola lettura — non puoi aggiungere esiti a questo socio.</div></div>')
+    + '</div>'
+    + '</td>'
+    + '</tr>';
+
   return '<tr style="opacity:0.82;" title="Socio BBC">'
     + '<td class="ragione-sociale">' + nomeCella + '</td>'
     + '<td>' + escapeHtml(s.azienda || '') + '</td>'
@@ -3111,13 +3181,14 @@ function creaRigaSocioHtml(s) {
     + '<td>—</td>'
     + '<td class="td-vecchio-consulente">' + consPrec + '</td>'
     + '<td>' + escapeHtml(s.consulente || '—') + '</td>'
-    + '<td>—</td>'
-    + '<td>—</td>'
-    + '<td>—</td>'
-    + '<td>—</td>'
+    + '<td>' + cellStato + '</td>'
+    + '<td>' + cellFase + '</td>'
+    + '<td>' + cellData + '</td>'
+    + '<td>' + cellEsiti + '</td>'
     + mktCols
     + '<td>' + btnModifica + '</td>'
-    + '</tr>';
+    + '</tr>'
+    + esitiPanel;
 }
 
 function escapeHtml(str) {
@@ -5844,6 +5915,20 @@ function renderStoricoEsitiHtml(esiti, key) {
   ).join('');
 }
 
+/* Versione dedicata ai Soci BBC: struttura identica a renderStoricoEsitiHtml, ma chiama
+   eliminaEsitoSocio. Il parametro mostraElimina permette la sola lettura per chi non può modificare. */
+function renderStoricoEsitiSocioHtml(esiti, socioId, mostraElimina) {
+  if (!Array.isArray(esiti) || !esiti.length) return '<div class="esiti-empty">Nessun esito registrato.</div>';
+  return esiti.map((e, i) =>
+    `<div class="esiti-entry">` +
+    `<div class="esiti-entry-meta">${escapeHtml(e.data || '')} — <b>${escapeHtml(e.consulente || '')}</b>` +
+    (mostraElimina ? `<button class="btn-esiti-elimina" title="Elimina questo esito" onclick="eliminaEsitoSocio('${escapeJs(socioId)}', ${i})">✕</button>` : '') +
+    `</div>` +
+    `<div class="esiti-entry-testo">${escapeHtml(e.testo || '').replace(/\n/g, '<br>')}</div>` +
+    `</div>`
+  ).join('');
+}
+
 /* Elimina un esito (per indice) previa conferma, riscrivendo l'array su Firestore */
 async function eliminaEsito(key, indice) {
   const contatto = getContattiCorrenti().find(c => c._key === key);
@@ -5933,6 +6018,131 @@ async function salvaEsito(key) {
     console.error('[Esiti] Errore salvataggio:', e);
     errEl.textContent = 'Errore durante il salvataggio. Riprova.';
     errEl.style.display = 'block';
+  }
+}
+
+/* ===================== ESITI SOCI BBC =====================
+   Funzioni dedicate ai Soci BBC, parallele ma indipendenti da quelle dei Contatti/CF.
+   Scrivono su CF_BBC_SOCI() e aggiornano bbcSoci[] — non toccano
+   getCollezioneCorrente() / getContattiCorrenti() né le funzioni condivise CF/contatti. */
+
+async function aggiornaCampoSocio(socioId, campo, valore) {
+  const socio = bbcSoci.find(s => s.id === socioId);
+  if (socio) socio[campo] = valore;
+  try {
+    await CF_BBC_SOCI().doc(socioId).update({ [campo]: valore });
+    showToast('Modifica salvata');
+  } catch(e) {
+    console.error('[BBC Soci] Errore aggiornamento campo socio:', e);
+    showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
+  }
+}
+
+/* Equivalente di salvaDataContatto per i Soci: stessa logica di parsing/validazione,
+   scrive ultimoContatto su CF_BBC_SOCI() tramite aggiornaCampoSocio. */
+function salvaDataContattoSocio(el, socioId) {
+  const testo = el.value.trim();
+  if (!testo) { aggiornaCampoSocio(socioId, 'ultimoContatto', ''); return; }
+
+  const m = testo.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) {
+    showToast('Data non valida: usa il formato gg/mm/aaaa (es. 21/08/2026).');
+    return;
+  }
+  const gg = parseInt(m[1], 10), mm = parseInt(m[2], 10), aaaa = parseInt(m[3], 10);
+  const d = new Date(aaaa, mm - 1, gg);
+  if (d.getFullYear() !== aaaa || d.getMonth() !== mm - 1 || d.getDate() !== gg) {
+    showToast('Data non valida: controlla giorno e mese.');
+    return;
+  }
+  const iso = aaaa + '-' + String(mm).padStart(2, '0') + '-' + String(gg).padStart(2, '0');
+  aggiornaCampoSocio(socioId, 'ultimoContatto', iso);
+}
+
+/* Equivalente di toggleEsitiPanel per i Soci: usa ID DOM dedicati (prefisso esiti-row-socio-)
+   per non collidere con le righe pannello dei Contatti. */
+function toggleEsitiPanelSocio(socioId) {
+  const row = document.getElementById('esiti-row-socio-' + socioId);
+  if (!row) return;
+  const aperto = row.style.display !== 'none';
+  row.style.display = aperto ? 'none' : '';
+}
+
+/* Equivalente di salvaEsito per i Soci: stessa validazione PROSSIMO STEP,
+   scrive con arrayUnion su CF_BBC_SOCI() e aggiorna bbcSoci in memoria. */
+async function salvaEsitoSocio(socioId) {
+  const socioHid = 'socio_' + socioId;
+  const textarea = document.getElementById('esiti-socio-textarea-' + socioHid);
+  const errEl    = document.getElementById('esiti-socio-error-' + socioHid);
+  const storiaEl = document.getElementById('esiti-socio-storia-' + socioHid);
+  const btnEl    = document.getElementById('esiti-socio-btn-' + socioHid);
+  if (!textarea || !errEl || !storiaEl) return;
+
+  const testoTrim = textarea.value.trim();
+
+  const upper  = testoTrim.toUpperCase();
+  const idx    = upper.indexOf('PROSSIMO STEP');
+  const dopoPs = idx >= 0 ? testoTrim.slice(idx + 'PROSSIMO STEP'.length).trim() : '';
+  if (idx < 0 || !dopoPs) {
+    errEl.textContent = 'Il testo deve contenere "PROSSIMO STEP" seguito da almeno un carattere (es. "PROSSIMO STEP: richiamare martedì").';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const nuovoEsito = {
+    data:       oggiIso(),
+    consulente: sessione ? (sessione.nome || sessione.email || '') : '',
+    testo:      testoTrim
+  };
+
+  try {
+    await CF_BBC_SOCI().doc(socioId).update({
+      esiti: firebase.firestore.FieldValue.arrayUnion(nuovoEsito)
+    });
+
+    const socio = bbcSoci.find(s => s.id === socioId);
+    if (socio) {
+      if (!Array.isArray(socio.esiti)) socio.esiti = [];
+      socio.esiti.push(nuovoEsito);
+    }
+    const esitiAggiornati = socio ? socio.esiti : [nuovoEsito];
+
+    storiaEl.innerHTML = renderStoricoEsitiSocioHtml(esitiAggiornati, socioId, true);
+    if (btnEl) btnEl.textContent = 'Esiti (' + esitiAggiornati.length + ')';
+    textarea.value = '';
+    showToast('Esito salvato');
+  } catch(e) {
+    console.error('[BBC Soci] Errore salvataggio esito socio:', e);
+    errEl.textContent = 'Errore durante il salvataggio. Riprova.';
+    errEl.style.display = 'block';
+  }
+}
+
+/* Equivalente di eliminaEsito per i Soci: stessa conferma e riscrittura array,
+   su CF_BBC_SOCI() anziché sulla collection dei contatti. */
+async function eliminaEsitoSocio(socioId, indice) {
+  const socio = bbcSoci.find(s => s.id === socioId);
+  if (!socio || !Array.isArray(socio.esiti) || !socio.esiti[indice]) return;
+  if (!confirm('Eliminare definitivamente questo esito? L\'operazione non è reversibile.')) return;
+
+  const socioHid   = 'socio_' + socioId;
+  const nuoviEsiti = socio.esiti.slice();
+  nuoviEsiti.splice(indice, 1);
+
+  try {
+    await CF_BBC_SOCI().doc(socioId).update({ esiti: nuoviEsiti });
+    socio.esiti = nuoviEsiti;
+
+    const storiaEl = document.getElementById('esiti-socio-storia-' + socioHid);
+    if (storiaEl) storiaEl.innerHTML = renderStoricoEsitiSocioHtml(nuoviEsiti, socioId, true);
+    const btnEl = document.getElementById('esiti-socio-btn-' + socioHid);
+    if (btnEl) btnEl.textContent = nuoviEsiti.length > 0 ? 'Esiti (' + nuoviEsiti.length + ')' : 'Esiti';
+
+    showToast('Esito eliminato');
+  } catch(e) {
+    console.error('[BBC Soci] Errore eliminazione esito socio:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
   }
 }
 
