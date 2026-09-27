@@ -1175,6 +1175,7 @@
   <!-- Bottoni sezione Marketing -->
   <button class="nav-btn nav-mkt-only" data-nav="mkt-dashboard" onclick="showPage('mkt-dashboard')" style="display:none;">Dashboard</button>
   <button class="nav-btn nav-mkt-only" data-nav="mkt-campagne" onclick="showPage('mkt-campagne')" style="display:none;">Campagne</button>
+  <button class="nav-btn nav-mkt-only" data-nav="mkt-lead" onclick="showPage('mkt-lead')" style="display:none;">Lead</button>
   <button class="nav-btn nav-mkt-only" data-nav="mkt-tutorial" onclick="showPage('mkt-tutorial')" style="display:none;">Tutorial</button>
   <!-- Sempre visibili -->
   <div class="nav-section-sep"></div>
@@ -1206,7 +1207,7 @@
         <div class="home-card home-card-mkt" id="homeCardMarketing" onclick="selezionaSezione('marketing')" style="display:none;">
           <span class="home-card-icon">📣</span>
           <div class="home-card-title">Marketing BBC</div>
-          <div class="home-card-desc">Dashboard campagne, KPI (Spesa, Lead, CPL, Back-End, Abbonamenti, Fatturato, ROI) e gestione campagne marketing.</div>
+          <div class="home-card-desc">Dashboard campagne, KPI (Spesa, Costi Front-End, Lead, CPL, Back-End, Abbonamenti, Importo ottenuto, ROI reale), gestione campagne e inserimento lead.</div>
           <div class="home-card-badge">Marketing</div>
         </div>
       </div>
@@ -1291,8 +1292,16 @@
     <!-- KPI Grid -->
     <div class="kpi-grid" id="mktKpiGrid">
       <div class="kpi-card">
-        <div class="kpi-label">Spesa Totale</div>
+        <div class="kpi-label">Spesa Campagne</div>
         <div class="kpi-value" id="mktKpiSpesa">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Costi Front-End</div>
+        <div class="kpi-value" id="mktKpiFrontEnd">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Costo Totale</div>
+        <div class="kpi-value" id="mktKpiCostoTotale">—</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Lead Totali</div>
@@ -1311,11 +1320,11 @@
         <div class="kpi-value" id="mktKpiAbbonamento">—</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Fatturato</div>
+        <div class="kpi-label">Importo Ottenuto</div>
         <div class="kpi-value" id="mktKpiFatturato">—</div>
       </div>
       <div class="kpi-card" id="mktKpiRoiCard">
-        <div class="kpi-label">ROI</div>
+        <div class="kpi-label">ROI Reale</div>
         <div class="kpi-value" id="mktKpiRoi">—</div>
       </div>
     </div>
@@ -1323,7 +1332,7 @@
     <!-- Grafici -->
     <div class="mkt-charts-grid">
       <div class="chart-card">
-        <div class="chart-title">Spesa vs Fatturato per campagna</div>
+        <div class="chart-title">Costo totale vs Importo ottenuto per campagna</div>
         <div class="mkt-chart-canvas-wrap"><canvas id="mktChartSpesaFatturato"></canvas></div>
       </div>
       <div class="chart-card">
@@ -1354,27 +1363,132 @@
     </div>
     <div class="table-wrap">
       <div class="table-scroll">
-        <table style="min-width:1100px;">
+        <table style="min-width:1000px;">
           <thead>
             <tr>
+              <th></th>
               <th>Nome</th>
               <th>Tipo</th>
               <th>Periodo</th>
               <th>Spesa</th>
+              <th>Front-End</th>
+              <th>Costo tot.</th>
+              <th>Importo</th>
+              <th>ROI reale</th>
               <th>Lead</th>
               <th>CPL</th>
+              <th>Back-End</th>
+              <th>Abb.</th>
               <th>Impression</th>
               <th>Click</th>
               <th>CTR</th>
-              <th>Back-End</th>
-              <th>Abb.</th>
-              <th>Fatturato</th>
-              <th>ROI</th>
-              <th></th>
             </tr>
           </thead>
           <tbody id="mktTabellaBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA MARKETING — LEAD ===== -->
+<div class="page" id="page-mkt-lead">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Lead</span> — Marketing BBC</div>
+        <div class="section-subtitle" id="mktLeadSottotitolo">I lead inseriti qui finiscono nel Database BBC e vengono lavorati dal consulente assegnato</div>
+      </div>
+    </div>
+
+    <!-- Form nuovo lead -->
+    <div class="card bbc-add-card" style="display:block;">
+      <div class="settings-label" style="margin-bottom:12px;">Inserisci nuovo lead</div>
+      <div class="bbc-add-grid">
+        <div class="settings-field">
+          <label class="settings-label">Ragione Sociale / Nome *</label>
+          <input type="text" class="settings-input" id="mktLeadNomeAzienda" placeholder="Es. Rossi Srl">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Referente</label>
+          <input type="text" class="settings-input" id="mktLeadReferente" placeholder="Es. Mario Rossi">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Telefono</label>
+          <input type="tel" class="settings-input" id="mktLeadTelefono" placeholder="Es. 051 123456">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Email</label>
+          <input type="email" class="settings-input" id="mktLeadEmail" placeholder="mario@azienda.it">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Provincia</label>
+          <input type="text" class="settings-input" id="mktLeadProvincia" placeholder="Es. Bologna">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Comune</label>
+          <input type="text" class="settings-input" id="mktLeadComune" placeholder="Es. Imola">
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Campagna di provenienza</label>
+          <select class="settings-input" id="mktLeadCampagna">
+            <option value="">— Nessuna campagna —</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label">Assegna a consulente</label>
+          <select class="settings-input" id="mktLeadConsulente">
+            <option value="">— Da assegnare —</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="aggiungiLeadMkt()">+ Inserisci lead</button>
+    </div>
+
+    <!-- Filtri -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label class="filter-label">Campagna</label>
+        <select class="filter-select" id="mktLeadFiltroCampagna" onchange="renderLeadMkt()">
+          <option value="">Tutte</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Consulente</label>
+        <select class="filter-select" id="mktLeadFiltroConsulente" onchange="renderLeadMkt()">
+          <option value="">Tutti</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;">
+        <label class="filter-label">Cerca nome / referente / email</label>
+        <input type="text" class="filter-input" id="mktLeadFiltroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderLeadMkt()">
+      </div>
+    </div>
+
+    <!-- Tabella lead -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table style="min-width:1100px;">
+          <thead>
+            <tr>
+              <th>Inserito il</th>
+              <th>Ragione Sociale / Nome</th>
+              <th>Referente</th>
+              <th>Telefono</th>
+              <th>Email</th>
+              <th>Campagna</th>
+              <th>Consulente Assegnato</th>
+              <th>Esito Contatto</th>
+              <th>Fase Cliente</th>
+              <th>Esiti</th>
+            </tr>
+          </thead>
+          <tbody id="mktLeadBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="mktLeadEmpty" style="display:none;">
+        <div class="empty-state-icon">👤</div>
+        <div>Nessun lead trovato. Inseriscine uno con il modulo qui sopra.</div>
       </div>
     </div>
   </div>
@@ -1398,17 +1512,19 @@
       <div class="tutorial-step">
         <div class="tutorial-step-num">1</div>
         <div>
-          <div class="tutorial-step-title">Dashboard — I 7 KPI fondamentali</div>
+          <div class="tutorial-step-title">Dashboard — I KPI fondamentali</div>
           <div class="tutorial-step-text">
             La dashboard mostra i dati aggregati di tutte le campagne (o di una sola, usando i filtri in alto).
             <div class="tutorial-kpi-grid">
-              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💶 Spesa</div>Budget investito in advertising e produzione contenuti.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💶 Spesa Campagne</div>Budget investito in advertising e produzione contenuti.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🎟️ Costi Front-End</div>Costi sostenuti per ottenere contatti o visibilità oltre alla campagna (eventi, materiali, omaggi...).</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🧾 Costo Totale</div>Spesa Campagne + Costi Front-End: è la base del ROI reale.</div>
               <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">👤 Lead</div>Numero di potenziali clienti acquisiti dalla campagna.</div>
               <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">📉 CPL</div>Costo Per Lead = Spesa ÷ Lead. Più basso è, meglio è.</div>
               <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🏆 Back-End</div>Contatti BBC con <em>Fase Cliente = Back-End</em> collegati a questa campagna.</div>
               <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🔁 Abbonamenti</div>Contatti BBC con <em>Fase Cliente = Abbonamento</em> collegati a questa campagna.</div>
-              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💰 Fatturato</div>Somma dei valori in euro dei contatti collegati (Back-End + Abbonamenti).</div>
-              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">📈 ROI</div>Return on Investment = (Fatturato − Spesa) ÷ Spesa × 100. Verde &gt; 100%, Giallo ≥ 0%, Rosso &lt; 0%.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💰 Importo Ottenuto</div>L'importo inserito a mano nella campagna. Se non lo inserisci, il portale usa la somma dei valori in euro dei contatti collegati (Back-End + Abbonamenti).</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">📈 ROI Reale</div>(Importo Ottenuto − Costo Totale) ÷ Costo Totale × 100. Verde ≥ 100%, Giallo ≥ 0%, Rosso &lt; 0%.</div>
             </div>
           </div>
         </div>
@@ -1424,8 +1540,9 @@
               <li><strong>Anagrafica</strong>: nome, tipo (Lead Gen / Awareness), date di inizio e fine</li>
               <li><strong>Contenuti</strong>: descrizione dei materiali creativi usati</li>
               <li><strong>Costi e risultati</strong>: spesa, lead generati, impression, click, copertura, CTR</li>
+              <li><strong>ROI reale</strong>: costi Front-End e importo ottenuto dalla campagna (l'anteprima del ROI si aggiorna mentre scrivi)</li>
             </ul>
-            I dati di Back-End, Abbonamenti e Fatturato vengono calcolati in automatico dai contatti BBC collegati.
+            I dati di Back-End e Abbonamenti vengono calcolati in automatico dai contatti BBC collegati.
           </div>
         </div>
       </div>
@@ -1433,15 +1550,15 @@
       <div class="tutorial-step">
         <div class="tutorial-step-num">3</div>
         <div>
-          <div class="tutorial-step-title">Collega i contatti BBC alla campagna</div>
+          <div class="tutorial-step-title">Inserisci i lead e assegnali a un consulente</div>
           <div class="tutorial-step-text">
-            Per attribuire un contatto BBC a una campagna, vai in <strong>Database BBC</strong>, apri la scheda del contatto e imposta il campo <strong>Campagna Marketing</strong> sul nome della campagna desiderata. Quel contatto verrà conteggiato automaticamente nei KPI di quella campagna.
+            Vai in <strong>Lead</strong>: inserisci nome e dati del lead, scegli la campagna di provenienza e il consulente. Il lead finisce subito nel <strong>Database BBC</strong> (con l'etichetta "Lead Marketing") e il consulente lo lavora come un cliente fermo: Esito Contatto, Fase Cliente, Ultimo Contatto ed Esiti. Nella pagina Lead vedi in tempo reale a chi è assegnato ogni lead e a che punto è; puoi cambiare il consulente dal menu a tendina. Se un lead con la stessa email o lo stesso telefono esiste già, il portale te lo segnala prima di inserirlo.
             <div class="tutorial-flusso">
               <strong>Flusso:</strong>
               <ol>
                 <li>Crei la campagna su Facebook/Instagram</li>
-                <li>Ricevi lead → li aggiungi come contatti BBC</li>
-                <li>Sul contatto imposti il campo <em>Campagna Marketing</em></li>
+                <li>Ricevi lead → li inserisci dalla pagina <em>Lead</em> con la campagna e il consulente</li>
+                <li>Il consulente lo lavora dal Database BBC</li>
                 <li>Quando il contatto acquista (Back-End o Abbonamento), imposti la <em>Fase Cliente</em> e il <em>Valore €</em></li>
                 <li>Il portale calcola automaticamente KPI e ROI</li>
               </ol>
@@ -2184,7 +2301,7 @@
       <div class="table-scroll">
         <table id="tabellaCruscotto" style="min-width:1080px;">
           <thead>
-            <tr>
+            <tr id="cruscottoHeadRow">
               <th>Consulente</th>
               <th>Assegnati</th>
               <th>Riattivati</th>
@@ -2544,7 +2661,7 @@
       <div class="mkt-form-grid">
         <div class="mkt-form-field">
           <label class="mkt-form-label">Spesa (€)</label>
-          <input type="number" class="mkt-form-input" id="mktCSpesa" min="0" step="0.01" placeholder="0.00">
+          <input type="number" class="mkt-form-input" id="mktCSpesa" min="0" step="0.01" placeholder="0.00" oninput="aggiornaAnteprimaRoiMkt()">
         </div>
         <div class="mkt-form-field">
           <label class="mkt-form-label">Lead generati</label>
@@ -2567,6 +2684,23 @@
           <input type="number" class="mkt-form-input" id="mktCCtr" min="0" max="100" step="0.01" placeholder="0.00">
         </div>
       </div>
+    </div>
+
+    <!-- Sezione: ROI reale -->
+    <div class="mkt-form-section">
+      <div class="mkt-form-section-title">ROI reale</div>
+      <div class="mkt-form-grid">
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Costi Front-End (€)</label>
+          <input type="number" class="mkt-form-input" id="mktCFrontEnd" min="0" step="0.01" placeholder="0.00" oninput="aggiornaAnteprimaRoiMkt()">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Importo ottenuto (€)</label>
+          <input type="number" class="mkt-form-input" id="mktCImporto" min="0" step="0.01" placeholder="Vuoto = somma dai contatti BBC" oninput="aggiornaAnteprimaRoiMkt()">
+        </div>
+      </div>
+      <div class="mkt-info-kpi-grid" id="mktAnteprimaRoi" style="margin-top:12px;"></div>
+      <p class="mkt-form-hint">I <b>costi Front-End</b> (eventi, materiali, omaggi, tutto ciò che serve a ottenere contatti o visibilità) si sommano alla spesa della campagna: il ROI reale è calcolato sul costo totale. Se lasci vuoto l'<b>importo ottenuto</b>, il portale usa la somma dei Valori € dei contatti BBC Back-End e Abbonamento collegati alla campagna.</p>
     </div>
 
     <!-- Sezione: Backend info (solo in modifica) -->
@@ -2698,6 +2832,8 @@ let sessione = null; // letta da sessionStorage all'avvio nell'IIFE
    possono contenere milioni di documenti senza alcun limite di dimensione. */
 const CF_DOC_PATH  = () => db.collection('portali').doc('clienti-fermi');
 const CF_CLIENTI   = () => db.collection('portali').doc('clienti-fermi').collection('clienti');
+/* Clienti tolti dal foglio Google che avevano esiti o dati inseriti nel portale: vengono spostati qui invece di essere persi */
+const CF_CLIENTI_ARCHIVIO = () => db.collection('portali').doc('clienti-fermi').collection('clienti-archiviati');
 const CF_EVENTI        = () => db.collection('portali').doc('clienti-fermi').collection('eventi');
 const CF_ORGANIGRAMMA  = () => db.collection('portali').doc('clienti-fermi').collection('organigramma');
 
@@ -3270,6 +3406,7 @@ function showPage(name) {
   if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
   if (name === 'mkt-dashboard') renderDashboardMkt();
   if (name === 'mkt-campagne') renderTabellaCampagneMkt();
+  if (name === 'mkt-lead') inizializzaPaginaLeadMkt();
 }
 
 function goHome() {
@@ -3581,8 +3718,11 @@ function creaRigaHtml(c, mostraAzioni) {
   const hid = esitiKeyToHtmlId(c._key);
   const storicoHtml = renderStoricoEsitiHtml(esiti, c._key);
 
+  const badgeLeadMkt = (mostraAzioni && c.origine === 'Marketing')
+    ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;margin-right:4px;vertical-align:middle;" title="Lead inserito dalla sezione Marketing">Lead Marketing</span>' : '';
+
   return `<tr data-cf-key="${escapeHtml(c._key)}"${rigaBloccataClass}>
-      <td class="ragione-sociale">${escapeHtml(c.ragioneSociale)}</td>
+      <td class="ragione-sociale">${badgeLeadMkt}${escapeHtml(c.ragioneSociale)}</td>
       <td>${escapeHtml(c.referente)}</td>
       <td>${c.contatto ? '<a href="tel:'+escapeHtml(c.contatto)+'">'+escapeHtml(c.contatto)+'</a>' : ''}</td>
       <td>${c.email ? '<a href="mailto:'+escapeHtml(c.email)+'">'+escapeHtml(c.email)+'</a>' : ''}</td>
@@ -3697,6 +3837,20 @@ function creaRigaSocioHtml(s) {
       : '<span style="color:var(--testo-muted);">—</span>';
   }
 
+  /* Consulente assegnato: Super Admin e Direzione Vendite possono cambiarlo direttamente dal Database BBC */
+  let cellConsulente;
+  if (puoVedereTuttiSociEdEventiBbc()) {
+    const consulenti = nomiConsulenti();
+    const opzCons = ['<option value="">— Non assegnato —</option>']
+      .concat(consulenti.map(n => '<option value="' + escapeHtml(n) + '"' + (s.consulente === n ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'));
+    if (s.consulente && !consulenti.includes(s.consulente)) {
+      opzCons.push('<option value="' + escapeHtml(s.consulente) + '" selected>' + escapeHtml(s.consulente) + '</option>');
+    }
+    cellConsulente = '<select class="td-select" onchange="aggiornaCounsulenteSocioInline(\'' + escapeJs(s.id) + '\',this.value)">' + opzCons.join('') + '</select>';
+  } else {
+    cellConsulente = escapeHtml(s.consulente || '—');
+  }
+
   /* Colspan identico a quello usato per i Contatti in BBC mode */
   const colspan = 13 + (puoVedereCampiMarketing() ? 2 : 0);
 
@@ -3728,7 +3882,7 @@ function creaRigaSocioHtml(s) {
     + '<td>—</td>'
     + '<td>—</td>'
     + '<td class="td-vecchio-consulente">' + consPrec + '</td>'
-    + '<td>' + escapeHtml(s.consulente || '—') + '</td>'
+    + '<td>' + cellConsulente + '</td>'
     + '<td>' + cellStato + '</td>'
     + '<td>' + cellFase + '</td>'
     + '<td>' + cellData + '</td>'
@@ -3835,7 +3989,9 @@ function inizializzaPaginaDatabase() {
 
   const selCons = document.getElementById('dbFiltroConsulente');
   const valorePrecedenteCons = selCons.value;
-  const opzioniConsulenti = elencoConsulentiPerSelect();
+  const opzioniConsulenti = sezioneCorrente === 'bbc'
+    ? [...new Set([...elencoConsulentiPerSelect(), ...bbcSoci.map(s => s.consulente).filter(Boolean)])].sort()
+    : elencoConsulentiPerSelect();
   selCons.innerHTML = '<option value="">Tutti</option>' + opzioniConsulenti.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
   if (opzioniConsulenti.includes(valorePrecedenteCons)) selCons.value = valorePrecedenteCons;
 
@@ -3884,9 +4040,16 @@ function renderDatabase() {
     const sociVisibili = puoVedereTuttiSociEdEventiBbc()
       ? bbcSoci
       : bbcSoci.filter(s => s.consulente && s.consulente === (sessione ? sessione.nome : ''));
-    const sociDb = filtroTesto
+    let sociDb = filtroTesto
       ? sociVisibili.filter(s => normalizza(s.nome || '').includes(filtroTesto) || normalizza(s.azienda || '').includes(filtroTesto))
       : sociVisibili;
+    // Gli stessi filtri di consulente, esito e fase valgono anche per i Soci
+    if (filtroConsulente) sociDb = sociDb.filter(s => s.consulente === filtroConsulente);
+    if (filtroNonAssegnati) sociDb = sociDb.filter(s => !s.consulente);
+    if (filtroStato) sociDb = sociDb.filter(s => s.stato === filtroStato);
+    if (filtroFase) sociDb = sociDb.filter(s => s.faseCliente === filtroFase);
+    // I Soci non hanno provincia/comune né la spunta "cliente attivo": con quei filtri attivi non vanno mostrati
+    if (filtroProvincia || filtroComune || filtroSoloAttiviDb) sociDb = [];
     sociDbCount = sociDb.length;
     if (sociDbCount) {
       sociDbHtml = sociDb.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).map(s => creaRigaSocioHtml(s)).join('');
@@ -4198,9 +4361,56 @@ function salvaDataContatto(el, key) {
   aggiornaCampoRiga(key, 'ultimoContatto', iso);
 }
 
+/* BBC: lead/contatti e soci del Business Club riuniti in un unico elenco con gli stessi campi,
+   usato da Cruscotto BBC e Riassunto BBC (i soci hanno campi anagrafici con nomi diversi). */
+function getRecordBbcUnificati() {
+  const lead = bbcContatti.map(c => ({
+    tipo: 'Lead', nome: c.ragioneSociale || c.referente || '', referente: c.referente || '',
+    telefono: c.contatto || '', email: c.email || '', consulente: c.consulente || '',
+    stato: c.stato || '', faseCliente: c.faseCliente || '', ultimoContatto: c.ultimoContatto || '',
+    clienteAttivo: c.clienteAttivo === true, valoreEuro: parseFloat(c.valoreEuro) || 0,
+    origine: c.origine || '', esiti: Array.isArray(c.esiti) ? c.esiti : []
+  }));
+  const soci = bbcSoci.map(s => ({
+    tipo: 'Socio', nome: s.azienda || s.nome || '', referente: s.nome || '',
+    telefono: s.telefono || '', email: s.email || '', consulente: s.consulente || '',
+    stato: s.stato || '', faseCliente: s.faseCliente || '', ultimoContatto: s.ultimoContatto || '',
+    clienteAttivo: false, valoreEuro: 0, origine: '', esiti: Array.isArray(s.esiti) ? s.esiti : []
+  }));
+  return lead.concat(soci);
+}
+
+/* BBC: quante iscrizioni agli eventi ha fatto ogni consulente (campo iscrittoDa dei partecipanti) */
+function contaIscrizioniEventiPerConsulente() {
+  const conteggio = {};
+  Object.values(bbcPartecipantiCache).forEach(parts => {
+    (parts || []).forEach(p => { if (p.iscrittoDa) conteggio[p.iscrittoDa] = (conteggio[p.iscrittoDa] || 0) + 1; });
+  });
+  return conteggio;
+}
+
+/* Carica in background i partecipanti di tutti gli eventi non ancora in cache, poi ridisegna il Cruscotto BBC */
+let _precaricoPartecipantiInCorso = false;
+const _partecipantiGiaRichiesti = new Set(); // evita di ritentare all'infinito un evento che non si carica
+async function precaricaPartecipantiPerCruscotto() {
+  if (_precaricoPartecipantiInCorso) return;
+  const mancanti = bbcEventiList.filter(ev => bbcPartecipantiCache[ev.id] == null && !_partecipantiGiaRichiesti.has(ev.id));
+  if (!mancanti.length) return;
+  mancanti.forEach(ev => _partecipantiGiaRichiesti.add(ev.id));
+  _precaricoPartecipantiInCorso = true;
+  try {
+    await Promise.all(mancanti.map(ev => caricaPartecipantiEvento(ev.id)));
+  } finally {
+    _precaricoPartecipantiInCorso = false;
+  }
+  if (sezioneCorrente === 'bbc' && document.getElementById('page-cruscotto').classList.contains('active')) renderCruscotto();
+}
+
 function calcolaStatisticheCruscotto() {
-  // Il cruscotto mostra tutti i contatti della sezione corrente (CF o BBC).
-  const tutti = getContattiCorrenti();
+  // Il cruscotto mostra tutti i contatti della sezione corrente (CF, oppure in BBC lead + soci).
+  const isBbc = sezioneCorrente === 'bbc';
+  const tutti = isBbc ? getRecordBbcUnificati() : getContattiCorrenti();
+  const iscrizioniEventi = isBbc ? contaIscrizioniEventiPerConsulente() : {};
   const nomiAssegnatari = new Set(tutti.map(c => c.consulente).filter(Boolean));
   nomiConsulenti().forEach(n => nomiAssegnatari.add(n));
 
@@ -4210,6 +4420,14 @@ function calcolaStatisticheCruscotto() {
     return {
       nome,
       assegnati: righe.length,
+      lead: righe.filter(c => c.tipo === 'Lead').length,
+      soci: righe.filter(c => c.tipo === 'Socio').length,
+      daMarketing: righe.filter(c => c.origine === 'Marketing').length,
+      appuntamenti: righe.filter(c => c.stato === 'Appuntamento fissato').length,
+      backend: righe.filter(c => c.faseCliente === 'Back-End').length,
+      abbonamenti: righe.filter(c => c.faseCliente === 'Abbonamento').length,
+      valore: righe.reduce((t, c) => t + (parseFloat(c.valoreEuro) || 0), 0),
+      iscrizioniEventi: iscrizioniEventi[nome] || 0,
       riattivati: righe.filter(c => c.faseCliente === 'Riattivato').length,
       attivi: righe.filter(c => c.clienteAttivo === true).length,
       fermi: righe.filter(c => c.faseCliente === 'Fermo').length,
@@ -4218,12 +4436,22 @@ function calcolaStatisticheCruscotto() {
       maiContattati: righe.filter(c => !c.ultimoContatto).length,
       ultimoContattoRecente: dateValide.length ? dateValide[dateValide.length - 1] : null
     };
-  }).filter(r => r.assegnati > 0);
+  }).filter(r => r.assegnati > 0 || r.iscrizioniEventi > 0);
 
   const nonAssegnati = tutti.filter(c => !c.consulente).length;
   const dateGlobali = tutti.map(c => c.ultimoContatto).filter(Boolean).sort();
 
   return {
+    tutti,
+    lead: tutti.filter(c => c.tipo === 'Lead').length,
+    soci: tutti.filter(c => c.tipo === 'Socio').length,
+    daMarketing: tutti.filter(c => c.origine === 'Marketing').length,
+    daMarketingNonAssegnati: tutti.filter(c => c.origine === 'Marketing' && !c.consulente).length,
+    appuntamenti: tutti.filter(c => c.stato === 'Appuntamento fissato').length,
+    backend: tutti.filter(c => c.faseCliente === 'Back-End').length,
+    abbonamenti: tutti.filter(c => c.faseCliente === 'Abbonamento').length,
+    valore: tutti.reduce((t, c) => t + (parseFloat(c.valoreEuro) || 0), 0),
+    iscrizioniEventi: Object.values(iscrizioniEventi).reduce((a, b) => a + b, 0),
     totale: tutti.length,
     assegnati: tutti.filter(c => c.consulente).length,
     nonAssegnati,
@@ -4246,6 +4474,13 @@ function renderCruscotto() {
   // Nasconde il grafico trend in sezione BBC (non disponibile)
   const trendSec = document.getElementById('cruscottoTrendSection');
   if (trendSec) trendSec.style.display = (sezioneCorrente === 'bbc') ? 'none' : '';
+
+  if (sezioneCorrente === 'bbc') {
+    renderCruscottoBbc(s);
+    return;
+  }
+  const headRow = document.getElementById('cruscottoHeadRow');
+  if (headRow) headRow.innerHTML = '<th>Consulente</th><th>Assegnati</th><th>Riattivati</th><th>Clienti Attivi</th><th>Fermi</th><th>In Gestione</th><th>Bloccati</th><th>Mai Contattati</th><th>Ultimo Contatto Registrato</th>';
 
   const kpi = document.getElementById('cruscottoKpiGrid');
   kpi.innerHTML = `
@@ -4290,12 +4525,70 @@ function renderCruscotto() {
   renderGraficoTrend();
 }
 
+/* Cruscotto in sezione BBC: lead + soci del Business Club, per consulente */
+function renderCruscottoBbc(s) {
+  document.getElementById('cruscottoSubtitle').textContent =
+    s.totale + ' record BBC (' + s.lead + ' lead/contatti + ' + s.soci + ' soci), ' + s.perConsulente.length + ' consulenti con assegnazioni attive';
+
+  document.getElementById('cruscottoKpiGrid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-value">${s.totale}</div><div class="kpi-label">Record BBC totali</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.lead}</div><div class="kpi-label">Lead / contatti</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.soci}</div><div class="kpi-label">Soci</div></div>
+    <div class="kpi-card ${s.nonAssegnati ? 'kpi-alert' : ''}"><div class="kpi-value">${s.nonAssegnati}</div><div class="kpi-label">Senza consulente</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.daMarketing}</div><div class="kpi-label">Lead da Marketing${s.daMarketingNonAssegnati ? ' (' + s.daMarketingNonAssegnati + ' da assegnare)' : ''}</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.appuntamenti}</div><div class="kpi-label">Appuntamenti fissati</div></div>
+    <div class="kpi-card" style="--fucsia:#2f9e63;--fucsia-dark:#1f7a4a;"><div class="kpi-value">${s.backend}</div><div class="kpi-label">Back-End</div></div>
+    <div class="kpi-card" style="--fucsia:#2f9e63;--fucsia-dark:#1f7a4a;"><div class="kpi-value">${s.abbonamenti}</div><div class="kpi-label">Abbonamenti</div></div>
+    <div class="kpi-card"><div class="kpi-value">${mktFmtEur(s.valore)}</div><div class="kpi-label">Valore € generato</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.iscrizioniEventi}</div><div class="kpi-label">Iscrizioni a eventi</div></div>
+    <div class="kpi-card"><div class="kpi-value">${s.contattatiUltimi30gg}</div><div class="kpi-label">Contattati (ultimi 30gg)</div></div>
+    <div class="kpi-card ${s.maiContattati ? 'kpi-alert' : ''}"><div class="kpi-value">${s.maiContattati}</div><div class="kpi-label">Mai contattati</div></div>
+  `;
+
+  const headRow = document.getElementById('cruscottoHeadRow');
+  if (headRow) headRow.innerHTML = '<th>Consulente</th><th>Assegnati</th><th>Lead</th><th>Soci</th><th>Da Mktg</th><th>Appunt.</th><th>Back-End</th><th>Abb.</th><th>Valore €</th><th>Iscr. eventi</th><th>Mai contatt.</th><th>Ultimo contatto</th>';
+
+  const body = document.getElementById('cruscottoBody');
+  const empty = document.getElementById('cruscottoEmptyState');
+  renderGraficoRipartizione(s);
+  if (!s.perConsulente.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    renderMiniPieStato(s);
+    precaricaPartecipantiPerCruscotto();
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = s.perConsulente.map(r => {
+    const dataFormattata = formattaDataItaliana(r.ultimoContattoRecente);
+    return `<tr>
+      <td class="ragione-sociale">${escapeHtml(r.nome)}</td>
+      <td class="num-cell">${r.assegnati}</td>
+      <td class="num-cell ${r.lead ? '' : 'zero'}">${r.lead}</td>
+      <td class="num-cell ${r.soci ? '' : 'zero'}">${r.soci}</td>
+      <td class="num-cell ${r.daMarketing ? '' : 'zero'}">${r.daMarketing}</td>
+      <td class="num-cell ${r.appuntamenti ? '' : 'zero'}">${r.appuntamenti}</td>
+      <td class="num-cell ${r.backend ? '' : 'zero'}">${r.backend}</td>
+      <td class="num-cell ${r.abbonamenti ? '' : 'zero'}">${r.abbonamenti}</td>
+      <td class="num-cell ${r.valore ? '' : 'zero'}">${mktFmtEur(r.valore)}</td>
+      <td class="num-cell ${r.iscrizioniEventi ? '' : 'zero'}">${r.iscrizioniEventi}</td>
+      <td class="num-cell ${r.maiContattati ? 'alert' : 'zero'}">${r.maiContattati}</td>
+      <td>${dataFormattata ? dataFormattata : '<span class="td-date-empty">Nessun dato</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  renderMiniPieStato(s);
+  precaricaPartecipantiPerCruscotto();
+}
+
 /* ===================== RIASSUNTO PER CONSULENTE ===================== */
 /* Pagina riservata a Super Admin e Direzione Vendite.
    Mostra un blocco per ogni consulente con tutti i suoi clienti assegnati, stampabile. */
 function renderRiassunto() {
   if (!puoVedereRiassunto()) return;
   const wrap = document.getElementById('riassuntoWrap');
+  if (sezioneCorrente === 'bbc') { renderRiassuntoBbc(wrap); return; }
 
   const nomiAssegnatari = [...new Set(getContattiCorrenti().map(c => c.consulente).filter(Boolean))].sort();
 
@@ -4356,6 +4649,71 @@ function renderRiassunto() {
   wrap.innerHTML = html;
 }
 
+/* Riassunto in sezione BBC: per ogni consulente i suoi lead/contatti e soci del Business Club,
+   più un blocco finale con i record ancora da assegnare */
+function renderRiassuntoBbc(wrap) {
+  const tutti = getRecordBbcUnificati();
+  if (!tutti.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><div>Nessun contatto o socio BBC ancora registrato.</div></div>';
+    return;
+  }
+  const nomiAssegnatari = [...new Set(tutti.map(c => c.consulente).filter(Boolean))].sort();
+  const gruppi = nomiAssegnatari.map(nome => ({ titolo: '👤 ' + nome, righe: tutti.filter(c => c.consulente === nome) }));
+  const senzaCons = tutti.filter(c => !c.consulente);
+  if (senzaCons.length) gruppi.push({ titolo: '⚠️ Da assegnare', righe: senzaCons });
+
+  const ordineTipo = { 'Socio': 0, 'Lead': 1 };
+  let html = '';
+  gruppi.forEach(g => {
+    const righe = g.righe.slice().sort((a, b) => (ordineTipo[a.tipo] - ordineTipo[b.tipo]) || (a.nome || '').localeCompare(b.nome || ''));
+    const nSoci = righe.filter(c => c.tipo === 'Socio').length;
+    const nLead = righe.length - nSoci;
+    const nBackend = righe.filter(c => c.faseCliente === 'Back-End').length;
+    const nAbb = righe.filter(c => c.faseCliente === 'Abbonamento').length;
+    html += `<div class="riassunto-consulente-section">
+      <div class="riassunto-consulente-title">
+        ${escapeHtml(g.titolo)}
+        <span style="font-weight:600; color:var(--testo-muted); font-size:0.85rem;">
+          — ${nLead} lead · ${nSoci} soc${nSoci === 1 ? 'io' : 'i'}
+          ${nBackend ? '&nbsp;·&nbsp;<span style="color:var(--verde);">' + nBackend + ' Back-End</span>' : ''}
+          ${nAbb ? '&nbsp;·&nbsp;<span style="color:var(--verde);">' + nAbb + ' Abbonament' + (nAbb === 1 ? 'o' : 'i') + '</span>' : ''}
+        </span>
+      </div>
+      <div class="table-wrap"><div class="table-scroll">
+        <table style="min-width:900px;">
+          <thead><tr>
+            <th>Tipo</th>
+            <th>Azienda / Nome</th>
+            <th>Referente</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Esito Contatto</th>
+            <th>Fase Cliente</th>
+            <th>Ultimo Contatto</th>
+            <th>Esiti</th>
+          </tr></thead>
+          <tbody>`;
+    righe.forEach(c => {
+      const badgeTipo = c.tipo === 'Socio'
+        ? '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>'
+        : '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">' + (c.origine === 'Marketing' ? 'Lead Marketing' : 'Lead') + '</span>';
+      html += `<tr>
+        <td>${badgeTipo}</td>
+        <td class="ragione-sociale">${escapeHtml(c.nome) || '—'}</td>
+        <td>${escapeHtml(c.referente) || '—'}</td>
+        <td>${c.telefono ? '<a href="tel:' + escapeHtml(c.telefono) + '">' + escapeHtml(c.telefono) + '</a>' : '—'}</td>
+        <td>${c.email ? '<a href="mailto:' + escapeHtml(c.email) + '">' + escapeHtml(c.email) + '</a>' : '—'}</td>
+        <td>${escapeHtml(c.stato) || '—'}</td>
+        <td>${escapeHtml(c.faseCliente) || '—'}</td>
+        <td>${escapeHtml(formattaDataItaliana(c.ultimoContatto)) || '—'}</td>
+        <td class="num-cell">${c.esiti.length}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div></div>`;
+  });
+  wrap.innerHTML = html;
+}
+
 /* ===================== GRAFICI CRUSCOTTO ===================== */
 const chartRegistry = {};
 function distruggiChart(id) {
@@ -4409,7 +4767,7 @@ function renderMiniPieStato(s) {
   emptyEl.style.display = 'none';
 
   s.perConsulente.forEach(r => {
-    const righeConsulente = contatti.filter(c => c.consulente === r.nome);
+    const righeConsulente = (s.tutti || contatti).filter(c => c.consulente === r.nome);
     const valoriStato = STATI_VALIDI.map(st => righeConsulente.filter(c => c.stato === st).length);
     const contattati = righeConsulente.filter(c => c.ultimoContatto).length;
     const nonContattati = righeConsulente.length - contattati;
@@ -4602,83 +4960,141 @@ async function elaboraTestoCsv(testo) {
 
   impostaStatus(true, 'Salvataggio in corso... — ' + righeGrezze.length + ' righe');
 
-  /* Mappa overlay: conserva l'intero documento esistente (non solo 5 campi),
-     così tutti i dati inseriti manualmente nel portale (esiti, campagna marketing,
-     valore €, statoPrecedente, dataAssegnazione, ecc.) non vengono persi al re-import. */
-  const overlayEsistente = {};
-  contatti.forEach(c => {
-    overlayEsistente[c._key] = c; // documento completo, non solo i campi base
-  });
-
-  /* Unisci dati grezzi con overlay esistente.
-     Strategia: parte dal documento ESISTENTE (con tutti i campi), poi sovrascrive
-     SOLO i campi che provengono legittimamente dal CSV (anagrafica e geo-match).
-     I campi inseriti manualmente (consulente, stato, fase, data contatto, attivo,
-     esiti, campagna, valore, ecc.) restano intatti dall'existing. */
-  const righeUnificate = righeGrezze.map(r => {
-    const existing = overlayEsistente[r._key];
-    if (!existing) return r; // contatto nuovo: usa i dati CSV as-is
-
-    return Object.assign({}, existing, {
-      // Campi aggiornati dal CSV (fonte di verità per l'anagrafica)
-      ragioneSociale:    r.ragioneSociale,
-      referente:         r.referente,
-      contatto:          r.contatto,
-      email:             r.email,
-      provincia:         r.provincia,
-      comune:            r.comune,
-      vecchioConsulente: r.vecchioConsulente,
-      _provinciaMatch:   r._provinciaMatch,
-      _comuneMatch:      r._comuneMatch,
-      _key:              r._key,
-      // Campi editabili manualmente: il valore del portale prevale su quello del CSV;
-      // il valore CSV è usato solo se il campo non è ancora stato impostato (undefined)
-      consulente:        existing.consulente     !== undefined ? existing.consulente     : r.consulente,
-      stato:             existing.stato          !== undefined ? existing.stato          : r.stato,
-      faseCliente:       existing.faseCliente    !== undefined ? existing.faseCliente    : r.faseCliente,
-      ultimoContatto:    existing.ultimoContatto !== undefined ? existing.ultimoContatto : r.ultimoContatto,
-      clienteAttivo:     existing.clienteAttivo  !== undefined ? existing.clienteAttivo  : (r.clienteAttivo || false)
-      // Nota: esiti, campagnaMarketing, valoreEuro, statoPrecedente, dataAssegnazione
-      // e qualsiasi altro campo presente nell'existing sono preservati automaticamente
-      // dalla base Object.assign({}, existing, ...) — non serve elencali esplicitamente.
-    });
-  });
-
-  /* Calcola quali docId sono nel nuovo CSV */
-  const nuoviDocIds = new Set(righeGrezze.map(r => sanitizeDocId(r._key)));
-
-  /* Leggi i docId esistenti nella sottocollezione per trovare i client obsoleti */
+  /* PROTEZIONE ESITI — regole dell'import:
+     1. La base dell'unione sono i documenti letti ORA da Firestore, non la copia in memoria:
+        così un esito salvato da un consulente pochi secondi prima non viene sovrascritto.
+     2. Sui clienti già esistenti si scrivono SOLO i campi anagrafici del foglio (set con merge):
+        esiti, consulente, stato, fase, date, campagna, valore € ecc. non vengono mai toccati.
+     3. Se nel foglio cambia la ragione sociale o la provincia (= cambia la chiave del cliente),
+        il vecchio documento viene riconosciuto (stessa email, telefono o ragione sociale) e i suoi
+        dati inseriti nel portale, esiti compresi, passano al nuovo.
+     4. Un cliente tolto dal foglio che aveva esiti o dati inseriti nel portale viene spostato
+        nell'archivio (clienti-archiviati) invece di essere cancellato. */
   const clientiSnap = await CF_CLIENTI().get();
-  const daEliminare = clientiSnap.docs.map(d => d.id).filter(id => !nuoviDocIds.has(id));
+  const esistentiPerId = {};
+  clientiSnap.docs.forEach(d => { esistentiPerId[d.id] = d.data(); });
 
-  const BATCH_SIZE = 500;
+  const nuoviDocIds = new Set(righeGrezze.map(r => sanitizeDocId(r._key)));
+  const obsoleti = Object.keys(esistentiPerId).filter(id => !nuoviDocIds.has(id));
+  const haDatiDelPortale = d => (Array.isArray(d.esiti) && d.esiti.length > 0) || !!d.consulente || !!d.stato
+    || !!d.faseCliente || !!d.ultimoContatto || d.clienteAttivo === true || !!d.campagnaMarketing || !!d.valoreEuro;
 
-  /* Elimina i client non più presenti nel CSV */
-  for (let i = 0; i < daEliminare.length; i += BATCH_SIZE) {
-    const chunk = daEliminare.slice(i, i + BATCH_SIZE);
+  // Punto 3: abbina i clienti "nuovi" ai vecchi documenti con dati del portale che stanno per sparire
+  const obsoletiConDati = obsoleti.filter(id => haDatiDelPortale(esistentiPerId[id]));
+  const vecchioIdPerNuovoId = {};
+  const obsoletiRecuperati = new Set();
+  righeGrezze.forEach(r => {
+    const id = sanitizeDocId(r._key);
+    if (esistentiPerId[id] || vecchioIdPerNuovoId[id]) return;
+    const email = (r.email || '').trim().toLowerCase();
+    const tel = (r.contatto || '').replace(/\D/g, '');
+    const rs = normalizza(r.ragioneSociale);
+    const match = obsoletiConDati.find(oid => {
+      if (obsoletiRecuperati.has(oid)) return false;
+      const o = esistentiPerId[oid];
+      return (email && (o.email || '').trim().toLowerCase() === email)
+        || (tel.length >= 6 && (o.contatto || '').replace(/\D/g, '') === tel)
+        || (rs && normalizza(o.ragioneSociale) === rs);
+    });
+    if (match) { vecchioIdPerNuovoId[id] = match; obsoletiRecuperati.add(match); }
+  });
+
+  const campiDalCsv = r => ({
+    ragioneSociale:    r.ragioneSociale,
+    referente:         r.referente,
+    contatto:          r.contatto,
+    email:             r.email,
+    provincia:         r.provincia,
+    comune:            r.comune,
+    vecchioConsulente: r.vecchioConsulente,
+    _provinciaMatch:   r._provinciaMatch,
+    _comuneMatch:      r._comuneMatch,
+    _key:              r._key
+  });
+  // Valori iniziali dal foglio, usati solo se il campo non è mai stato impostato nel portale
+  const valoriIniziali = (r, esistente) => {
+    const v = {};
+    ['consulente', 'dataAssegnazione', 'stato', 'faseCliente', 'ultimoContatto'].forEach(campo => {
+      if (esistente[campo] === undefined) v[campo] = r[campo];
+    });
+    if (esistente.clienteAttivo === undefined) v.clienteAttivo = r.clienteAttivo || false;
+    return v;
+  };
+
+  const scritture = [];      // { id, dati, merge }
+  const righeUnificate = [];
+  const idGiaScritti = new Set();
+  righeGrezze.forEach(r => {
+    const id = sanitizeDocId(r._key);
+    if (idGiaScritti.has(id)) return; // riga duplicata nel foglio: conta la prima
+    idGiaScritti.add(id);
+    const esistente = esistentiPerId[id];
+    const vecchioId = vecchioIdPerNuovoId[id];
+    if (esistente) {
+      const agg = Object.assign(campiDalCsv(r), valoriIniziali(r, esistente));
+      scritture.push({ id, dati: agg, merge: true });
+      righeUnificate.push(Object.assign({}, esistente, agg));
+    } else if (vecchioId) {
+      const vecchio = esistentiPerId[vecchioId];
+      const dati = Object.assign({}, vecchio, campiDalCsv(r), valoriIniziali(r, vecchio));
+      scritture.push({ id, dati, merge: false });
+      righeUnificate.push(dati);
+    } else {
+      scritture.push({ id, dati: r, merge: false });
+      righeUnificate.push(r);
+    }
+  });
+
+  const BATCH_SIZE = 400;
+
+  /* Prima si scrivono tutti i clienti del foglio: se qualcosa va storto qui, nulla è stato ancora cancellato */
+  for (let i = 0; i < scritture.length; i += BATCH_SIZE) {
     const batch = db.batch();
-    chunk.forEach(id => batch.delete(CF_CLIENTI().doc(id)));
-    await batch.commit();
-  }
-
-  /* Scrivi / aggiorna tutti i client del nuovo CSV */
-  for (let i = 0; i < righeUnificate.length; i += BATCH_SIZE) {
-    const chunk = righeUnificate.slice(i, i + BATCH_SIZE);
-    const batch = db.batch();
-    chunk.forEach(r => {
-      batch.set(CF_CLIENTI().doc(sanitizeDocId(r._key)), r);
+    scritture.slice(i, i + BATCH_SIZE).forEach(s => {
+      if (s.merge) batch.set(CF_CLIENTI().doc(s.id), s.dati, { merge: true });
+      else batch.set(CF_CLIENTI().doc(s.id), s.dati);
     });
     await batch.commit();
   }
 
-  contatti = righeUnificate;
+  /* Poi si tolgono i clienti non più presenti nel foglio */
+  const daArchiviare = obsoleti.filter(id => !obsoletiRecuperati.has(id) && haDatiDelPortale(esistentiPerId[id]));
+  const daCancellareSubito = obsoleti.filter(id => obsoletiRecuperati.has(id) || !haDatiDelPortale(esistentiPerId[id]));
+  const nonArchiviati = [];
+  const BATCH_ARCHIVIO = 200; // 2 operazioni per cliente (copia + cancellazione): resta sotto il limite di 500 di Firestore
+  for (let i = 0; i < daArchiviare.length; i += BATCH_ARCHIVIO) {
+    const chunk = daArchiviare.slice(i, i + BATCH_ARCHIVIO);
+    try {
+      const batch = db.batch();
+      chunk.forEach(id => {
+        batch.set(CF_CLIENTI_ARCHIVIO().doc(id), Object.assign({}, esistentiPerId[id], { archiviatoIl: oggiIso(), motivoArchivio: 'Non più presente nel foglio Google' }));
+        batch.delete(CF_CLIENTI().doc(id));
+      });
+      await batch.commit();
+    } catch(e) {
+      // Archivio non scrivibile: questi clienti restano nel database invece di perdere i loro esiti
+      console.error('[Clienti Fermi] Archiviazione non riuscita, clienti mantenuti:', e);
+      nonArchiviati.push(...chunk);
+    }
+  }
+  for (let i = 0; i < daCancellareSubito.length; i += BATCH_SIZE) {
+    const batch = db.batch();
+    daCancellareSubito.slice(i, i + BATCH_SIZE).forEach(id => batch.delete(CF_CLIENTI().doc(id)));
+    await batch.commit();
+  }
+
+  contatti = righeUnificate.concat(nonArchiviati.map(id => esistentiPerId[id]));
   const ora = new Date().toLocaleString('it-IT');
   cfState.ultimoAgg = ora;
 
   aggiornaStatsBar();
   await saveField('ultimoAgg', ora);
   impostaStatus(true, 'Ultimo aggiornamento: ' + ora + ' — ' + contatti.length + ' righe caricate');
-  showToast('Dati aggiornati: ' + contatti.length + ' clienti fermi');
+  const note = [];
+  if (obsoletiRecuperati.size) note.push(obsoletiRecuperati.size + ' con dati trasferiti (nome/provincia cambiati nel foglio)');
+  if (daArchiviare.length - nonArchiviati.length) note.push((daArchiviare.length - nonArchiviati.length) + ' tolti dal foglio e archiviati con i loro esiti');
+  if (nonArchiviati.length) note.push(nonArchiviati.length + ' tolti dal foglio ma mantenuti (avevano esiti)');
+  showToast('Dati aggiornati: ' + contatti.length + ' clienti fermi' + (note.length ? ' — ' + note.join(', ') : ''));
 }
 
 function gestisciFileSelezionato(event) {
@@ -5393,7 +5809,7 @@ async function esportaPartecipantiEvento(eventoId) {
   }
   const parts = bbcPartecipantiCache[eventoId] || [];
   if (!parts.length) { showToast('Nessun partecipante per questo evento.'); return; }
-  const header = ['Nome', 'Azienda', 'Telefono', 'Email', 'Tipo', 'Stato'];
+  const header = ['Nome', 'Azienda', 'Telefono', 'Email', 'Tipo', 'Iscritto da', 'Stato'];
   const righe = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).map(p => {
     let tel = '', mail = '';
     if (p.tipo === 'socio' && p.socioId) {
@@ -5403,7 +5819,7 @@ async function esportaPartecipantiEvento(eventoId) {
       const c = bbcContatti.find(x => x._key === p.contattoId);
       if (c) { tel = c.contatto || ''; mail = c.email || ''; }
     }
-    return [p.nome || '', p.azienda || '', tel, mail, p.tipo === 'contatto' ? 'Lead/Contatto' : 'Socio', p.stato || ''];
+    return [p.nome || '', p.azienda || '', tel, mail, p.tipo === 'contatto' ? 'Lead/Contatto' : 'Socio', p.iscrittoDa || '', p.stato || ''];
   });
   const slug = csvSlug((ev ? ev.nome : eventoId));
   const data = oggiIso().replace(/-/g, '');
@@ -5746,31 +6162,11 @@ async function aggiungiBbcContatto() {
     consulente = sessione ? sessione.nome : '';
   }
 
-  // Risolvi provincia e comune tramite helper geografico
-  const provFeature = provincia ? risolviProvincia(provincia) : null;
-  const comuneRisolto = comune ? risolviComune(comune, provincia) : null;
-  const _provinciaMatch = provFeature ? provFeature.properties.prov_name : (provincia || null);
-  const _comuneMatch = comuneRisolto ? comuneRisolto[0] : (comune || null);
-
-  const nuovoContatto = {
-    ragioneSociale,
-    referente,
-    contatto: contattoTel,
-    email,
-    provincia,
-    comune,
-    consulente,
-    eventoProvenienza: eventoId || '',
-    campagnaMarketing: campagnaId || '',
-    dataAggiunta: oggiIso(),
-    _provinciaMatch,
-    _comuneMatch
-  };
-
-  try {
-    const ref = await CF_BBC_CLIENTI().add(nuovoContatto);
-    nuovoContatto._key = ref.id;
-    bbcContatti.push(nuovoContatto);
+  const creato = await salvaNuovoContattoBbc({
+    ragioneSociale, referente, contatto: contattoTel, email, provincia, comune,
+    consulente, eventoProvenienza: eventoId, campagnaMarketing: campagnaId, origine: 'Database BBC'
+  });
+  if (creato) {
     // Svuota form
     ['bbcNomeAzienda','bbcReferente','bbcContatto','bbcEmail','bbcProvincia','bbcComune'].forEach(id => {
       const el = document.getElementById(id);
@@ -5785,9 +6181,58 @@ async function aggiungiBbcContatto() {
     aggiornaStatsBar();
     if (document.getElementById('page-database').classList.contains('active')) inizializzaPaginaDatabase();
     showToast('Contatto BBC aggiunto con successo.');
+  }
+}
+
+/* Crea un nuovo contatto nel Database BBC (usata sia dal Database BBC sia dalla pagina Lead del Marketing).
+   Avvisa se esiste già un contatto con la stessa email o lo stesso telefono. Restituisce il contatto creato, o null. */
+async function salvaNuovoContattoBbc(dati) {
+  const emailNorm = (dati.email || '').trim().toLowerCase();
+  const telNorm = (dati.contatto || '').replace(/\D/g, '');
+  const doppione = bbcContatti.find(c =>
+    (emailNorm && (c.email || '').trim().toLowerCase() === emailNorm) ||
+    (telNorm.length >= 6 && (c.contatto || '').replace(/\D/g, '') === telNorm));
+  if (doppione) {
+    const nomeDoppione = doppione.ragioneSociale || doppione.referente || '';
+    const consDoppione = doppione.consulente ? ' (assegnato a ' + doppione.consulente + ')' : ' (senza consulente)';
+    if (!confirm('Nel Database BBC esiste già "' + nomeDoppione + '"' + consDoppione + ' con la stessa email o lo stesso telefono.\n\nVuoi inserirlo comunque come nuovo contatto?')) return null;
+  }
+
+  // Risolvi provincia e comune tramite helper geografico
+  const provincia = dati.provincia || '';
+  const comune = dati.comune || '';
+  const provFeature = provincia ? risolviProvincia(provincia) : null;
+  const comuneRisolto = comune ? risolviComune(comune, provincia) : null;
+  const _provinciaMatch = provFeature ? provFeature.properties.prov_name : (provincia || null);
+  const _comuneMatch = comuneRisolto ? comuneRisolto[0] : (comune || null);
+
+  const nuovoContatto = {
+    ragioneSociale: dati.ragioneSociale || '',
+    referente: dati.referente || '',
+    contatto: dati.contatto || '',
+    email: dati.email || '',
+    provincia,
+    comune,
+    consulente: dati.consulente || '',
+    dataAssegnazione: dati.consulente ? oggiIso() : '',
+    eventoProvenienza: dati.eventoProvenienza || '',
+    campagnaMarketing: dati.campagnaMarketing || '',
+    origine: dati.origine || '',
+    inseritoDa: sessione ? (sessione.nome || sessione.email || '') : '',
+    dataAggiunta: oggiIso(),
+    _provinciaMatch,
+    _comuneMatch
+  };
+
+  try {
+    const ref = await CF_BBC_CLIENTI().add(nuovoContatto);
+    nuovoContatto._key = ref.id;
+    if (!bbcContatti.find(c => c._key === ref.id)) bbcContatti.push(nuovoContatto);
+    return nuovoContatto;
   } catch(e) {
     console.error('[BBC] Errore aggiunta contatto:', e);
     showToast('Errore aggiunta contatto BBC: ' + (e.message || e.code || 'errore sconosciuto'));
+    return null;
   }
 }
 
@@ -6066,14 +6511,21 @@ async function aggiornaCounsulenteSocioInline(socioId, nuovoConsulente) {
   const vecchioConsulente = socio.consulente;
   if (vecchioConsulente === nuovoConsulente) return;
   socio.consulente = nuovoConsulente;
+  const vecchiaDataAssegnazione = socio.dataAssegnazione;
+  socio.dataAssegnazione = nuovoConsulente ? oggiIso() : '';
   try {
-    await CF_BBC_SOCI().doc(socioId).update({ consulente: nuovoConsulente });
+    await CF_BBC_SOCI().doc(socioId).update({ consulente: nuovoConsulente, dataAssegnazione: socio.dataAssegnazione });
     showToast('Consulente aggiornato.');
+    // Aggiorna le altre viste che mostrano il consulente del socio
+    if (document.getElementById('page-database').classList.contains('active')) renderDatabase();
+    if (document.getElementById('page-cruscotto').classList.contains('active')) renderCruscotto();
   } catch(e) {
     socio.consulente = vecchioConsulente; // rollback in memoria
+    socio.dataAssegnazione = vecchiaDataAssegnazione;
     console.error('[BBC Soci] Errore aggiornamento consulente:', e);
     showToast('Errore aggiornamento consulente: ' + (e.message || e.code || 'errore sconosciuto'));
     renderBbcSoci();
+    if (document.getElementById('page-database').classList.contains('active')) renderDatabase();
   }
 }
 
@@ -6274,48 +6726,7 @@ function renderPartecipantiPanelHtml(eventoId) {
     .map(c => '<option value="' + escapeHtml(c._key) + '">' + escapeHtml(c.ragioneSociale || c.referente || '—') + (c.referente && c.ragioneSociale ? ' (' + escapeHtml(c.referente) + ')' : '') + '</option>')
     .join('');
 
-  /* Punto 1: tabella con tel/email, filtro rapido se > 10 partecipanti */
-  const partOrdinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-  const filtroHtml = parts.length > 10
-    ? '<input type="text" class="bbc-part-filtro" id="filtro-part-' + escapeHtml(eventoId) + '" placeholder="Filtra per nome, azienda o email..." oninput="filtraPartecipantiTabella(\'' + escapeJs(eventoId) + '\',this.value)">'
-    : '';
-  const listaHtml = parts.length
-    ? filtroHtml + '<table class="bbc-part-table" id="tbl-part-' + escapeHtml(eventoId) + '">'
-        + '<thead><tr><th>Nome</th><th>Azienda</th><th>Telefono</th><th>Email</th><th>Tipo</th><th>Stato</th>' + (puoModificare ? '<th></th>' : '') + '</tr></thead>'
-        + '<tbody>' + partOrdinati.map(p => {
-          let tel = '', mail = '';
-          if (p.tipo === 'socio' && p.socioId) {
-            const s = bbcSoci.find(x => x.id === p.socioId);
-            if (s) { tel = s.telefono || ''; mail = s.email || ''; }
-          } else if (p.tipo === 'contatto' && p.contattoId) {
-            const c = bbcContatti.find(x => x._key === p.contattoId);
-            if (c) { tel = c.contatto || ''; mail = c.email || ''; }
-          }
-          const badge = puoModificare
-            ? selectStatoPartecipante(eventoId, p.id, p.stato)
-            : badgeStatoPartecipante(p.stato);
-          const tipoBadge = (p.tipo === 'contatto')
-            ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
-            : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
-          const delBtn = puoModificare
-            ? '<td><button class="bbc-part-del" onclick="rimuoviPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(p.id) + '\')">✕</button></td>'
-            : '';
-          let accompTxt = '';
-          if (p.tipo === 'socio' && p.socioId) {
-            const sr = bbcSoci.find(x => x.id === p.socioId);
-            if (sr && Array.isArray(sr.accompagnatori) && sr.accompagnatori.length) accompTxt = '<br><span style="font-size:0.75em;color:var(--testo-muted);">+ ' + escapeHtml(sr.accompagnatori.join(', ')) + '</span>';
-          }
-          return '<tr data-nome="' + escapeHtml((p.nome || '') + ' ' + (p.azienda || '') + ' ' + mail).toLowerCase() + '">'
-            + '<td class="ragione-sociale">' + escapeHtml(p.nome || '—') + accompTxt + '</td>'
-            + '<td>' + escapeHtml(p.azienda || '—') + '</td>'
-            + '<td>' + (tel ? '<a href="tel:' + escapeHtml(tel) + '">' + escapeHtml(tel) + '</a>' : '—') + '</td>'
-            + '<td>' + (mail ? '<a href="mailto:' + escapeHtml(mail) + '">' + escapeHtml(mail) + '</a>' : '—') + '</td>'
-            + '<td>' + tipoBadge + '</td>'
-            + '<td>' + badge + '</td>'
-            + delBtn
-            + '</tr>';
-        }).join('') + '</tbody></table>'
-    : '<div class="bbc-partecipanti-empty">Nessun partecipante registrato per questo evento.</div>';
+  const listaHtml = renderTabellaPartecipantiHtml(eventoId, puoModificare);
 
   // Form di aggiunta (solo per chi può modificare)
   const addFormHtml = puoModificare
@@ -6352,6 +6763,76 @@ function renderPartecipantiPanelHtml(eventoId) {
     + addFormHtml
     + '<div class="bbc-partecipanti-list" id="lista-part-' + escapeHtml(eventoId) + '">' + listaHtml + '</div>'
     + '</div>';
+}
+
+/* Tabella partecipanti di un evento (con tel/email, filtro rapido se > 10 partecipanti)
+   + riepilogo di quante persone ha iscritto ciascun consulente */
+function renderTabellaPartecipantiHtml(eventoId, puoModificare) {
+  const parts = bbcPartecipantiCache[eventoId] || [];
+  if (!parts.length) return '<div class="bbc-partecipanti-empty">Nessun partecipante registrato per questo evento.</div>';
+
+  // Riepilogo iscrizioni per consulente (i partecipanti registrati prima di questa funzione non hanno l'informazione)
+  const perConsulente = {};
+  let senzaInfo = 0;
+  parts.forEach(p => {
+    if (p.iscrittoDa) perConsulente[p.iscrittoDa] = (perConsulente[p.iscrittoDa] || 0) + 1;
+    else senzaInfo++;
+  });
+  const riepilogo = Object.keys(perConsulente).sort((a, b) => perConsulente[b] - perConsulente[a] || a.localeCompare(b))
+    .map(n => '<span class="badge" style="background:var(--fucsia-badge-bg);color:var(--fucsia-dark);font-size:0.72rem;">' + escapeHtml(n) + ': <b>' + perConsulente[n] + '</b></span>')
+    .join(' ');
+  const riepilogoHtml = '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px;font-size:0.78rem;">'
+    + '<span style="font-weight:700;color:var(--testo-muted);">Iscritti per consulente:</span> '
+    + (riepilogo || '<span style="color:var(--testo-muted);">—</span>')
+    + (senzaInfo ? ' <span style="color:var(--testo-muted);font-style:italic;">(' + senzaInfo + ' iscritt' + (senzaInfo === 1 ? 'o' : 'i') + ' prima di questo aggiornamento, consulente non registrato)</span>' : '')
+    + '</div>';
+
+  const partOrdinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+  const filtroHtml = parts.length > 10
+    ? '<input type="text" class="bbc-part-filtro" id="filtro-part-' + escapeHtml(eventoId) + '" placeholder="Filtra per nome, azienda, email o consulente..." oninput="filtraPartecipantiTabella(\'' + escapeJs(eventoId) + '\',this.value)">'
+    : '';
+  const righe = partOrdinati.map(p => {
+    let tel = '', mail = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const s = bbcSoci.find(x => x.id === p.socioId);
+      if (s) { tel = s.telefono || ''; mail = s.email || ''; }
+    } else if (p.tipo === 'contatto' && p.contattoId) {
+      const c = bbcContatti.find(x => x._key === p.contattoId);
+      if (c) { tel = c.contatto || ''; mail = c.email || ''; }
+    }
+    const badge = puoModificare
+      ? selectStatoPartecipante(eventoId, p.id, p.stato)
+      : badgeStatoPartecipante(p.stato);
+    const tipoBadge = (p.tipo === 'contatto')
+      ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
+      : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
+    const delBtn = puoModificare
+      ? '<td><button class="bbc-part-del" onclick="rimuoviPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(p.id) + '\')">✕</button></td>'
+      : '';
+    let accompTxt = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const sr = bbcSoci.find(x => x.id === p.socioId);
+      if (sr && Array.isArray(sr.accompagnatori) && sr.accompagnatori.length) accompTxt = '<br><span style="font-size:0.75em;color:var(--testo-muted);">+ ' + escapeHtml(sr.accompagnatori.join(', ')) + '</span>';
+    }
+    const cellIscrittoDa = p.iscrittoDa
+      ? '<strong>' + escapeHtml(p.iscrittoDa) + '</strong>'
+      : '<span style="color:var(--testo-muted);font-style:italic;" title="Iscritto prima che il portale registrasse il consulente">n.d.</span>';
+    return '<tr data-nome="' + escapeHtml((p.nome || '') + ' ' + (p.azienda || '') + ' ' + mail + ' ' + (p.iscrittoDa || '')).toLowerCase() + '">'
+      + '<td class="ragione-sociale">' + escapeHtml(p.nome || '—') + accompTxt + '</td>'
+      + '<td>' + escapeHtml(p.azienda || '—') + '</td>'
+      + '<td>' + (tel ? '<a href="tel:' + escapeHtml(tel) + '">' + escapeHtml(tel) + '</a>' : '—') + '</td>'
+      + '<td>' + (mail ? '<a href="mailto:' + escapeHtml(mail) + '">' + escapeHtml(mail) + '</a>' : '—') + '</td>'
+      + '<td>' + tipoBadge + '</td>'
+      + '<td>' + cellIscrittoDa + '</td>'
+      + '<td>' + badge + '</td>'
+      + delBtn
+      + '</tr>';
+  }).join('');
+
+  return riepilogoHtml + filtroHtml
+    + '<table class="bbc-part-table" id="tbl-part-' + escapeHtml(eventoId) + '">'
+    + '<thead><tr><th>Nome</th><th>Azienda</th><th>Telefono</th><th>Email</th><th>Tipo</th><th>Iscritto da</th><th>Stato</th>' + (puoModificare ? '<th></th>' : '') + '</tr></thead>'
+    + '<tbody>' + righe + '</tbody></table>';
 }
 
 /* Aggiorna la visibilità dei wrapper socio/contatto nel form partecipanti */
@@ -6391,54 +6872,8 @@ function aggiornaListaPartecipantiDom(eventoId) {
   if (cntEl) cntEl.textContent = parts.length;
 
   if (!listaEl) return;
-  if (!parts.length) {
-    listaEl.innerHTML = '<div class="bbc-partecipanti-empty">Nessun partecipante registrato per questo evento.</div>';
-    return;
-  }
-
   const puoModificare = sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente');
-  const partOrdinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-  const filtroHtml = parts.length > 10
-    ? '<input type="text" class="bbc-part-filtro" id="filtro-part-' + escapeHtml(eventoId) + '" placeholder="Filtra per nome, azienda o email..." oninput="filtraPartecipantiTabella(\'' + escapeJs(eventoId) + '\',this.value)">'
-    : '';
-  const righe = partOrdinati.map(p => {
-    let tel = '', mail = '';
-    if (p.tipo === 'socio' && p.socioId) {
-      const s = bbcSoci.find(x => x.id === p.socioId);
-      if (s) { tel = s.telefono || ''; mail = s.email || ''; }
-    } else if (p.tipo === 'contatto' && p.contattoId) {
-      const c = bbcContatti.find(x => x._key === p.contattoId);
-      if (c) { tel = c.contatto || ''; mail = c.email || ''; }
-    }
-    const badge = puoModificare
-      ? selectStatoPartecipante(eventoId, p.id, p.stato)
-      : badgeStatoPartecipante(p.stato);
-    const tipoBadge = (p.tipo === 'contatto')
-      ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
-      : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
-    const delBtn = puoModificare
-      ? '<td><button class="bbc-part-del" onclick="rimuoviPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(p.id) + '\')">✕</button></td>'
-      : '';
-    let accompTxt = '';
-    if (p.tipo === 'socio' && p.socioId) {
-      const sr = bbcSoci.find(x => x.id === p.socioId);
-      if (sr && Array.isArray(sr.accompagnatori) && sr.accompagnatori.length) accompTxt = '<br><span style="font-size:0.75em;color:var(--testo-muted);">+ ' + escapeHtml(sr.accompagnatori.join(', ')) + '</span>';
-    }
-    return '<tr data-nome="' + escapeHtml((p.nome || '') + ' ' + (p.azienda || '') + ' ' + mail).toLowerCase() + '">'
-      + '<td class="ragione-sociale">' + escapeHtml(p.nome || '—') + accompTxt + '</td>'
-      + '<td>' + escapeHtml(p.azienda || '—') + '</td>'
-      + '<td>' + (tel ? '<a href="tel:' + escapeHtml(tel) + '">' + escapeHtml(tel) + '</a>' : '—') + '</td>'
-      + '<td>' + (mail ? '<a href="mailto:' + escapeHtml(mail) + '">' + escapeHtml(mail) + '</a>' : '—') + '</td>'
-      + '<td>' + tipoBadge + '</td>'
-      + '<td>' + badge + '</td>'
-      + delBtn
-      + '</tr>';
-  }).join('');
-
-  listaEl.innerHTML = filtroHtml
-    + '<table class="bbc-part-table" id="tbl-part-' + escapeHtml(eventoId) + '">'
-    + '<thead><tr><th>Nome</th><th>Azienda</th><th>Telefono</th><th>Email</th><th>Tipo</th><th>Stato</th>' + (puoModificare ? '<th></th>' : '') + '</tr></thead>'
-    + '<tbody>' + righe + '</tbody></table>';
+  listaEl.innerHTML = renderTabellaPartecipantiHtml(eventoId, puoModificare);
 
   /* Aggiorna anche lo storico nella pagina soci (se aperta) */
   if (document.getElementById('page-bbc-soci') && document.getElementById('page-bbc-soci').classList.contains('active')) {
@@ -6491,6 +6926,9 @@ async function aggiungiPartecipante(eventoId) {
     payload = { tipo: 'contatto', contattoId, stato, nome: contatto.ragioneSociale || contatto.referente || '', azienda: contatto.referente || '', ts: oggiIso() };
     selContatto.value = '';
   }
+
+  // Registra quale consulente (o Super Admin) ha iscritto questa persona all'evento
+  payload.iscrittoDa = sessione ? (sessione.nome || sessione.email || '') : '';
 
   try {
     const ref = await CF_BBC_EVENTO_PARTECIPANTI(eventoId).add(payload);
@@ -6688,11 +7126,14 @@ async function eliminaEsito(key, indice) {
   if (!confirm('Eliminare definitivamente questo esito? L\'operazione non è reversibile.')) return;
 
   const hid = esitiKeyToHtmlId(key);
+  const esitoDaTogliere = contatto.esiti[indice];
   const nuoviEsiti = contatto.esiti.slice();
   nuoviEsiti.splice(indice, 1);
 
   try {
-    await getCollezioneCorrente().doc(sanitizeDocId(key)).update({ esiti: nuoviEsiti });
+    /* arrayRemove toglie solo questo esito: non riscrive la lista partendo dalla copia in memoria,
+       quindi non cancella esiti aggiunti nel frattempo da un altro utente */
+    await getCollezioneCorrente().doc(sanitizeDocId(key)).update({ esiti: firebase.firestore.FieldValue.arrayRemove(esitoDaTogliere) });
     contatto.esiti = nuoviEsiti;
 
     const storiaEl = document.getElementById('esiti-storia-' + hid);
@@ -6902,11 +7343,13 @@ async function eliminaEsitoSocio(socioId, indice) {
   if (!confirm('Eliminare definitivamente questo esito? L\'operazione non è reversibile.')) return;
 
   const socioHid   = 'socio_' + socioId;
+  const esitoDaTogliere = socio.esiti[indice];
   const nuoviEsiti = socio.esiti.slice();
   nuoviEsiti.splice(indice, 1);
 
   try {
-    await CF_BBC_SOCI().doc(socioId).update({ esiti: nuoviEsiti });
+    // Toglie solo questo esito (vedi eliminaEsito): i Soci non hanno aggiornamento in tempo reale
+    await CF_BBC_SOCI().doc(socioId).update({ esiti: firebase.firestore.FieldValue.arrayRemove(esitoDaTogliere) });
     socio.esiti = nuoviEsiti;
 
     const storiaEl = document.getElementById('esiti-socio-storia-' + socioHid);
@@ -7381,6 +7824,11 @@ function _processaBbcChange(change) {
 function _refreshUiDopoChanges(sezione, haAddedOrRemoved) {
   aggiornaStatsBar();
 
+  // Pagina Lead del Marketing: mostra in tempo reale assegnazioni ed esiti dei lead lavorati dai consulenti
+  if (sezione === 'bbc' && document.getElementById('page-mkt-lead') && document.getElementById('page-mkt-lead').classList.contains('active')) {
+    renderLeadMkt();
+  }
+
   if (!haAddedOrRemoved) return; // solo modifiche: già gestite riga per riga
 
   // Re-render completo delle tabelle, solo se la sezione coincide con quella corrente
@@ -7514,27 +7962,45 @@ function mktKpiPerCampagna(campagna) {
   const abbonamenti = correlati.filter(c => (c.faseCliente || '') === 'Abbonamento');
   const fatturatoBackend = backend.reduce((s, c) => s + (parseFloat(c.valoreEuro) || 0), 0);
   const fatturatoAbb = abbonamenti.reduce((s, c) => s + (parseFloat(c.valoreEuro) || 0), 0);
+  const fatturatoContatti = fatturatoBackend + fatturatoAbb;
+  /* Economia della campagna per il ROI reale:
+     costo totale = spesa campagna + costi Front-End (eventi, materiali... per ottenere contatti o visibilità);
+     importo ottenuto = quello inserito a mano, se compilato, altrimenti la somma dai contatti BBC collegati. */
+  const spesa = parseFloat(campagna.spesa) || 0;
+  const frontEnd = parseFloat(campagna.costiFrontEnd) || 0;
+  const costoTotale = spesa + frontEnd;
+  const importoManuale = (campagna.importoOttenuto !== undefined && campagna.importoOttenuto !== null && campagna.importoOttenuto !== '')
+    ? (parseFloat(campagna.importoOttenuto) || 0) : null;
+  const fatturato = importoManuale !== null ? importoManuale : fatturatoContatti;
   return {
     backend: backend.length,
     abbonamenti: abbonamenti.length,
-    fatturato: fatturatoBackend + fatturatoAbb
+    fatturatoContatti,
+    importoManuale,
+    fatturato,
+    spesa,
+    frontEnd,
+    costoTotale,
+    roi: costoTotale > 0 ? ((fatturato - costoTotale) / costoTotale) * 100 : null
   };
 }
 
 /* KPI aggregati su un array di campagne (eventualmente filtrato) */
 function mktKpiTotali(campagne) {
-  let spesa = 0, lead = 0, fatturato = 0, backend = 0, abbonamenti = 0;
+  let spesa = 0, frontEnd = 0, lead = 0, fatturato = 0, backend = 0, abbonamenti = 0;
   campagne.forEach(c => {
-    spesa      += parseFloat(c.spesa)  || 0;
     lead       += parseInt(c.lead)     || 0;
     const kpi   = mktKpiPerCampagna(c);
+    spesa      += kpi.spesa;
+    frontEnd   += kpi.frontEnd;
     backend    += kpi.backend;
     abbonamenti += kpi.abbonamenti;
     fatturato  += kpi.fatturato;
   });
+  const costoTotale = spesa + frontEnd;
   const cpl = lead > 0 ? spesa / lead : null;
-  const roi = spesa > 0 ? ((fatturato - spesa) / spesa) * 100 : null;
-  return { spesa, lead, cpl, backend, abbonamenti, fatturato, roi };
+  const roi = costoTotale > 0 ? ((fatturato - costoTotale) / costoTotale) * 100 : null;
+  return { spesa, frontEnd, costoTotale, lead, cpl, backend, abbonamenti, fatturato, roi };
 }
 
 /* Popola i filtri Anno e Campagna della dashboard */
@@ -7578,6 +8044,8 @@ function renderDashboardMkt() {
 
   const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   _set('mktKpiSpesa',       mktFmtEur(kpi.spesa));
+  _set('mktKpiFrontEnd',    mktFmtEur(kpi.frontEnd));
+  _set('mktKpiCostoTotale', mktFmtEur(kpi.costoTotale));
   _set('mktKpiLead',        mktFmtNum(kpi.lead));
   _set('mktKpiCpl',         kpi.cpl != null ? mktFmtEur(kpi.cpl) : '—');
   _set('mktKpiBackend',     mktFmtNum(kpi.backend));
@@ -7630,12 +8098,12 @@ function renderGraficiMkt(campagne) {
       labels,
       datasets: [
         {
-          label: 'Spesa',
-          data: sorted.map(c => parseFloat(c.spesa) || 0),
+          label: 'Costo totale',
+          data: kpiArr.map(k => k.costoTotale),
           backgroundColor: 'rgba(192,57,43,0.7)', borderRadius: 4
         },
         {
-          label: 'Fatturato',
+          label: 'Importo ottenuto',
           data: kpiArr.map(k => k.fatturato),
           backgroundColor: 'rgba(179,70,141,0.75)', borderRadius: 4
         }
@@ -7645,17 +8113,13 @@ function renderGraficiMkt(campagne) {
   });
 
   // 2. ROI
-  const roiData = sorted.map((c, i) => {
-    const spesa = parseFloat(c.spesa) || 0;
-    if (!spesa) return null;
-    return ((kpiArr[i].fatturato - spesa) / spesa) * 100;
-  });
+  const roiData = kpiArr.map(k => k.roi);
   crea('mktChartRoi', {
     type: 'bar',
     data: {
       labels,
       datasets: [{
-        label: 'ROI %',
+        label: 'ROI reale %',
         data: roiData,
         backgroundColor: roiData.map(v => {
           if (v == null)   return 'rgba(150,150,150,0.4)';
@@ -7723,36 +8187,38 @@ function renderTabellaCampagneMkt() {
     .slice().sort((a, b) => (b.dataInizio || '').localeCompare(a.dataInizio || ''));
 
   if (!sorted.length) {
-    tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;color:var(--testo-muted);padding:30px;">Nessuna campagna registrata. Clicca "+ Nuova campagna" per iniziare.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:var(--testo-muted);padding:30px;">Nessuna campagna registrata. Clicca "+ Nuova campagna" per iniziare.</td></tr>';
     return;
   }
 
   tbody.innerHTML = sorted.map(c => {
-    const spesa  = parseFloat(c.spesa)  || 0;
+    const kpi    = mktKpiPerCampagna(c);
+    const spesa  = kpi.spesa;
     const lead   = parseInt(c.lead)     || 0;
     const cpl    = lead > 0 ? spesa / lead : null;
-    const kpi    = mktKpiPerCampagna(c);
-    const roi    = spesa > 0 ? ((kpi.fatturato - spesa) / spesa) * 100 : null;
+    const roi    = kpi.roi;
     const roiClass = roi == null ? '' : roi >= 100 ? 'style="color:var(--verde-scuro,#2f9e63);font-weight:800;"'
                     : roi >= 0  ? 'style="color:var(--arancio);font-weight:800;"'
                     : 'style="color:var(--rosso);font-weight:800;"';
     const badgeClass = c.tipo === 'Awareness' ? 'mkt-badge-awareness' : 'mkt-badge-leadgen';
     const canEdit = puoModificareCampagneMkt();
     return `<tr>
+      <td>${canEdit ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;" title="Modifica campagna" onclick='apriModalModificaMkt(${JSON.stringify(c.id || '')})'>✏️</button>` : ''}</td>
       <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
       <td><span class="badge ${badgeClass}">${escapeHtml(c.tipo || 'Lead Gen')}</span></td>
       <td style="white-space:nowrap;">${mktFmtData(c.dataInizio)} – ${mktFmtData(c.dataFine)}</td>
       <td>${mktFmtEur(spesa)}</td>
+      <td>${mktFmtEur(kpi.frontEnd)}</td>
+      <td><strong>${mktFmtEur(kpi.costoTotale)}</strong></td>
+      <td title="${kpi.importoManuale !== null ? 'Importo inserito a mano nella campagna' : 'Somma dai contatti BBC collegati (nessun importo inserito a mano)'}">${mktFmtEur(kpi.fatturato)}${kpi.importoManuale !== null ? '' : ' <span style="font-size:0.7rem;color:var(--testo-muted);">(auto)</span>'}</td>
+      <td ${roiClass}>${roi != null ? mktFmtPct(roi) : '—'}</td>
       <td>${mktFmtNum(lead)}</td>
       <td>${cpl != null ? mktFmtEur(cpl) : '—'}</td>
+      <td>${mktFmtNum(kpi.backend)}</td>
+      <td>${mktFmtNum(kpi.abbonamenti)}</td>
       <td>${mktFmtNum(c.impression)}</td>
       <td>${mktFmtNum(c.click)}</td>
       <td>${c.ctr != null && c.ctr !== '' ? mktFmtPct(c.ctr) : '—'}</td>
-      <td>${mktFmtNum(kpi.backend)}</td>
-      <td>${mktFmtNum(kpi.abbonamenti)}</td>
-      <td>${mktFmtEur(kpi.fatturato)}</td>
-      <td ${roiClass}>${roi != null ? mktFmtPct(roi) : '—'}</td>
-      <td>${canEdit ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;" onclick='apriModalModificaMkt(${JSON.stringify(c.id || '')})'>✏️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -7773,6 +8239,9 @@ function apriModalNuovaCampagnaMkt() {
   document.getElementById('mktCClick').value = '';
   document.getElementById('mktCCopertura').value = '';
   document.getElementById('mktCCtr').value = '';
+  document.getElementById('mktCFrontEnd').value = '';
+  document.getElementById('mktCImporto').value = '';
+  aggiornaAnteprimaRoiMkt();
   document.getElementById('mktSecBackendInfo').style.display = 'none';
   document.getElementById('mktBtnEliminaCampagna').style.display = 'none';
   document.getElementById('mktModalCampagna').classList.add('show');
@@ -7796,20 +8265,43 @@ function apriModalModificaMkt(id) {
   document.getElementById('mktCClick').value = c.click != null ? c.click : '';
   document.getElementById('mktCCopertura').value = c.copertura != null ? c.copertura : '';
   document.getElementById('mktCCtr').value = c.ctr != null ? c.ctr : '';
+  document.getElementById('mktCFrontEnd').value = c.costiFrontEnd != null && c.costiFrontEnd !== 0 ? c.costiFrontEnd : '';
+  document.getElementById('mktCImporto').value = c.importoOttenuto != null ? c.importoOttenuto : '';
 
   // Mostra info backend live
   const kpi = mktKpiPerCampagna(c);
-  const spesa = parseFloat(c.spesa) || 0;
-  const roi = spesa > 0 ? ((kpi.fatturato - spesa) / spesa) * 100 : null;
+  const nLeadInseriti = bbcContatti.filter(x => (x.campagnaMarketing || '') === id).length;
   document.getElementById('mktBackendInfoGrid').innerHTML = `
+    <div><div class="mkt-info-kpi-val">${mktFmtNum(nLeadInseriti)}</div><div class="mkt-info-kpi-lbl">Lead nel Database BBC</div></div>
     <div><div class="mkt-info-kpi-val">${mktFmtNum(kpi.backend)}</div><div class="mkt-info-kpi-lbl">Back-End</div></div>
     <div><div class="mkt-info-kpi-val">${mktFmtNum(kpi.abbonamenti)}</div><div class="mkt-info-kpi-lbl">Abbonamenti</div></div>
-    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.fatturato)}</div><div class="mkt-info-kpi-lbl">Fatturato</div></div>
-    <div><div class="mkt-info-kpi-val">${roi != null ? mktFmtPct(roi) : '—'}</div><div class="mkt-info-kpi-lbl">ROI</div></div>
+    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.fatturatoContatti)}</div><div class="mkt-info-kpi-lbl">Valore € dai contatti</div></div>
   `;
+  aggiornaAnteprimaRoiMkt();
   document.getElementById('mktSecBackendInfo').style.display = '';
   document.getElementById('mktBtnEliminaCampagna').style.display = '';
   document.getElementById('mktModalCampagna').classList.add('show');
+}
+
+/* Modal — anteprima live di costo totale, importo e ROI reale mentre si compilano i campi */
+function aggiornaAnteprimaRoiMkt() {
+  const box = document.getElementById('mktAnteprimaRoi');
+  if (!box) return;
+  const campagnaEsistente = _mktEditingId ? campagneMarketingCache.find(x => x.id === _mktEditingId) : null;
+  const bozza = Object.assign({}, campagnaEsistente || {}, {
+    id: _mktEditingId || '__nuova__',
+    spesa: document.getElementById('mktCSpesa').value,
+    costiFrontEnd: document.getElementById('mktCFrontEnd').value,
+    importoOttenuto: document.getElementById('mktCImporto').value.trim()
+  });
+  const kpi = mktKpiPerCampagna(bozza);
+  const colore = kpi.roi == null ? '' : kpi.roi >= 100 ? 'color:#2f9e63;' : kpi.roi >= 0 ? 'color:var(--arancio);' : 'color:var(--rosso);';
+  box.innerHTML = `
+    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.costoTotale)}</div><div class="mkt-info-kpi-lbl">Costo totale</div></div>
+    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.fatturato)}</div><div class="mkt-info-kpi-lbl">Importo ottenuto${kpi.importoManuale === null ? ' (dai contatti)' : ''}</div></div>
+    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.fatturato - kpi.costoTotale)}</div><div class="mkt-info-kpi-lbl">Utile netto</div></div>
+    <div><div class="mkt-info-kpi-val" style="${colore}">${kpi.roi != null ? mktFmtPct(kpi.roi) : '—'}</div><div class="mkt-info-kpi-lbl">ROI reale</div></div>
+  `;
 }
 
 /* Modal — chiudi */
@@ -7835,6 +8327,10 @@ async function salvaCampagnaMkt() {
     click:       parseInt(document.getElementById('mktCClick').value)        || 0,
     copertura:   parseInt(document.getElementById('mktCCopertura').value)    || 0,
     ctr:         parseFloat(document.getElementById('mktCCtr').value)        || 0,
+    costiFrontEnd: parseFloat(document.getElementById('mktCFrontEnd').value) || 0,
+    // Vuoto = non inserito: il ROI usa la somma dei Valori € dei contatti BBC collegati
+    importoOttenuto: document.getElementById('mktCImporto').value.trim() === ''
+      ? '' : (parseFloat(document.getElementById('mktCImporto').value) || 0),
   };
 
   try {
@@ -7879,6 +8375,161 @@ async function eliminaCampagnaMkt() {
   } catch(e) {
     console.error('[Marketing] Errore eliminazione campagna:', e);
     showToast('Errore durante l\'eliminazione. Riprova.');
+  }
+}
+
+/* ===================== MARKETING — LEAD =====================
+   I lead inseriti qui vengono scritti nel Database BBC (bbc-clienti), assegnati a un consulente
+   e lavorati dal consulente esattamente come i Clienti Fermi (Esito, Fase, Ultimo contatto, Esiti). */
+
+/* Lead mostrati nella pagina: quelli inseriti dal Marketing o collegati a una campagna */
+function getLeadMarketing() {
+  return bbcContatti.filter(c => c.origine === 'Marketing' || c.campagnaMarketing);
+}
+
+function inizializzaPaginaLeadMkt() {
+  const consulenti = nomiConsulenti();
+  const opzCampagne = campagneMarketingCache
+    .map(c => '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.nome || c.id) + '</option>').join('');
+
+  const selCamp = document.getElementById('mktLeadCampagna');
+  if (selCamp) {
+    const v = selCamp.value;
+    selCamp.innerHTML = '<option value="">— Nessuna campagna —</option>' + opzCampagne;
+    selCamp.value = v;
+  }
+  const selCons = document.getElementById('mktLeadConsulente');
+  if (selCons) {
+    const v = selCons.value;
+    selCons.innerHTML = '<option value="">— Da assegnare —</option>'
+      + consulenti.map(n => '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>').join('');
+    selCons.value = consulenti.includes(v) ? v : '';
+  }
+  const filCamp = document.getElementById('mktLeadFiltroCampagna');
+  if (filCamp) {
+    const v = filCamp.value;
+    filCamp.innerHTML = '<option value="">Tutte</option>' + opzCampagne;
+    filCamp.value = v;
+  }
+  const filCons = document.getElementById('mktLeadFiltroConsulente');
+  if (filCons) {
+    const v = filCons.value;
+    filCons.innerHTML = '<option value="">Tutti</option><option value="__nessuno__">Senza consulente</option>'
+      + consulenti.map(n => '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>').join('');
+    filCons.value = v;
+  }
+  renderLeadMkt();
+}
+
+function renderLeadMkt() {
+  const tbody = document.getElementById('mktLeadBody');
+  const empty = document.getElementById('mktLeadEmpty');
+  if (!tbody) return;
+
+  const filtroCamp = (document.getElementById('mktLeadFiltroCampagna') || {}).value || '';
+  const filtroCons = (document.getElementById('mktLeadFiltroConsulente') || {}).value || '';
+  const filtroTesto = normalizza((document.getElementById('mktLeadFiltroTesto') || {}).value || '');
+
+  const tutti = getLeadMarketing();
+  let lista = tutti.slice();
+  if (filtroCamp) lista = lista.filter(c => c.campagnaMarketing === filtroCamp);
+  if (filtroCons === '__nessuno__') lista = lista.filter(c => !c.consulente);
+  else if (filtroCons) lista = lista.filter(c => c.consulente === filtroCons);
+  if (filtroTesto) lista = lista.filter(c =>
+    normalizza(c.ragioneSociale).includes(filtroTesto) || normalizza(c.referente).includes(filtroTesto) || normalizza(c.email).includes(filtroTesto));
+  lista.sort((a, b) => (b.dataAggiunta || '').localeCompare(a.dataAggiunta || ''));
+
+  const senzaCons = tutti.filter(c => !c.consulente).length;
+  const sott = document.getElementById('mktLeadSottotitolo');
+  if (sott) sott.textContent = tutti.length + ' lead nel Database BBC' + (senzaCons ? ' · ' + senzaCons + ' ancora da assegnare' : ' · tutti assegnati');
+
+  if (!lista.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const consulenti = nomiConsulenti();
+  const puoAssegnare = puoAssegnareConsulente();
+  tbody.innerHTML = lista.map(c => {
+    const camp = campagneMarketingCache.find(x => x.id === c.campagnaMarketing);
+    let cellCons;
+    if (puoAssegnare) {
+      const opz = ['<option value="">— Da assegnare —</option>']
+        .concat(consulenti.map(n => '<option value="' + escapeHtml(n) + '"' + (c.consulente === n ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'));
+      if (c.consulente && !consulenti.includes(c.consulente)) {
+        opz.push('<option value="' + escapeHtml(c.consulente) + '" selected>' + escapeHtml(c.consulente) + '</option>');
+      }
+      cellCons = '<select class="td-select" onchange="aggiornaConsulenteLeadMkt(\'' + escapeJs(c._key) + '\',this.value)">' + opz.join('') + '</select>';
+    } else {
+      cellCons = escapeHtml(c.consulente) || '<span style="color:var(--testo-muted);">Da assegnare</span>';
+    }
+    const nEsiti = Array.isArray(c.esiti) ? c.esiti.length : 0;
+    return '<tr>'
+      + '<td style="white-space:nowrap;">' + (escapeHtml(formattaDataItaliana(c.dataAggiunta)) || '—') + '</td>'
+      + '<td class="ragione-sociale">' + escapeHtml(c.ragioneSociale || '—') + '</td>'
+      + '<td>' + escapeHtml(c.referente || '—') + '</td>'
+      + '<td>' + (c.contatto ? '<a href="tel:' + escapeHtml(c.contatto) + '">' + escapeHtml(c.contatto) + '</a>' : '—') + '</td>'
+      + '<td>' + (c.email ? '<a href="mailto:' + escapeHtml(c.email) + '">' + escapeHtml(c.email) + '</a>' : '—') + '</td>'
+      + '<td>' + (camp ? escapeHtml(camp.nome || camp.id) : '—') + '</td>'
+      + '<td>' + cellCons + '</td>'
+      + '<td>' + (escapeHtml(c.stato) || '—') + '</td>'
+      + '<td>' + (escapeHtml(c.faseCliente) || '—') + '</td>'
+      + '<td>' + (nEsiti ? nEsiti : '<span style="color:var(--testo-muted);">0</span>') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+async function aggiungiLeadMkt() {
+  if (!puoAssegnareConsulente()) return;
+  const val = id => ((document.getElementById(id) || {}).value || '').trim();
+  const ragioneSociale = val('mktLeadNomeAzienda');
+  const referente = val('mktLeadReferente');
+  if (!ragioneSociale && !referente) { showToast('Inserisci almeno la ragione sociale o il nome del referente.'); return; }
+
+  const creato = await salvaNuovoContattoBbc({
+    ragioneSociale: ragioneSociale || referente,
+    referente,
+    contatto: val('mktLeadTelefono'),
+    email: val('mktLeadEmail'),
+    provincia: val('mktLeadProvincia'),
+    comune: val('mktLeadComune'),
+    campagnaMarketing: val('mktLeadCampagna'),
+    consulente: val('mktLeadConsulente'),
+    origine: 'Marketing'
+  });
+  if (!creato) return;
+
+  // Svuota solo i dati anagrafici: campagna e consulente restano selezionati per inserire più lead di fila
+  ['mktLeadNomeAzienda','mktLeadReferente','mktLeadTelefono','mktLeadEmail','mktLeadProvincia','mktLeadComune'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  renderLeadMkt();
+  showToast(creato.consulente ? 'Lead inserito nel Database BBC e assegnato a ' + creato.consulente + '.' : 'Lead inserito nel Database BBC (da assegnare).');
+}
+
+/* Cambia il consulente di un lead dalla pagina Lead del Marketing (scrive su bbc-clienti) */
+async function aggiornaConsulenteLeadMkt(key, nuovoConsulente) {
+  if (!puoAssegnareConsulente()) return;
+  const lead = bbcContatti.find(c => c._key === key);
+  if (!lead) return;
+  const vecchio = lead.consulente || '';
+  if (vecchio === nuovoConsulente) return;
+  const aggiornamento = {
+    consulente: nuovoConsulente,
+    dataAssegnazione: nuovoConsulente ? oggiIso() : ''
+  };
+  try {
+    await CF_BBC_CLIENTI().doc(sanitizeDocId(key)).update(aggiornamento);
+    Object.assign(lead, aggiornamento);
+    renderLeadMkt();
+    showToast(nuovoConsulente ? 'Lead assegnato a ' + nuovoConsulente + '.' : 'Consulente rimosso dal lead.');
+  } catch(e) {
+    console.error('[Marketing Lead] Errore assegnazione consulente:', e);
+    showToast('Errore di salvataggio. Riprova o ricarica la pagina.');
+    renderLeadMkt();
   }
 }
 
