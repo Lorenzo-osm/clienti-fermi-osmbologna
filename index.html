@@ -616,9 +616,9 @@
     margin-bottom: 40px; line-height: 1.6;
   }
   .home-cards {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 22px;
   }
-  @media (max-width: 600px) { .home-cards { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .home-cards { grid-template-columns: 1fr; } }
   .home-card {
     background: #fff; border: 2px solid var(--card-border); border-radius: 22px;
     padding: 36px 28px; text-align: center; cursor: pointer; transition: all 0.25s;
@@ -1047,6 +1047,107 @@
     border-bottom: 1px solid var(--fucsia-border); font-size: 0.82rem;
   }
   .bbc-socio-storico-item:last-child { border-bottom: none; }
+
+  /* ===== CHART TITLE (usata nella sezione Marketing) ===== */
+  .chart-title { font-size: 0.85rem; font-weight: 800; color: var(--testo); margin-bottom: 14px; letter-spacing: 0.01em; }
+
+  /* ===== KPI POSITIVE (ROI buono) ===== */
+  .kpi-card.kpi-positive .kpi-value { background: linear-gradient(135deg, var(--verde), #237a4b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ===== BTN DANGER ===== */
+  .btn-danger { background: var(--rosso); color: #fff; }
+  .btn-danger:hover { background: #a52f22; }
+
+  /* ===== MARKETING BBC — HOME CARD ===== */
+  .home-card.home-card-mkt { border-color: rgba(58,111,179,0.2); }
+  .home-card.home-card-mkt:hover { border-color: var(--blu); box-shadow: 0 14px 44px rgba(58,111,179,0.18); }
+  .home-card-mkt .home-card-badge { background: var(--blu-bg); color: var(--blu); border-color: rgba(58,111,179,0.3); }
+
+  /* ===== MARKETING BBC — KPI WARN ===== */
+  .kpi-card.kpi-warn .kpi-value { background: linear-gradient(135deg, var(--arancio), #b45309); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ===== MARKETING BBC — GRAFICI ===== */
+  .mkt-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media(max-width:860px){ .mkt-charts-grid { grid-template-columns: 1fr; } }
+  .mkt-chart-canvas-wrap { position: relative; height: 280px; }
+
+  /* ===== MARKETING BBC — BADGE CAMPAGNA ===== */
+  .mkt-badge-awareness { background: #f3e8ff; color: #7c3aed; }
+  .mkt-badge-leadgen { background: var(--fucsia-badge-bg); color: var(--fucsia-dark); }
+
+  /* ===== MARKETING BBC — MODAL CAMPAGNA ===== */
+  .mkt-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 2000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .mkt-modal-overlay.show { display: flex; }
+  .mkt-modal-box {
+    background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 700px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: mktModalIn 0.22s ease;
+  }
+  @keyframes mktModalIn { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
+  .mkt-modal-title { font-size: 1.2rem; font-weight: 800; color: var(--testo); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
+  .mkt-modal-close {
+    margin-left: auto; background: none; border: 1px solid var(--card-border); border-radius: 7px;
+    cursor: pointer; padding: 5px 10px; font-size: 0.85rem; color: var(--testo-muted); transition: all 0.15s;
+  }
+  .mkt-modal-close:hover { background: var(--rosso-bg); border-color: var(--rosso); color: var(--rosso); }
+
+  /* ===== MARKETING BBC — FORM SEZIONI MODAL ===== */
+  .mkt-form-section { border-top: 1px solid var(--card-border); padding-top: 18px; margin-top: 10px; }
+  .mkt-form-section:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .mkt-form-section-title {
+    font-size: 0.7rem; font-weight: 800; color: var(--fucsia-dark);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mkt-form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--fucsia-border); opacity: 0.6; }
+  .mkt-info-kpi-grid {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border); border-radius: 10px;
+    padding: 14px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px;
+  }
+  .mkt-info-kpi-val { font-size: 1.1rem; font-weight: 800; color: var(--fucsia-dark); }
+  .mkt-info-kpi-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--testo-muted); margin-top: 2px; }
+
+  .mkt-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  .mkt-field-full { grid-column: 1 / -1; }
+  .mkt-form-field { display: flex; flex-direction: column; gap: 5px; }
+  .mkt-form-label { font-size: 0.75rem; font-weight: 700; color: var(--testo); letter-spacing: 0.04em; text-transform: uppercase; }
+  .mkt-form-input, .mkt-form-select, .mkt-form-textarea {
+    background: #fff; border: 1px solid var(--card-border); color: var(--testo);
+    padding: 10px 13px; border-radius: 8px; font-size: 0.85rem; outline: none;
+    font-family: inherit; transition: border-color 0.18s;
+  }
+  .mkt-form-input:focus, .mkt-form-select:focus, .mkt-form-textarea:focus {
+    border-color: var(--fucsia); box-shadow: 0 0 0 3px rgba(179,70,141,0.1);
+  }
+  .mkt-form-textarea { resize: vertical; min-height: 80px; }
+  .mkt-form-hint { font-size: 0.73rem; color: var(--testo-muted); margin-top: 4px; line-height: 1.5; }
+
+  /* ===== MARKETING BBC — TUTORIAL ESTESO ===== */
+  .tutorial-flusso {
+    background: var(--fucsia-light); border: 1px solid var(--fucsia-border); border-radius: 12px;
+    padding: 14px 18px; margin-top: 10px; font-size: 0.84rem; color: var(--testo); line-height: 1.7;
+  }
+  .tutorial-flusso strong { color: var(--fucsia-dark); }
+  .tutorial-flusso ol { padding-left: 18px; margin-top: 6px; }
+  .tutorial-flusso li { margin-bottom: 5px; }
+  .tutorial-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+  .tutorial-kpi-item {
+    background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 12px 14px; font-size: 0.83rem; color: var(--testo); line-height: 1.55;
+  }
+  .tutorial-kpi-label { font-weight: 800; color: var(--fucsia-dark); margin-bottom: 3px; }
+  .tutorial-warning {
+    display: flex; gap: 12px; align-items: flex-start; background: #fff7ed;
+    border: 1px solid rgba(201,122,30,0.3); border-radius: 14px; padding: 16px 20px; margin-top: 10px;
+  }
+  .tutorial-warning-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .tutorial-warning-text { font-size: 0.84rem; color: #7c4a0a; line-height: 1.65; }
+  .tutorial-step-text ul { padding-left: 18px; margin-top: 6px; }
+  .tutorial-step-text li { margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -1071,6 +1172,10 @@
   <button class="nav-btn nav-bbc-only" data-nav="riassunto" onclick="showPage('riassunto')" style="display:none;">Riassunto BBC</button>
   <button class="nav-btn nav-bbc-only" data-nav="bbc-eventi" onclick="showPage('bbc-eventi')" id="navBtnBbcEventi" style="display:none;">Eventi BBC</button>
   <button class="nav-btn nav-bbc-only" data-nav="bbc-soci" onclick="showPage('bbc-soci')" id="navBtnBbcSoci" style="display:none;">Soci BBC</button>
+  <!-- Bottoni sezione Marketing -->
+  <button class="nav-btn nav-mkt-only" data-nav="mkt-dashboard" onclick="showPage('mkt-dashboard')" style="display:none;">Dashboard</button>
+  <button class="nav-btn nav-mkt-only" data-nav="mkt-campagne" onclick="showPage('mkt-campagne')" style="display:none;">Campagne</button>
+  <button class="nav-btn nav-mkt-only" data-nav="mkt-tutorial" onclick="showPage('mkt-tutorial')" style="display:none;">Tutorial</button>
   <!-- Sempre visibili -->
   <div class="nav-section-sep"></div>
   <button class="nav-cambio-sezione" onclick="showPage('home')">&#8644; Cambia sezione</button>
@@ -1097,6 +1202,12 @@
           <div class="home-card-title">Bologna Business Club</div>
           <div class="home-card-desc">Il database dei contatti BBC. Aggiungi contatti direttamente, collegali agli eventi e gestisci il follow-up.</div>
           <div class="home-card-badge">Bologna Business Club</div>
+        </div>
+        <div class="home-card home-card-mkt" id="homeCardMarketing" onclick="selezionaSezione('marketing')" style="display:none;">
+          <span class="home-card-icon">📣</span>
+          <div class="home-card-title">Marketing BBC</div>
+          <div class="home-card-desc">Dashboard campagne, KPI (Spesa, Lead, CPL, Back-End, Abbonamenti, Fatturato, ROI) e gestione campagne marketing.</div>
+          <div class="home-card-badge">Marketing</div>
         </div>
       </div>
     </div>
@@ -1154,6 +1265,220 @@
       <div class="tutorial-tip-icon">💡</div>
       <div class="tutorial-tip-text">
         <b>Ricorda:</b> i dati BBC sono completamente separati dal database Clienti Fermi. Puoi passare dall'una all'altra sezione in qualsiasi momento usando il pulsante "Cambia sezione" in alto.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA MARKETING — DASHBOARD ===== -->
+<div class="page" id="page-mkt-dashboard">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Dashboard</span> — Marketing BBC</div>
+        <div class="section-subtitle">KPI aggregati su tutte le campagne attive</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select class="filter-select" id="mktFiltroAnno" onchange="renderDashboardMkt()" style="min-width:100px;">
+          <option value="">Tutti gli anni</option>
+        </select>
+        <select class="filter-select" id="mktFiltroCampagna" onchange="renderDashboardMkt()" style="min-width:180px;">
+          <option value="">Tutte le campagne</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid" id="mktKpiGrid">
+      <div class="kpi-card">
+        <div class="kpi-label">Spesa Totale</div>
+        <div class="kpi-value" id="mktKpiSpesa">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Lead Totali</div>
+        <div class="kpi-value" id="mktKpiLead">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">CPL Medio</div>
+        <div class="kpi-value" id="mktKpiCpl">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Back-End</div>
+        <div class="kpi-value" id="mktKpiBackend">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Abbonamenti</div>
+        <div class="kpi-value" id="mktKpiAbbonamento">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Fatturato</div>
+        <div class="kpi-value" id="mktKpiFatturato">—</div>
+      </div>
+      <div class="kpi-card" id="mktKpiRoiCard">
+        <div class="kpi-label">ROI</div>
+        <div class="kpi-value" id="mktKpiRoi">—</div>
+      </div>
+    </div>
+
+    <!-- Grafici -->
+    <div class="mkt-charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Spesa vs Fatturato per campagna</div>
+        <div class="mkt-chart-canvas-wrap"><canvas id="mktChartSpesaFatturato"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ROI per campagna</div>
+        <div class="mkt-chart-canvas-wrap"><canvas id="mktChartRoi"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">CPL per campagna</div>
+        <div class="mkt-chart-canvas-wrap"><canvas id="mktChartCpl"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Funnel di conversione</div>
+        <div class="mkt-chart-canvas-wrap"><canvas id="mktChartFunnel"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA MARKETING — CAMPAGNE ===== -->
+<div class="page" id="page-mkt-campagne">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Campagne</span> — Marketing BBC</div>
+        <div class="section-subtitle">Registro completo di tutte le campagne marketing</div>
+      </div>
+      <button class="btn btn-primary" id="mktBtnNuovaCampagna" onclick="apriModalNuovaCampagnaMkt()" style="display:none;">+ Nuova campagna</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table style="min-width:1100px;">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Periodo</th>
+              <th>Spesa</th>
+              <th>Lead</th>
+              <th>CPL</th>
+              <th>Impression</th>
+              <th>Click</th>
+              <th>CTR</th>
+              <th>Back-End</th>
+              <th>Abb.</th>
+              <th>Fatturato</th>
+              <th>ROI</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="mktTabellaBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGINA MARKETING — TUTORIAL ===== -->
+<div class="page" id="page-mkt-tutorial">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><span>Tutorial</span> — Marketing BBC</div>
+        <div class="section-subtitle">Come usare la sezione Marketing del portale</div>
+      </div>
+    </div>
+    <div class="card tutorial-card">
+
+      <div class="tutorial-intro">
+        Questa sezione ti permette di registrare e analizzare le campagne marketing del Bologna Business Club. Per ogni campagna puoi tracciare la spesa, i lead generati, il fatturato ottenuto e calcolare il ROI.
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">1</div>
+        <div>
+          <div class="tutorial-step-title">Dashboard — I 7 KPI fondamentali</div>
+          <div class="tutorial-step-text">
+            La dashboard mostra i dati aggregati di tutte le campagne (o di una sola, usando i filtri in alto).
+            <div class="tutorial-kpi-grid">
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💶 Spesa</div>Budget investito in advertising e produzione contenuti.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">👤 Lead</div>Numero di potenziali clienti acquisiti dalla campagna.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">📉 CPL</div>Costo Per Lead = Spesa ÷ Lead. Più basso è, meglio è.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🏆 Back-End</div>Contatti BBC con <em>Fase Cliente = Back-End</em> collegati a questa campagna.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">🔁 Abbonamenti</div>Contatti BBC con <em>Fase Cliente = Abbonamento</em> collegati a questa campagna.</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">💰 Fatturato</div>Somma dei valori in euro dei contatti collegati (Back-End + Abbonamenti).</div>
+              <div class="tutorial-kpi-item"><div class="tutorial-kpi-label">📈 ROI</div>Return on Investment = (Fatturato − Spesa) ÷ Spesa × 100. Verde &gt; 100%, Giallo ≥ 0%, Rosso &lt; 0%.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">2</div>
+        <div>
+          <div class="tutorial-step-title">Crea una campagna</div>
+          <div class="tutorial-step-text">
+            Vai in <strong>Campagne</strong> e clicca <strong>+ Nuova campagna</strong>. Compila:
+            <ul>
+              <li><strong>Anagrafica</strong>: nome, tipo (Lead Gen / Awareness), date di inizio e fine</li>
+              <li><strong>Contenuti</strong>: descrizione dei materiali creativi usati</li>
+              <li><strong>Costi e risultati</strong>: spesa, lead generati, impression, click, copertura, CTR</li>
+            </ul>
+            I dati di Back-End, Abbonamenti e Fatturato vengono calcolati in automatico dai contatti BBC collegati.
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">3</div>
+        <div>
+          <div class="tutorial-step-title">Collega i contatti BBC alla campagna</div>
+          <div class="tutorial-step-text">
+            Per attribuire un contatto BBC a una campagna, vai in <strong>Database BBC</strong>, apri la scheda del contatto e imposta il campo <strong>Campagna Marketing</strong> sul nome della campagna desiderata. Quel contatto verrà conteggiato automaticamente nei KPI di quella campagna.
+            <div class="tutorial-flusso">
+              <strong>Flusso:</strong>
+              <ol>
+                <li>Crei la campagna su Facebook/Instagram</li>
+                <li>Ricevi lead → li aggiungi come contatti BBC</li>
+                <li>Sul contatto imposti il campo <em>Campagna Marketing</em></li>
+                <li>Quando il contatto acquista (Back-End o Abbonamento), imposti la <em>Fase Cliente</em> e il <em>Valore €</em></li>
+                <li>Il portale calcola automaticamente KPI e ROI</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">4</div>
+        <div>
+          <div class="tutorial-step-title">Analizza con i grafici</div>
+          <div class="tutorial-step-text">
+            La dashboard offre 4 grafici:
+            <ul>
+              <li><strong>Spesa vs Fatturato</strong>: confronto visivo per campagna</li>
+              <li><strong>ROI per campagna</strong>: identifica le campagne più redditizie</li>
+              <li><strong>CPL per campagna</strong>: valuta l'efficienza nella generazione di lead</li>
+              <li><strong>Funnel</strong>: Lead → Back-End → Abbonamenti, vedi dove si perde il traffico</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tutorial-warning">
+      <div class="tutorial-warning-icon">⚠️</div>
+      <div class="tutorial-warning-text">
+        <strong>Attenzione:</strong> i dati di Back-End, Abbonamenti e Fatturato dipendono da quanto correttamente sono stati compilati i campi <em>Campagna Marketing</em>, <em>Fase Cliente</em> e <em>Valore €</em> nei contatti BBC. Se i KPI sembrano zero, verifica prima quei campi.
+      </div>
+    </div>
+
+    <div class="tutorial-tip">
+      <div class="tutorial-tip-icon">💡</div>
+      <div class="tutorial-tip-text">
+        <b>Suggerimento:</b> usa il filtro <em>Campagna</em> nella dashboard per analizzare una sola campagna in dettaglio. Puoi poi tornare a "Tutte le campagne" per vedere il quadro complessivo.
       </div>
     </div>
   </div>
@@ -2168,6 +2493,100 @@
   </div>
 </div>
 
+<!-- ===== MODAL CAMPAGNA MARKETING ===== -->
+<div class="mkt-modal-overlay" id="mktModalCampagna">
+  <div class="mkt-modal-box">
+    <div class="mkt-modal-title">
+      <span id="mktModalTitolo">Nuova campagna</span>
+      <button class="mkt-modal-close" onclick="chiudiModalMkt()">Chiudi</button>
+    </div>
+
+    <!-- Sezione: Anagrafica -->
+    <div class="mkt-form-section">
+      <div class="mkt-form-section-title">Anagrafica</div>
+      <div class="mkt-form-grid">
+        <div class="mkt-form-field mkt-field-full">
+          <label class="mkt-form-label">Nome campagna *</label>
+          <input type="text" class="mkt-form-input" id="mktCNome" placeholder="Es. Campagna Ottobre 2026">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Tipo</label>
+          <select class="mkt-form-select" id="mktCTipo">
+            <option value="Lead Gen">Lead Gen</option>
+            <option value="Awareness">Awareness</option>
+          </select>
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Data inizio</label>
+          <input type="date" class="mkt-form-input" id="mktCDataInizio">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Data fine</label>
+          <input type="date" class="mkt-form-input" id="mktCDataFine">
+        </div>
+      </div>
+    </div>
+
+    <!-- Sezione: Contenuti -->
+    <div class="mkt-form-section">
+      <div class="mkt-form-section-title">Contenuti</div>
+      <div class="mkt-form-grid">
+        <div class="mkt-form-field mkt-field-full">
+          <label class="mkt-form-label">Descrizione contenuti</label>
+          <textarea class="mkt-form-textarea" id="mktCContenuti" placeholder="Descrivi i materiali creativi, copy, visual usati nella campagna..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sezione: Costi e risultati -->
+    <div class="mkt-form-section">
+      <div class="mkt-form-section-title">Costi e risultati</div>
+      <div class="mkt-form-grid">
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Spesa (€)</label>
+          <input type="number" class="mkt-form-input" id="mktCSpesa" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Lead generati</label>
+          <input type="number" class="mkt-form-input" id="mktCLead" min="0" placeholder="0">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Impression</label>
+          <input type="number" class="mkt-form-input" id="mktCImpression" min="0" placeholder="0">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Click</label>
+          <input type="number" class="mkt-form-input" id="mktCClick" min="0" placeholder="0">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">Copertura</label>
+          <input type="number" class="mkt-form-input" id="mktCCopertura" min="0" placeholder="0">
+        </div>
+        <div class="mkt-form-field">
+          <label class="mkt-form-label">CTR (%)</label>
+          <input type="number" class="mkt-form-input" id="mktCCtr" min="0" max="100" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+    </div>
+
+    <!-- Sezione: Backend info (solo in modifica) -->
+    <div class="mkt-form-section" id="mktSecBackendInfo" style="display:none;">
+      <div class="mkt-form-section-title">Dati da contatti BBC</div>
+      <div class="mkt-info-kpi-grid" id="mktBackendInfoGrid"></div>
+      <p class="mkt-form-hint">Questi dati sono calcolati automaticamente dai contatti BBC con questa campagna assegnata. Per modificarli, aggiorna i singoli contatti nella sezione BBC.</p>
+    </div>
+
+    <!-- Footer azioni -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--card-border);">
+      <button class="btn btn-danger" id="mktBtnEliminaCampagna" onclick="eliminaCampagnaMkt()" style="display:none;">Elimina</button>
+      <div style="margin-left:auto;display:flex;gap:10px;">
+        <button class="btn btn-outline" onclick="chiudiModalMkt()">Annulla</button>
+        <button class="btn btn-primary" onclick="salvaCampagnaMkt()">Salva campagna</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -2318,7 +2737,9 @@ let bbcEventiList = [];        // eventi fisici BBC (serate networking, ecc.)
 let bbcSoci = [];              // soci iscritti al Bologna Business Club
 let bbcPartecipantiCache = {}; // eventoId -> array di oggetti partecipante
 let campagneMarketingCache = []; // campagne caricate dal portale Marketing BBC
-let sezioneCorrente = 'cf';    // 'cf' oppure 'bbc'
+let sezioneCorrente = 'cf';    // 'cf' | 'bbc' | 'marketing'
+let _mktEditingId = null;       // ID campagna in modifica nel modal Marketing
+let _mktCharts = {};            // Chart.js instances per la sezione Marketing
 
 /* ===================== LISTENER REALTIME ===================== */
 let _cfUnsubscribe  = null;    // unsubscribe function del listener CF
@@ -2732,19 +3153,27 @@ async function eseguiLogout() {
 function aggiornaUIPerRuolo() {
   const etichette = { superadmin: 'Super Admin', direzione: 'Direzione Vendite', consulente: 'Consulente', marketing: 'Marketing' };
   document.getElementById('roleBadge').textContent = etichette[sessione.ruolo] + (sessione.nome ? ' · ' + sessione.nome : '');
-  // Prima imposta la sezione (CF/BBC): rende visibili tutti i bottoni della sezione attiva,
-  // nasconde quelli dell'altra sezione. Deve venire PRIMA dei controlli permesso.
+  // Prima imposta la sezione (CF/BBC/Marketing): rende visibili tutti i bottoni della sezione attiva,
+  // nasconde quelli delle altre sezioni. Deve venire PRIMA dei controlli permesso.
   aggiornaNvbarPerSezione(sezioneCorrente);
+  // Card Marketing nella home: visibile solo a superadmin e marketing
+  const cardMkt = document.getElementById('homeCardMarketing');
+  if (cardMkt) {
+    cardMkt.style.display = (sessione.ruolo === 'superadmin' || sessione.ruolo === 'marketing') ? '' : 'none';
+  }
+  // Bottone "Nuova campagna" nella pagina Campagne: solo superadmin e marketing
+  const btnNuova = document.getElementById('mktBtnNuovaCampagna');
+  if (btnNuova) {
+    btnNuova.style.display = (sessione.ruolo === 'superadmin' || sessione.ruolo === 'marketing') ? '' : 'none';
+  }
   // Poi i controlli permesso: agiscono SOLO sui bottoni della sezione corrente
-  // usando il prefisso .nav-cf-only / .nav-bbc-only per evitare di riattivare
-  // bottoni dell'altra sezione tramite querySelector generico.
-  const _navPfx = sezioneCorrente === 'bbc' ? '.nav-bbc-only' : '.nav-cf-only';
+  const _navPfx = sezioneCorrente === 'bbc' ? '.nav-bbc-only' : sezioneCorrente === 'marketing' ? '.nav-mkt-only' : '.nav-cf-only';
   const _q = (nav) => document.querySelector(_navPfx + '[data-nav="' + nav + '"]');
   const _show = (el, vis) => { if (el) el.style.display = vis ? '' : 'none'; };
   _show(_q('impostazioni'), puoVedereImpostazioni());
   _show(_q('consulenti'), puoVedereUtenti());
   _show(_q('cruscotto'), puoVedereCruscotto());
-  _show(_q('tutorial'), puoVedereTutorial());
+  _show(_q('tutorial'), sezioneCorrente === 'marketing' ? true : puoVedereTutorial());
   _show(_q('riassunto'), puoVedereRiassunto());
   document.getElementById('dbFiltroConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
   document.getElementById('dbFiltroVecchioConsulenteWrap').style.display = puoAssegnareConsulente() ? '' : 'none';
@@ -2839,9 +3268,15 @@ function showPage(name) {
   if (name === 'bbc-soci') inizializzaPaginaBbcSoci();
   if (name === 'impostazioni') renderGestioneListeDinamicheUI();
   if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
+  if (name === 'mkt-dashboard') renderDashboardMkt();
+  if (name === 'mkt-campagne') renderTabellaCampagneMkt();
 }
 
 function goHome() {
+  if (sezioneCorrente === 'marketing') {
+    showPage('mkt-dashboard');
+    return;
+  }
   showPage('mappa');
   tornaAllaMappa();
 }
@@ -4802,8 +5237,10 @@ function aggiornaNvbarPerSezione(sezione) {
   document.querySelectorAll('.nav-bbc-only').forEach(el => {
     el.style.display = sezione === 'bbc' ? '' : 'none';
   });
+  document.querySelectorAll('.nav-mkt-only').forEach(el => {
+    el.style.display = sezione === 'marketing' ? '' : 'none';
+  });
   // Bottone eventi BBC: visibile a superadmin e consulenti in sezione BBC
-  // (i consulenti vedono gli eventi in sola lettura: nessun form di aggiunta, nessun eliminazione)
   const btnEventi = document.getElementById('navBtnBbcEventi');
   if (btnEventi) {
     btnEventi.style.display = (sezione === 'bbc' && sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'consulente')) ? '' : 'none';
@@ -4850,6 +5287,10 @@ async function selezionaSezione(sezione) {
   sezioneCorrente = sezione;
   aggiornaUIPerRuolo();
   aggiornaTuttiFiltriListeDinamiche();
+  if (sezione === 'marketing') {
+    showPage('mkt-dashboard');
+    return;
+  }
   showPage('mappa'); // rende page-mappa visibile (display:block) — da qui in avanti #map ha dimensioni reali
   if (!map) {
     // Prima volta: inizializza la mappa ora che il contenitore è visibile.
@@ -7033,6 +7474,415 @@ function avviaListenerRealtime() {
     console.error('[Realtime BBC] Errore listener onSnapshot:', err);
   });
 }
+
+/* ===================== MARKETING BBC — FUNZIONI ===================== */
+
+/* Utility di formattazione */
+function mktFmtEur(v) {
+  if (v == null || isNaN(+v)) return '—';
+  return (+v).toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+}
+function mktFmtNum(v) {
+  if (v == null || isNaN(+v)) return '—';
+  return (+v).toLocaleString('it-IT');
+}
+function mktFmtPct(v) {
+  if (v == null || isNaN(+v)) return '—';
+  return (+v).toFixed(1) + '%';
+}
+function mktFmtX(v) {
+  if (v == null || isNaN(+v)) return '—';
+  return (+v).toFixed(2) + 'x';
+}
+function mktFmtData(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return iso;
+  return d + '/' + m + '/' + y;
+}
+
+/* Chi può modificare/eliminare campagne */
+function puoModificareCampagneMkt() {
+  return sessione && (sessione.ruolo === 'superadmin' || sessione.ruolo === 'marketing');
+}
+
+/* KPI per una singola campagna (fonte: bbcContatti globale) */
+function mktKpiPerCampagna(campagna) {
+  const id = campagna.id || campagna._key || '';
+  const correlati = bbcContatti.filter(c => (c.campagnaMarketing || '') === id);
+  const backend = correlati.filter(c => (c.faseCliente || '') === 'Back-End');
+  const abbonamenti = correlati.filter(c => (c.faseCliente || '') === 'Abbonamento');
+  const fatturatoBackend = backend.reduce((s, c) => s + (parseFloat(c.valoreEuro) || 0), 0);
+  const fatturatoAbb = abbonamenti.reduce((s, c) => s + (parseFloat(c.valoreEuro) || 0), 0);
+  return {
+    backend: backend.length,
+    abbonamenti: abbonamenti.length,
+    fatturato: fatturatoBackend + fatturatoAbb
+  };
+}
+
+/* KPI aggregati su un array di campagne (eventualmente filtrato) */
+function mktKpiTotali(campagne) {
+  let spesa = 0, lead = 0, fatturato = 0, backend = 0, abbonamenti = 0;
+  campagne.forEach(c => {
+    spesa      += parseFloat(c.spesa)  || 0;
+    lead       += parseInt(c.lead)     || 0;
+    const kpi   = mktKpiPerCampagna(c);
+    backend    += kpi.backend;
+    abbonamenti += kpi.abbonamenti;
+    fatturato  += kpi.fatturato;
+  });
+  const cpl = lead > 0 ? spesa / lead : null;
+  const roi = spesa > 0 ? ((fatturato - spesa) / spesa) * 100 : null;
+  return { spesa, lead, cpl, backend, abbonamenti, fatturato, roi };
+}
+
+/* Popola i filtri Anno e Campagna della dashboard */
+function aggiornaFiltriDashboardMkt() {
+  const selAnno = document.getElementById('mktFiltroAnno');
+  const selCamp = document.getElementById('mktFiltroCampagna');
+  if (!selAnno || !selCamp) return;
+
+  // Anno
+  const anni = [...new Set(campagneMarketingCache
+    .map(c => (c.dataInizio || '').substring(0, 4))
+    .filter(Boolean)
+  )].sort().reverse();
+  selAnno.innerHTML = '<option value="">Tutti gli anni</option>'
+    + anni.map(a => `<option value="${a}">${a}</option>`).join('');
+
+  // Campagna
+  selCamp.innerHTML = '<option value="">Tutte le campagne</option>'
+    + campagneMarketingCache
+        .slice().sort((a, b) => (b.dataInizio || '').localeCompare(a.dataInizio || ''))
+        .map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome || c.id)}</option>`)
+        .join('');
+}
+
+/* Filtra le campagne in base ai filtri della dashboard */
+function getCampagneFiltrate() {
+  const anno = (document.getElementById('mktFiltroAnno') || {}).value || '';
+  const campId = (document.getElementById('mktFiltroCampagna') || {}).value || '';
+  return campagneMarketingCache.filter(c => {
+    if (anno && !(c.dataInizio || '').startsWith(anno)) return false;
+    if (campId && (c.id || c._key || '') !== campId) return false;
+    return true;
+  });
+}
+
+/* Aggiorna la griglia KPI della dashboard */
+function renderDashboardMkt() {
+  aggiornaFiltriDashboardMkt();
+  const filtrate = getCampagneFiltrate();
+  const kpi = mktKpiTotali(filtrate);
+
+  const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  _set('mktKpiSpesa',       mktFmtEur(kpi.spesa));
+  _set('mktKpiLead',        mktFmtNum(kpi.lead));
+  _set('mktKpiCpl',         kpi.cpl != null ? mktFmtEur(kpi.cpl) : '—');
+  _set('mktKpiBackend',     mktFmtNum(kpi.backend));
+  _set('mktKpiAbbonamento', mktFmtNum(kpi.abbonamenti));
+  _set('mktKpiFatturato',   mktFmtEur(kpi.fatturato));
+  _set('mktKpiRoi',         kpi.roi != null ? mktFmtPct(kpi.roi) : '—');
+
+  // Colora la card ROI
+  const roiCard = document.getElementById('mktKpiRoiCard');
+  if (roiCard && kpi.roi != null) {
+    roiCard.classList.remove('kpi-positive', 'kpi-alert', 'kpi-warn');
+    if (kpi.roi >= 100)     roiCard.classList.add('kpi-positive');
+    else if (kpi.roi >= 0)  roiCard.classList.add('kpi-warn');
+    else                    roiCard.classList.add('kpi-alert');
+  }
+
+  renderGraficiMkt(filtrate);
+}
+
+/* Disegna i 4 grafici Chart.js */
+function renderGraficiMkt(campagne) {
+  const palette = ['#b3468d','#3a6fb3','#2f9e63','#c97a1e','#e87ba4','#4a3aa7','#e34948','#008300'];
+
+  // Distrugge grafici precedenti (necessario prima di ridisegnare su stesso canvas)
+  ['mktChartSpesaFatturato','mktChartRoi','mktChartCpl','mktChartFunnel'].forEach(id => {
+    if (_mktCharts[id]) { _mktCharts[id].destroy(); delete _mktCharts[id]; }
+  });
+
+  const sorted = campagne.slice().sort((a, b) => (a.dataInizio || '').localeCompare(b.dataInizio || ''));
+  const labels = sorted.map(c => c.nome || c.id || '?');
+  const kpiArr = sorted.map(c => mktKpiPerCampagna(c));
+
+  // Funzione di supporto per creare un grafico
+  function crea(id, config) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    _mktCharts[id] = new Chart(canvas.getContext('2d'), config);
+  }
+
+  const chartDefaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+    scales: { x: { ticks: { font: { size: 10 }, maxRotation: 30 } }, y: { ticks: { font: { size: 10 } } } }
+  };
+
+  // 1. Spesa vs Fatturato
+  crea('mktChartSpesaFatturato', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Spesa',
+          data: sorted.map(c => parseFloat(c.spesa) || 0),
+          backgroundColor: 'rgba(192,57,43,0.7)', borderRadius: 4
+        },
+        {
+          label: 'Fatturato',
+          data: kpiArr.map(k => k.fatturato),
+          backgroundColor: 'rgba(179,70,141,0.75)', borderRadius: 4
+        }
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // 2. ROI
+  const roiData = sorted.map((c, i) => {
+    const spesa = parseFloat(c.spesa) || 0;
+    if (!spesa) return null;
+    return ((kpiArr[i].fatturato - spesa) / spesa) * 100;
+  });
+  crea('mktChartRoi', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'ROI %',
+        data: roiData,
+        backgroundColor: roiData.map(v => {
+          if (v == null)   return 'rgba(150,150,150,0.4)';
+          if (v >= 100)    return 'rgba(47,158,99,0.75)';
+          if (v >= 0)      return 'rgba(201,122,30,0.75)';
+          return           'rgba(192,57,43,0.75)';
+        }),
+        borderRadius: 4
+      }]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // 3. CPL
+  crea('mktChartCpl', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'CPL (€)',
+        data: sorted.map(c => {
+          const s = parseFloat(c.spesa) || 0;
+          const l = parseInt(c.lead) || 0;
+          return l > 0 ? +(s / l).toFixed(2) : null;
+        }),
+        backgroundColor: sorted.map((_, i) => palette[i % palette.length] + 'bf'),
+        borderRadius: 4
+      }]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // 4. Funnel
+  const totLead   = sorted.reduce((s, c) => s + (parseInt(c.lead) || 0), 0);
+  const totBE     = kpiArr.reduce((s, k) => s + k.backend, 0);
+  const totAbb    = kpiArr.reduce((s, k) => s + k.abbonamenti, 0);
+  crea('mktChartFunnel', {
+    type: 'bar',
+    data: {
+      labels: ['Lead', 'Back-End', 'Abbonamenti'],
+      datasets: [{
+        label: 'Persone',
+        data: [totLead, totBE, totAbb],
+        backgroundColor: ['rgba(58,111,179,0.75)','rgba(179,70,141,0.75)','rgba(47,158,99,0.75)'],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      indexAxis: 'y',
+      scales: {
+        x: { ticks: { font: { size: 10 } } },
+        y: { ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+/* Render tabella campagne */
+function renderTabellaCampagneMkt() {
+  const tbody = document.getElementById('mktTabellaBody');
+  if (!tbody) return;
+
+  const sorted = campagneMarketingCache
+    .slice().sort((a, b) => (b.dataInizio || '').localeCompare(a.dataInizio || ''));
+
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;color:var(--testo-muted);padding:30px;">Nessuna campagna registrata. Clicca "+ Nuova campagna" per iniziare.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(c => {
+    const spesa  = parseFloat(c.spesa)  || 0;
+    const lead   = parseInt(c.lead)     || 0;
+    const cpl    = lead > 0 ? spesa / lead : null;
+    const kpi    = mktKpiPerCampagna(c);
+    const roi    = spesa > 0 ? ((kpi.fatturato - spesa) / spesa) * 100 : null;
+    const roiClass = roi == null ? '' : roi >= 100 ? 'style="color:var(--verde-scuro,#2f9e63);font-weight:800;"'
+                    : roi >= 0  ? 'style="color:var(--arancio);font-weight:800;"'
+                    : 'style="color:var(--rosso);font-weight:800;"';
+    const badgeClass = c.tipo === 'Awareness' ? 'mkt-badge-awareness' : 'mkt-badge-leadgen';
+    const canEdit = puoModificareCampagneMkt();
+    return `<tr>
+      <td><strong>${escapeHtml(c.nome || '—')}</strong></td>
+      <td><span class="badge ${badgeClass}">${escapeHtml(c.tipo || 'Lead Gen')}</span></td>
+      <td style="white-space:nowrap;">${mktFmtData(c.dataInizio)} – ${mktFmtData(c.dataFine)}</td>
+      <td>${mktFmtEur(spesa)}</td>
+      <td>${mktFmtNum(lead)}</td>
+      <td>${cpl != null ? mktFmtEur(cpl) : '—'}</td>
+      <td>${mktFmtNum(c.impression)}</td>
+      <td>${mktFmtNum(c.click)}</td>
+      <td>${c.ctr != null && c.ctr !== '' ? mktFmtPct(c.ctr) : '—'}</td>
+      <td>${mktFmtNum(kpi.backend)}</td>
+      <td>${mktFmtNum(kpi.abbonamenti)}</td>
+      <td>${mktFmtEur(kpi.fatturato)}</td>
+      <td ${roiClass}>${roi != null ? mktFmtPct(roi) : '—'}</td>
+      <td>${canEdit ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:0.78rem;" onclick='apriModalModificaMkt(${JSON.stringify(c.id || '')})'>✏️</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* Modal — apri per nuova campagna */
+function apriModalNuovaCampagnaMkt() {
+  if (!puoModificareCampagneMkt()) return;
+  _mktEditingId = null;
+  document.getElementById('mktModalTitolo').textContent = 'Nuova campagna';
+  document.getElementById('mktCNome').value = '';
+  document.getElementById('mktCTipo').value = 'Lead Gen';
+  document.getElementById('mktCDataInizio').value = '';
+  document.getElementById('mktCDataFine').value = '';
+  document.getElementById('mktCContenuti').value = '';
+  document.getElementById('mktCSpesa').value = '';
+  document.getElementById('mktCLead').value = '';
+  document.getElementById('mktCImpression').value = '';
+  document.getElementById('mktCClick').value = '';
+  document.getElementById('mktCCopertura').value = '';
+  document.getElementById('mktCCtr').value = '';
+  document.getElementById('mktSecBackendInfo').style.display = 'none';
+  document.getElementById('mktBtnEliminaCampagna').style.display = 'none';
+  document.getElementById('mktModalCampagna').classList.add('show');
+}
+
+/* Modal — apri per modifica */
+function apriModalModificaMkt(id) {
+  if (!puoModificareCampagneMkt()) return;
+  const c = campagneMarketingCache.find(x => x.id === id);
+  if (!c) { showToast('Campagna non trovata.'); return; }
+  _mktEditingId = id;
+  document.getElementById('mktModalTitolo').textContent = 'Modifica campagna';
+  document.getElementById('mktCNome').value = c.nome || '';
+  document.getElementById('mktCTipo').value = c.tipo || 'Lead Gen';
+  document.getElementById('mktCDataInizio').value = c.dataInizio || '';
+  document.getElementById('mktCDataFine').value = c.dataFine || '';
+  document.getElementById('mktCContenuti').value = c.contenuti || '';
+  document.getElementById('mktCSpesa').value = c.spesa != null ? c.spesa : '';
+  document.getElementById('mktCLead').value = c.lead != null ? c.lead : '';
+  document.getElementById('mktCImpression').value = c.impression != null ? c.impression : '';
+  document.getElementById('mktCClick').value = c.click != null ? c.click : '';
+  document.getElementById('mktCCopertura').value = c.copertura != null ? c.copertura : '';
+  document.getElementById('mktCCtr').value = c.ctr != null ? c.ctr : '';
+
+  // Mostra info backend live
+  const kpi = mktKpiPerCampagna(c);
+  const spesa = parseFloat(c.spesa) || 0;
+  const roi = spesa > 0 ? ((kpi.fatturato - spesa) / spesa) * 100 : null;
+  document.getElementById('mktBackendInfoGrid').innerHTML = `
+    <div><div class="mkt-info-kpi-val">${mktFmtNum(kpi.backend)}</div><div class="mkt-info-kpi-lbl">Back-End</div></div>
+    <div><div class="mkt-info-kpi-val">${mktFmtNum(kpi.abbonamenti)}</div><div class="mkt-info-kpi-lbl">Abbonamenti</div></div>
+    <div><div class="mkt-info-kpi-val">${mktFmtEur(kpi.fatturato)}</div><div class="mkt-info-kpi-lbl">Fatturato</div></div>
+    <div><div class="mkt-info-kpi-val">${roi != null ? mktFmtPct(roi) : '—'}</div><div class="mkt-info-kpi-lbl">ROI</div></div>
+  `;
+  document.getElementById('mktSecBackendInfo').style.display = '';
+  document.getElementById('mktBtnEliminaCampagna').style.display = '';
+  document.getElementById('mktModalCampagna').classList.add('show');
+}
+
+/* Modal — chiudi */
+function chiudiModalMkt() {
+  document.getElementById('mktModalCampagna').classList.remove('show');
+  _mktEditingId = null;
+}
+
+/* Modal — salva (crea o aggiorna) */
+async function salvaCampagnaMkt() {
+  const nome = document.getElementById('mktCNome').value.trim();
+  if (!nome) { showToast('Inserisci un nome per la campagna.'); return; }
+
+  const payload = {
+    nome,
+    tipo:        document.getElementById('mktCTipo').value || 'Lead Gen',
+    dataInizio:  document.getElementById('mktCDataInizio').value || '',
+    dataFine:    document.getElementById('mktCDataFine').value || '',
+    contenuti:   document.getElementById('mktCContenuti').value.trim() || '',
+    spesa:       parseFloat(document.getElementById('mktCSpesa').value)      || 0,
+    lead:        parseInt(document.getElementById('mktCLead').value)         || 0,
+    impression:  parseInt(document.getElementById('mktCImpression').value)   || 0,
+    click:       parseInt(document.getElementById('mktCClick').value)        || 0,
+    copertura:   parseInt(document.getElementById('mktCCopertura').value)    || 0,
+    ctr:         parseFloat(document.getElementById('mktCCtr').value)        || 0,
+  };
+
+  try {
+    if (_mktEditingId) {
+      await CF_MARKETING_CAMPAGNE().doc(_mktEditingId).update(payload);
+      const idx = campagneMarketingCache.findIndex(c => c.id === _mktEditingId);
+      if (idx >= 0) campagneMarketingCache[idx] = Object.assign({}, campagneMarketingCache[idx], payload);
+      showToast('Campagna aggiornata.');
+    } else {
+      const ref = await CF_MARKETING_CAMPAGNE().add(payload);
+      campagneMarketingCache.push(Object.assign({ id: ref.id }, payload));
+      showToast('Campagna creata.');
+    }
+    chiudiModalMkt();
+    aggiornaFiltriDashboardMkt();
+    if (document.getElementById('page-mkt-dashboard') && document.getElementById('page-mkt-dashboard').classList.contains('active')) {
+      renderDashboardMkt();
+    }
+    if (document.getElementById('page-mkt-campagne') && document.getElementById('page-mkt-campagne').classList.contains('active')) {
+      renderTabellaCampagneMkt();
+    }
+  } catch(e) {
+    console.error('[Marketing] Errore salvataggio campagna:', e);
+    showToast('Errore durante il salvataggio. Riprova.');
+  }
+}
+
+/* Modal — elimina */
+async function eliminaCampagnaMkt() {
+  if (!_mktEditingId) return;
+  const c = campagneMarketingCache.find(x => x.id === _mktEditingId);
+  const nome = c ? (c.nome || _mktEditingId) : _mktEditingId;
+  if (!confirm('Eliminare definitivamente la campagna "' + nome + '"? L\'operazione non è reversibile.')) return;
+  try {
+    await CF_MARKETING_CAMPAGNE().doc(_mktEditingId).delete();
+    campagneMarketingCache = campagneMarketingCache.filter(x => x.id !== _mktEditingId);
+    chiudiModalMkt();
+    aggiornaFiltriDashboardMkt();
+    renderDashboardMkt();
+    renderTabellaCampagneMkt();
+    showToast('Campagna eliminata.');
+  } catch(e) {
+    console.error('[Marketing] Errore eliminazione campagna:', e);
+    showToast('Errore durante l\'eliminazione. Riprova.');
+  }
+}
+
+/* ============================================================ */
 
 (function avvio() {
   document.addEventListener('click', (e) => {
