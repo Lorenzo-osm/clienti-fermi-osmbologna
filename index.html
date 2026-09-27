@@ -2068,6 +2068,22 @@
           <button class="btn btn-primary" style="height:40px;white-space:nowrap;" onclick="aggiungiFaseDinamica('bbc')">+ Aggiungi</button>
         </div>
       </div>
+
+      <!-- Sezione Stati partecipanti eventi BBC -->
+      <div style="padding-top:20px; border-top:1px solid var(--card-border); margin-top:8px;">
+        <div class="settings-label" style="margin-bottom:4px; color:var(--fucsia-dark);">Stati Partecipanti — BBC (eventi)</div>
+        <div class="settings-hint" style="margin-top:0; margin-bottom:10px;">
+          Stati disponibili nel pannello partecipanti di ogni evento BBC. Modificabili direttamente anche dopo la registrazione del partecipante.
+        </div>
+        <div id="listaDinamicaStatiBbcPart" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px;margin-bottom:14px;align-items:center;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="settings-field" style="margin:0;flex:1;min-width:180px;">
+            <label class="settings-label">Nuovo stato partecipante</label>
+            <input type="text" class="settings-input" id="nuovoStatoPartBbcInput" placeholder="Es. Assente giustificato">
+          </div>
+          <button class="btn btn-primary" style="height:40px;white-space:nowrap;" onclick="aggiungiStatoPartecipanteBbc()">+ Aggiungi</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2200,6 +2216,9 @@ const STATI_VALIDI_SEED = ["Non risponde", "Appuntamento fissato", "Non interess
 const FASI_VALIDE_SEED = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente", "Fuori Zona"];
 const FASI_VALIDE_BBC_EXTRA_SEED = ["Back-End", "Abbonamento"];
 const COLORI_STATO_SEED = { 'Non risponde': '#8a8a8a', 'Appuntamento fissato': '#2f9e63', 'Non interessato': '#c97a1e', 'Da non ricontattare': '#c0392b' };
+/* Stati partecipanti BBC — gestibili dalle Impostazioni (seed di default) */
+const STATI_PARTECIPANTE_BBC_SEED = ['Iscritto/Previsto', 'Partecipato'];
+let STATI_PARTECIPANTE_BBC = STATI_PARTECIPANTE_BBC_SEED.slice();
 
 /* Stato = Esito Contatto — caricato da Firestore all'avvio (i seed sopra sono il fallback) */
 let STATI_VALIDI = STATI_VALIDI_SEED.slice();
@@ -2307,6 +2326,9 @@ let _bbcUnsubscribe = null;    // unsubscribe function del listener BBC
 let _cfRealtimeAttivo  = false; // true dopo il primo snapshot CF  (per saltare il batch iniziale)
 let _bbcRealtimeAttivo = false; // true dopo il primo snapshot BBC
 
+/* Set di chiavi contatto per cui è in corso un salvataggio esito (anti-doppio invio) */
+const _esitiSalvataggioInCorso = new Set();
+
 /* ===================== HELPER MIGRAZIONE ===================== */
 /* Scrive un array di righe (già con overlay applicato) nella sottocollezione clienti,
    a batch di max 500 per rispettare i limiti Firestore per singola operazione batch. */
@@ -2352,10 +2374,11 @@ async function loadFromFirestore() {
         ultimoAgg:         localStorage.getItem('cf_ultimo_agg') || '',
         nomeFile:          localStorage.getItem('cf_nome_file') || '',
         superadminPassword: localStorage.getItem('cf_superadmin_password') || SUPERADMIN_PASSWORD_DEFAULT,
-        statiValidi:        STATI_VALIDI_SEED.slice(),
-        fasiValide:         FASI_VALIDE_SEED.slice(),
-        fasiValideBbcExtra: FASI_VALIDE_BBC_EXTRA_SEED.slice(),
-        coloriStato:        Object.assign({}, COLORI_STATO_SEED)
+        statiValidi:            STATI_VALIDI_SEED.slice(),
+        fasiValide:             FASI_VALIDE_SEED.slice(),
+        fasiValideBbcExtra:     FASI_VALIDE_BBC_EXTRA_SEED.slice(),
+        coloriStato:            Object.assign({}, COLORI_STATO_SEED),
+        statiPartecipanteBbc:   STATI_PARTECIPANTE_BBC_SEED.slice()
       };
       await CF_DOC_PATH().set(cfState);
 
@@ -2411,6 +2434,14 @@ async function loadFromFirestore() {
           fasiValideBbcExtra: _fasiExtra,
           coloriStato:        COLORI_STATO
         }).catch(e => console.warn('[CF] Seed liste dinamiche:', e));
+      }
+
+      /* Carica (o inizializza) gli stati partecipanti BBC */
+      const _statiPartBbc = Array.isArray(data.statiPartecipanteBbc) && data.statiPartecipanteBbc.length > 0;
+      STATI_PARTECIPANTE_BBC = _statiPartBbc ? data.statiPartecipanteBbc : STATI_PARTECIPANTE_BBC_SEED.slice();
+      if (!_statiPartBbc) {
+        CF_DOC_PATH().update({ statiPartecipanteBbc: STATI_PARTECIPANTE_BBC })
+          .catch(e => console.warn('[BBC] Seed stati partecipante:', e));
       }
 
       /* ---- Migrazione automatica dall'intervento precedente ----
@@ -4939,6 +4970,107 @@ async function esportaPartecipantiEvento(eventoId) {
   showToast('CSV esportato: ' + righe.length + ' partecipanti.');
 }
 
+/* Stampa una lista firme per l'evento (foglio A4 con colonna firma vuota) */
+async function stampaListaFirme(eventoId) {
+  const ev = bbcEventiList.find(e => e.id === eventoId);
+  /* Carica i partecipanti se non già in cache */
+  if (!bbcPartecipantiCache[eventoId]) {
+    try {
+      const snap = await CF_BBC_EVENTO_PARTECIPANTI(eventoId).get();
+      bbcPartecipantiCache[eventoId] = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      aggiornaListaPartecipantiDom(eventoId);
+    } catch(e) {
+      showToast('Errore caricamento partecipanti: ' + (e.message || e.code || 'errore'));
+      return;
+    }
+  }
+  const parts = bbcPartecipantiCache[eventoId] || [];
+  if (!parts.length) { showToast('Nessun partecipante da stampare.'); return; }
+
+  /* Ordina alfabeticamente per nome; include tutti (iscritti, previsti, già partecipato) */
+  const ordinati = parts.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+  const nomeEvento = ev ? (ev.nome || 'Evento BBC') : 'Evento BBC';
+  const dataEvento = ev && ev.data ? (formattaDataItaliana(ev.data) || ev.data) : '';
+  const luogoEvento = ev && ev.luogo ? ev.luogo : '';
+
+  const righe = ordinati.map((p, i) => {
+    let tel = '';
+    if (p.tipo === 'socio' && p.socioId) {
+      const s = bbcSoci.find(x => x.id === p.socioId);
+      if (s) tel = s.telefono || '';
+    } else if (p.tipo === 'contatto' && p.contattoId) {
+      const c = bbcContatti.find(x => x._key === p.contattoId);
+      if (c) tel = c.contatto || '';
+    }
+    return `<tr>
+      <td style="width:30px;text-align:center;color:#999;">${i + 1}</td>
+      <td style="font-weight:600;">${p.nome ? p.nome.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '—'}</td>
+      <td style="color:#555;">${(p.azienda || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') || '—'}</td>
+      <td style="color:#555;">${tel || '—'}</td>
+      <td></td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Lista firme — ${nomeEvento.replace(/</g,'&lt;')}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1a0d14; background: #fff; }
+  .header { text-align: center; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2px solid #b3468d; }
+  .header h1 { font-size: 16pt; font-weight: 800; color: #b3468d; margin-bottom: 4px; }
+  .header .sub { font-size: 10pt; color: #555; }
+  .header .logo { font-size: 9pt; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #b3468d; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #b3468d; color: #fff; }
+  thead th { padding: 8px 10px; font-size: 9pt; font-weight: 700; text-align: left; }
+  tbody tr { border-bottom: 1px solid #e0d0da; }
+  tbody tr:nth-child(even) { background: #fdf5fb; }
+  tbody td { padding: 9px 10px; font-size: 10pt; vertical-align: middle; }
+  .col-firma { min-width: 160px; }
+  .footer { margin-top: 20px; font-size: 8.5pt; color: #999; text-align: right; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">OSM Partner Bologna — Bologna Business Club</div>
+  <h1>${nomeEvento.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</h1>
+  <div class="sub">${dataEvento ? 'Data: <b>' + dataEvento + '</b>' : ''}${dataEvento && luogoEvento ? ' &nbsp;·&nbsp; ' : ''}${luogoEvento ? 'Luogo: <b>' + luogoEvento.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</b>' : ''}</div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:30px;">#</th>
+      <th>Nome / Azienda</th>
+      <th>Azienda</th>
+      <th>Telefono</th>
+      <th class="col-firma">Firma</th>
+    </tr>
+  </thead>
+  <tbody>${righe}</tbody>
+</table>
+<div class="footer">Totale partecipanti: ${ordinati.length} &nbsp;·&nbsp; Stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 600);
+  } else {
+    showToast('Impossibile aprire la finestra di stampa. Controlla i pop-up del browser.');
+  }
+}
+
 /* Export tutti soci + contatti BBC visibili all'utente (rispetta scoping) */
 function esportaTuttiSociBbc() {
   const header = ['Nome / Referente', 'Azienda / Rag.Soc.', 'Telefono', 'Email', 'Tipo', 'Consulente Precedente', 'Consulente Assegnato'];
@@ -5034,7 +5166,11 @@ function renderBbcEventi() {
       ? '<span class="bbc-evento-badge-passato">Passato</span>'
       : '<span class="bbc-evento-badge-futuro">In programma</span>';
     const nContattiCollegati = bbcContatti.filter(c => c.eventoProvenienza === ev.id).length;
-    const nPartecipanti = (bbcPartecipantiCache[ev.id] || []).length;
+    /* Mostra "—" finché la cache non è ancora caricata (evita di mostrare 0 come dato falso);
+       il vero conteggio arriva appena caricaPartecipantiEvento() aggiorna il DOM. */
+    const nPartecipanti = bbcPartecipantiCache[ev.id] != null
+      ? bbcPartecipantiCache[ev.id].length
+      : '—';
     return '<div class="bbc-evento-row' + (isPassato ? ' passato' : '') + '" id="card-evento-' + escapeHtml(ev.id) + '">'
       + '<div class="bbc-evento-row-main">'
       + '<div class="bbc-evento-info">'
@@ -5049,6 +5185,7 @@ function renderBbcEventi() {
       + '</div>'
       + '<div class="bbc-evento-actions">'
       + '<button class="btn btn-outline" style="font-size:0.78rem;" onclick="togglePartecipantiPanel(\'' + escapeJs(ev.id) + '\')">👥 Partecipanti</button>'
+      + '<button class="btn btn-outline" style="font-size:0.78rem;" onclick="stampaListaFirme(\'' + escapeJs(ev.id) + '\')">🖨️ Lista firme</button>'
       + '<button class="btn btn-outline" style="font-size:0.78rem;" onclick="esportaPartecipantiEvento(\'' + escapeJs(ev.id) + '\')">📤 Esporta</button>'
       + (isSuperAdmin ? '<button class="btn btn-outline" style="font-size:0.78rem; color:var(--rosso); border-color:var(--rosso);" onclick="eliminaBbcEvento(\'' + escapeJs(ev.id) + '\')">🗑️ Elimina</button>' : '')
       + '</div>'
@@ -5067,6 +5204,14 @@ function renderBbcEventi() {
     html += '<div class="bbc-eventi-list">' + passati.map(renderCard).join('') + '</div>';
   }
   wrap.innerHTML = html;
+
+  /* Precarica i conteggi partecipanti per tutti gli eventi non ancora in cache.
+     caricaPartecipantiEvento() aggiorna cnt-part-{id} nel DOM appena i dati arrivano. */
+  lista.forEach(ev => {
+    if (bbcPartecipantiCache[ev.id] == null) {
+      caricaPartecipantiEvento(ev.id);
+    }
+  });
 }
 
 async function aggiungiBbcEvento() {
@@ -5606,12 +5751,8 @@ function renderStoricoSocioHtml(socioId) {
 
   return '<div style="font-size:0.8rem; font-weight:800; color:var(--fucsia-dark); margin-bottom:8px;">Storico eventi:</div>'
     + entries.map(({ ev, part }) => {
-      const isPartecipato = part.stato === 'Partecipato';
-      const badge = isPartecipato
-        ? '<span class="badge badge-partecipato">Partecipato</span>'
-        : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
       return '<div class="bbc-socio-storico-item">'
-        + badge
+        + badgeStatoPartecipante(part.stato)
         + '<span style="font-weight:700;">' + escapeHtml(ev ? ev.nome : 'Evento sconosciuto') + '</span>'
         + '<span style="color:var(--testo-muted);">' + (ev && ev.data ? formattaDataItaliana(ev.data) || ev.data : '') + '</span>'
         + '</div>';
@@ -5619,6 +5760,52 @@ function renderStoricoSocioHtml(socioId) {
 }
 
 /* ===================== BBC — PARTECIPANTI EVENTO ===================== */
+
+/* Genera il badge visuale per uno stato partecipante BBC.
+   I due stati seed ("Iscritto/Previsto" e "Partecipato") hanno colori fissi per continuità;
+   gli stati custom ricevono un badge neutro grigio. */
+function badgeStatoPartecipante(stato) {
+  if (stato === 'Partecipato') return '<span class="badge badge-partecipato">' + escapeHtml(stato) + '</span>';
+  if (stato === 'Iscritto/Previsto') return '<span class="badge badge-previsto">' + escapeHtml(stato) + '</span>';
+  return '<span class="badge" style="background:var(--grigio-bg);color:var(--testo-muted);">' + escapeHtml(stato || '—') + '</span>';
+}
+
+/* Genera la select per modificare lo stato di un partecipante già registrato */
+function selectStatoPartecipante(eventoId, partecipanteId, statoCorrente) {
+  const opzioni = STATI_PARTECIPANTE_BBC.map(st =>
+    '<option value="' + escapeHtml(st) + '"' + (statoCorrente === st ? ' selected' : '') + '>' + escapeHtml(st) + '</option>'
+  ).join('');
+  const opzioneExtra = (statoCorrente && !STATI_PARTECIPANTE_BBC.includes(statoCorrente))
+    ? '<option value="' + escapeHtml(statoCorrente) + '" selected>' + escapeHtml(statoCorrente) + '</option>'
+    : '';
+  return '<select class="td-select" style="font-size:0.75rem;min-width:130px;"'
+    + ' onchange="cambiaStatoPartecipante(\'' + escapeJs(eventoId) + '\',\'' + escapeJs(partecipanteId) + '\',this.value)">'
+    + opzioni + opzioneExtra
+    + '</select>';
+}
+
+/* Aggiorna lo stato di un partecipante su Firestore e in cache */
+async function cambiaStatoPartecipante(eventoId, partecipanteId, nuovoStato) {
+  try {
+    await CF_BBC_EVENTO_PARTECIPANTI(eventoId).doc(partecipanteId).update({ stato: nuovoStato });
+    const cache = bbcPartecipantiCache[eventoId];
+    if (cache) {
+      const p = cache.find(x => x.id === partecipanteId);
+      if (p) p.stato = nuovoStato;
+    }
+    /* Aggiorna solo il DOM della lista senza rigenerare l'intero pannello (la select ha già il valore) */
+    const cntEl = document.getElementById('cnt-part-' + eventoId);
+    if (cntEl) cntEl.textContent = (bbcPartecipantiCache[eventoId] || []).length;
+    /* Aggiorna lo storico soci/contatti se la pagina soci è aperta */
+    if (document.getElementById('page-bbc-soci') && document.getElementById('page-bbc-soci').classList.contains('active')) {
+      renderBbcSoci();
+    }
+    showToast('Stato aggiornato.');
+  } catch(e) {
+    console.error('[BBC Part] Errore cambio stato:', e);
+    showToast('Errore aggiornamento stato: ' + (e.message || e.code || 'errore sconosciuto'));
+  }
+}
 
 function renderPartecipantiPanelHtml(eventoId) {
   const parts = bbcPartecipantiCache[eventoId] || [];
@@ -5663,9 +5850,9 @@ function renderPartecipantiPanelHtml(eventoId) {
             const c = bbcContatti.find(x => x._key === p.contattoId);
             if (c) { tel = c.contatto || ''; mail = c.email || ''; }
           }
-          const badge = p.stato === 'Partecipato'
-            ? '<span class="badge badge-partecipato">Partecipato</span>'
-            : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+          const badge = puoModificare
+            ? selectStatoPartecipante(eventoId, p.id, p.stato)
+            : badgeStatoPartecipante(p.stato);
           const tipoBadge = (p.tipo === 'contatto')
             ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
             : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
@@ -5710,8 +5897,7 @@ function renderPartecipantiPanelHtml(eventoId) {
     + '<div class="filter-group">'
     + '<label class="filter-label">Stato</label>'
     + '<select class="settings-input" id="sel-part-stato-' + escapeHtml(eventoId) + '">'
-    + '<option value="Iscritto/Previsto">Iscritto/Previsto</option>'
-    + '<option value="Partecipato">Partecipato</option>'
+    + STATI_PARTECIPANTE_BBC.map(st => '<option value="' + escapeHtml(st) + '">' + escapeHtml(st) + '</option>').join('')
     + '</select>'
     + '</div>'
     + '<div class="filter-group" style="align-self:flex-end;">'
@@ -5783,9 +5969,9 @@ function aggiornaListaPartecipantiDom(eventoId) {
       const c = bbcContatti.find(x => x._key === p.contattoId);
       if (c) { tel = c.contatto || ''; mail = c.email || ''; }
     }
-    const badge = p.stato === 'Partecipato'
-      ? '<span class="badge badge-partecipato">Partecipato</span>'
-      : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
+    const badge = puoModificare
+      ? selectStatoPartecipante(eventoId, p.id, p.stato)
+      : badgeStatoPartecipante(p.stato);
     const tipoBadge = (p.tipo === 'contatto')
       ? '<span class="badge" style="background:var(--blu-bg);color:var(--blu);font-size:0.65rem;">Lead</span>'
       : '<span class="badge" style="background:var(--verde-bg);color:var(--verde);font-size:0.65rem;">Socio</span>';
@@ -6012,12 +6198,8 @@ function renderStoricoContattoBbcHtml(contattoKey) {
 
   entries.sort((a, b) => ((b.ev && b.ev.data) || '').localeCompare((a.ev && a.ev.data) || ''));
   return entries.map(({ ev, part }) => {
-    const isPartecipato = part.stato === 'Partecipato';
-    const badge = isPartecipato
-      ? '<span class="badge badge-partecipato">Partecipato</span>'
-      : '<span class="badge badge-previsto">Iscritto/Previsto</span>';
     return '<div class="bbc-socio-storico-item">'
-      + badge
+      + badgeStatoPartecipante(part.stato)
       + '<span style="font-weight:700;">' + escapeHtml(ev ? ev.nome : 'Evento sconosciuto') + '</span>'
       + '<span style="color:var(--testo-muted);">' + (ev && ev.data ? formattaDataItaliana(ev.data) || ev.data : '') + '</span>'
       + '</div>';
@@ -6093,8 +6275,14 @@ function toggleEsitiPanel(key) {
   row.style.display = aperto ? 'none' : '';
 }
 
-/* Valida e salva un nuovo esito su Firestore (arrayUnion), poi aggiorna il DOM */
+/* Valida e salva un nuovo esito su Firestore (arrayUnion), poi aggiorna il DOM.
+   NOTA: usa _esitiSalvataggioInCorso per impedire invii concorrenti (doppio click o
+   doppio invio rapido) che causerebbero duplicati visivi: vedi commento dettagliato
+   nella funzione per la spiegazione della race condition con onSnapshot. */
 async function salvaEsito(key) {
+  /* Protezione anti-doppio invio: se un salvataggio per questa chiave è già in corso, esce subito */
+  if (_esitiSalvataggioInCorso.has(key)) return;
+
   const hid      = esitiKeyToHtmlId(key);
   const textarea = document.getElementById('esiti-textarea-' + hid);
   const errEl    = document.getElementById('esiti-error-' + hid);
@@ -6122,16 +6310,31 @@ async function salvaEsito(key) {
     testo:      testoTrim
   };
 
+  /* Aggiunge il lock PRIMA dell'await: da qui nessuna seconda invocazione può procedere */
+  _esitiSalvataggioInCorso.add(key);
+
   try {
     await getCollezioneCorrente().doc(sanitizeDocId(key)).update({
       esiti: firebase.firestore.FieldValue.arrayUnion(nuovoEsito)
     });
 
-    /* Aggiorna in memoria */
+    /* Aggiorna in memoria — RACE CONDITION GUARD:
+       Il listener onSnapshot su CF_CLIENTI() / CF_BBC_CLIENTI() può ricevere il "modified"
+       e aggiornare contatti[idx] = docData (già con il nuovo esito) PRIMA che questo await
+       si risolva. In quel caso aggiornaDomRiga viene saltata (textarea ha ancora testo) e
+       il docData Firestore — già corretto — sostituisce il vecchio oggetto in contatti[].
+       Quando poi arriviamo qui, `contatto` punta all'oggetto aggiornato da Firestore (N+1
+       esiti): fare push senza controllo porterebbe a N+2. Il controllo giàPresente evita
+       il duplicato in qualunque ordine arrivi il snapshot. */
     const contatto = getContattiCorrenti().find(c => c._key === key);
     if (contatto) {
       if (!Array.isArray(contatto.esiti)) contatto.esiti = [];
-      contatto.esiti.push(nuovoEsito);
+      const giàPresente = contatto.esiti.some(e =>
+        e.data === nuovoEsito.data &&
+        e.consulente === nuovoEsito.consulente &&
+        e.testo === nuovoEsito.testo
+      );
+      if (!giàPresente) contatto.esiti.push(nuovoEsito);
     }
     const esitiAggiornati = contatto ? contatto.esiti : [nuovoEsito];
 
@@ -6147,6 +6350,8 @@ async function salvaEsito(key) {
     console.error('[Esiti] Errore salvataggio:', e);
     errEl.textContent = 'Errore durante il salvataggio. Riprova.';
     errEl.style.display = 'block';
+  } finally {
+    _esitiSalvataggioInCorso.delete(key);
   }
 }
 
@@ -6325,10 +6530,73 @@ function renderListaDinamicaFasiBbc() {
   }).join('');
 }
 
+function renderListaDinamicaStatiBbcPartecipante() {
+  const wrap = document.getElementById('listaDinamicaStatiBbcPart');
+  if (!wrap) return;
+  if (!STATI_PARTECIPANTE_BBC.length) {
+    wrap.innerHTML = '<span style="color:var(--testo-muted);font-size:0.83rem;">Nessuno stato definito.</span>';
+    return;
+  }
+  wrap.innerHTML = STATI_PARTECIPANTE_BBC.map((s, i) => {
+    const isDefault = STATI_PARTECIPANTE_BBC_SEED.includes(s);
+    const style = s === 'Partecipato'
+      ? 'background:var(--verde-bg);color:var(--verde);border:1px solid var(--verde);'
+      : s === 'Iscritto/Previsto'
+        ? 'background:var(--fucsia-badge-bg);color:var(--fucsia-dark);border:1px solid var(--fucsia-border);'
+        : 'background:var(--grigio-bg);color:var(--testo-muted);border:1px solid #ccc;';
+    return `<span class="badge" style="${style}padding:5px 10px;font-size:0.8rem;">`
+      + `${escapeHtml(s)}`
+      + (isDefault ? '' : `<span style="cursor:pointer;margin-left:6px;opacity:0.65;font-size:0.9em;" title="Rimuovi" onclick="rimuoviStatoPartecipanteBbc(${i})">✕</span>`)
+      + `</span>`;
+  }).join('');
+}
+
+async function aggiungiStatoPartecipanteBbc() {
+  if (!puoVedereImpostazioni()) return;
+  const inputEl = document.getElementById('nuovoStatoPartBbcInput');
+  const val = (inputEl ? inputEl.value.trim() : '');
+  if (!val) { showToast('Inserisci il nome del nuovo stato.'); if (inputEl) inputEl.focus(); return; }
+  if (STATI_PARTECIPANTE_BBC.includes(val)) { showToast('Questo stato esiste già.'); return; }
+  const nuovi = [...STATI_PARTECIPANTE_BBC, val];
+  const prec  = STATI_PARTECIPANTE_BBC.slice();
+  STATI_PARTECIPANTE_BBC = nuovi;
+  try {
+    await CF_DOC_PATH().update({ statiPartecipanteBbc: STATI_PARTECIPANTE_BBC });
+    if (inputEl) inputEl.value = '';
+    renderGestioneListeDinamicheUI();
+    showToast('Stato "' + val + '" aggiunto.');
+  } catch(e) {
+    console.error('[BBC] Errore aggiunta stato partecipante:', e);
+    showToast('Errore salvataggio. Riprova.');
+    STATI_PARTECIPANTE_BBC = prec;
+  }
+}
+
+async function rimuoviStatoPartecipanteBbc(indice) {
+  if (!puoVedereImpostazioni()) return;
+  const val = STATI_PARTECIPANTE_BBC[indice];
+  if (!val) return;
+  if (STATI_PARTECIPANTE_BBC_SEED.includes(val)) { showToast('I due stati predefiniti non possono essere rimossi.'); return; }
+  if (!confirm('Rimuovere lo stato "' + val + '"?\n\nI partecipanti con questo stato conserveranno il valore nel database ma non sarà più selezionabile.')) return;
+  const nuovi = STATI_PARTECIPANTE_BBC.filter((_, i) => i !== indice);
+  const prec  = STATI_PARTECIPANTE_BBC.slice();
+  STATI_PARTECIPANTE_BBC = nuovi;
+  try {
+    await CF_DOC_PATH().update({ statiPartecipanteBbc: STATI_PARTECIPANTE_BBC });
+    renderGestioneListeDinamicheUI();
+    showToast('Stato "' + val + '" rimosso.');
+  } catch(e) {
+    console.error('[BBC] Errore rimozione stato partecipante:', e);
+    showToast('Errore salvataggio. Riprova.');
+    STATI_PARTECIPANTE_BBC = prec;
+  }
+}
+
 function renderGestioneListeDinamicheUI() {
   renderListaDinamicaStati();
   renderListaDinamicaFasiCf();
   renderListaDinamicaFasiBbc();
+  renderListaDinamicaStatiBbcPartecipante();
 }
 
 async function aggiungiStatoDinamico() {
