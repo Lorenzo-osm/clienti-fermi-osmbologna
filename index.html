@@ -1441,23 +1441,12 @@
         <label class="filter-label">Esito Contatto</label>
         <select class="filter-select" id="filtroStato" onchange="renderTabellaProvincia()">
           <option value="">Tutti</option>
-          <option value="Non risponde">Non risponde</option>
-          <option value="Appuntamento fissato">Appuntamento fissato</option>
-          <option value="Non interessato">Non interessato</option>
-          <option value="Da non ricontattare">Da non ricontattare</option>
         </select>
       </div>
       <div class="filter-group">
         <label class="filter-label">Fase Cliente</label>
         <select class="filter-select" id="filtroFase" onchange="renderTabellaProvincia()">
           <option value="">Tutte</option>
-          <option value="Fermo">Fermo</option>
-          <option value="Bloccato">Bloccato</option>
-          <option value="In Gestione">In Gestione</option>
-          <option value="Riattivato">Riattivato</option>
-          <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
-          <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
-          <option value="Fuori Zona">Fuori Zona</option>
         </select>
       </div>
       <div class="filter-group">
@@ -1590,23 +1579,12 @@
         <label class="filter-label">Esito Contatto</label>
         <select class="filter-select" id="dbFiltroStato" onchange="renderDatabase()">
           <option value="">Tutti</option>
-          <option value="Non risponde">Non risponde</option>
-          <option value="Appuntamento fissato">Appuntamento fissato</option>
-          <option value="Non interessato">Non interessato</option>
-          <option value="Da non ricontattare">Da non ricontattare</option>
         </select>
       </div>
       <div class="filter-group">
         <label class="filter-label">Fase Cliente</label>
         <select class="filter-select" id="dbFiltroFase" onchange="renderDatabase()">
           <option value="">Tutte</option>
-          <option value="Fermo">Fermo</option>
-          <option value="Bloccato">Bloccato</option>
-          <option value="In Gestione">In Gestione</option>
-          <option value="Riattivato">Riattivato</option>
-          <option value="Imprenditore non sei Solo">Imprenditore non sei Solo</option>
-          <option value="Gestito da un altro consulente">Gestito da un altro consulente</option>
-          <option value="Fuori Zona">Fuori Zona</option>
         </select>
       </div>
       <div class="filter-group">
@@ -2033,6 +2011,64 @@
       </div>
       <button class="btn btn-primary" onclick="salvaPassword()">Cambia password</button>
     </div>
+
+    <!-- ===== GESTIONE STATI E FASI (solo Super Admin) ===== -->
+    <div class="card" id="cardListeDinamiche">
+      <div class="settings-label" style="margin-bottom:6px;">Gestione Stati e Fasi</div>
+      <div class="settings-hint" style="margin-top:0; margin-bottom:22px;">
+        Aggiungi o rimuovi le voci dei menu a tendina <b>Esito Contatto</b> e <b>Fase Cliente</b>
+        in tutto il portale (sia CF che BBC). Le modifiche sono immediate e globali.
+        Se rimuovi una voce già usata da qualche contatto, il valore resterà nel database ma
+        non sarà più selezionabile — nessun dato verrà cancellato.
+      </div>
+
+      <!-- Sezione Stati -->
+      <div style="margin-bottom:28px;">
+        <div class="settings-label" style="margin-bottom:10px; color:var(--fucsia-dark);">Esito Contatto (Stato)</div>
+        <div id="listaDinamicaStati" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px;margin-bottom:14px;align-items:center;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="settings-field" style="margin:0;flex:1;min-width:160px;">
+            <label class="settings-label">Nuovo stato</label>
+            <input type="text" class="settings-input" id="nuovoStatoInput" placeholder="Es. In valutazione">
+          </div>
+          <div class="settings-field" style="margin:0;min-width:100px;">
+            <label class="settings-label">Colore badge</label>
+            <input type="color" id="nuovoStatoColore" value="#8a8a8a"
+              style="width:100%;height:40px;padding:4px 8px;border:1px solid var(--card-border);border-radius:8px;cursor:pointer;">
+          </div>
+          <button class="btn btn-primary" style="height:40px;white-space:nowrap;" onclick="aggiungiStatoDinamico()">+ Aggiungi</button>
+        </div>
+      </div>
+
+      <!-- Sezione Fasi CF -->
+      <div style="margin-bottom:28px; padding-top:20px; border-top:1px solid var(--card-border);">
+        <div class="settings-label" style="margin-bottom:10px; color:var(--fucsia-dark);">Fase Cliente — CF</div>
+        <div id="listaDinamicaFasiCf" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px;margin-bottom:14px;align-items:center;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="settings-field" style="margin:0;flex:1;min-width:180px;">
+            <label class="settings-label">Nuova fase CF</label>
+            <input type="text" class="settings-input" id="nuovaFaseCfInput" placeholder="Es. In follow-up">
+          </div>
+          <button class="btn btn-primary" style="height:40px;white-space:nowrap;" onclick="aggiungiFaseDinamica('cf')">+ Aggiungi</button>
+        </div>
+      </div>
+
+      <!-- Sezione Fasi BBC extra -->
+      <div style="padding-top:20px; border-top:1px solid var(--card-border);">
+        <div class="settings-label" style="margin-bottom:4px; color:var(--fucsia-dark);">Fase Cliente — BBC (fasi aggiuntive rispetto a CF)</div>
+        <div class="settings-hint" style="margin-top:0; margin-bottom:10px;">
+          Visibili solo nella sezione BBC. Si sommano automaticamente alle fasi CF elencate sopra.
+        </div>
+        <div id="listaDinamicaFasiBbc" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px;margin-bottom:14px;align-items:center;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="settings-field" style="margin:0;flex:1;min-width:180px;">
+            <label class="settings-label">Nuova fase BBC</label>
+            <input type="text" class="settings-input" id="nuovaFaseBbcInput" placeholder="Es. In attesa referral">
+          </div>
+          <button class="btn btn-primary" style="height:40px;white-space:nowrap;" onclick="aggiungiFaseDinamica('bbc')">+ Aggiungi</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2159,19 +2195,24 @@ const PROVINCES_URL_FALLBACK = "https://raw.githubusercontent.com/openpolis/geoj
 const COMUNI_PROVINCIA_URL = (id) => `https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_P_${id}_municipalities.geojson`;
 const COMUNI_PROVINCIA_URL_FALLBACK = (id) => `https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_P_${id}_municipalities.geojson`;
 
-/* Stato = Esito Contatto: cosa è successo nell'ultimo tentativo di contatto */
-const STATI_VALIDI = ["Non risponde", "Appuntamento fissato", "Non interessato", "Da non ricontattare"];
-/* Fase Cliente = Stato di gestione: elenco unico (assorbe i vecchi "Riattivato" e
-   "In contatto con altro consulente", ora "Gestito da un altro consulente") */
-const FASI_VALIDE = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente", "Fuori Zona"];
-/* Fasi aggiuntive per la sezione BBC (non usate in CF — non interferiscono con i dati esistenti) */
-const FASI_VALIDE_BBC = [...FASI_VALIDE, "Back-End", "Abbonamento"];
+/* ---- Seed: valori di default hardcoded, usati al primo avvio e come fallback ---- */
+const STATI_VALIDI_SEED = ["Non risponde", "Appuntamento fissato", "Non interessato", "Da non ricontattare"];
+const FASI_VALIDE_SEED = ["Fermo", "Bloccato", "In Gestione", "Riattivato", "Imprenditore non sei Solo", "Gestito da un altro consulente", "Fuori Zona"];
+const FASI_VALIDE_BBC_EXTRA_SEED = ["Back-End", "Abbonamento"];
+const COLORI_STATO_SEED = { 'Non risponde': '#8a8a8a', 'Appuntamento fissato': '#2f9e63', 'Non interessato': '#c97a1e', 'Da non ricontattare': '#c0392b' };
+
+/* Stato = Esito Contatto — caricato da Firestore all'avvio (i seed sopra sono il fallback) */
+let STATI_VALIDI = STATI_VALIDI_SEED.slice();
+/* Fase Cliente CF — caricata da Firestore */
+let FASI_VALIDE = FASI_VALIDE_SEED.slice();
+/* Fase Cliente BBC = CF + fasi extra BBC — ricostruita da Firestore */
+let FASI_VALIDE_BBC = [...FASI_VALIDE_SEED, ...FASI_VALIDE_BBC_EXTRA_SEED];
 
 /* Palette categorica per identificare i consulenti nei grafici (ordine fisso, non ciclato
    per i primi 8 slot — validata per distinguibilità anche in caso di daltonismo). */
 const COLORI_CONSULENTI = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
-/* Colori dello Stato (Esito Contatto): riusano esattamente quelli già assegnati ai badge nel resto del portale */
-const COLORI_STATO = { 'Non risponde': '#8a8a8a', 'Appuntamento fissato': '#2f9e63', 'Non interessato': '#c97a1e', 'Da non ricontattare': '#c0392b' };
+/* Colori dello Stato (Esito Contatto) — caricati da Firestore, fallback ai seed */
+let COLORI_STATO = Object.assign({}, COLORI_STATO_SEED);
 const MESI_BREVI = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 /* Alias per far coincidere il testo scritto nel foglio Google con i nomi ufficiali ISTAT */
@@ -2310,7 +2351,11 @@ async function loadFromFirestore() {
         csvUrl:            localStorage.getItem('cf_csv_url') || '',
         ultimoAgg:         localStorage.getItem('cf_ultimo_agg') || '',
         nomeFile:          localStorage.getItem('cf_nome_file') || '',
-        superadminPassword: localStorage.getItem('cf_superadmin_password') || SUPERADMIN_PASSWORD_DEFAULT
+        superadminPassword: localStorage.getItem('cf_superadmin_password') || SUPERADMIN_PASSWORD_DEFAULT,
+        statiValidi:        STATI_VALIDI_SEED.slice(),
+        fasiValide:         FASI_VALIDE_SEED.slice(),
+        fasiValideBbcExtra: FASI_VALIDE_BBC_EXTRA_SEED.slice(),
+        coloriStato:        Object.assign({}, COLORI_STATO_SEED)
       };
       await CF_DOC_PATH().set(cfState);
 
@@ -2344,6 +2389,29 @@ async function loadFromFirestore() {
       cfState.ultimoAgg         = data.ultimoAgg         || '';
       cfState.nomeFile          = data.nomeFile          || '';
       cfState.superadminPassword = data.superadminPassword || SUPERADMIN_PASSWORD_DEFAULT;
+
+      /* ---- Carica le liste dinamiche di Stati/Fasi da Firestore ---- */
+      const _statiCaricati = Array.isArray(data.statiValidi) && data.statiValidi.length > 0;
+      const _fasiCaricati  = Array.isArray(data.fasiValide)  && data.fasiValide.length  > 0;
+      /* Se la lista Stati esiste già su Firestore, la gestione dinamica è attiva: la vecchia
+         migrazione Stato → Fase (più sotto) NON deve più girare, altrimenti svuoterebbe lo stato
+         dei contatti ogni volta che il Super Admin rimuove una voce dal menu. */
+      const _listeDinamicheAttive = Array.isArray(data.statiValidi);
+      STATI_VALIDI = _statiCaricati ? data.statiValidi : STATI_VALIDI_SEED.slice();
+      FASI_VALIDE  = _fasiCaricati  ? data.fasiValide  : FASI_VALIDE_SEED.slice();
+      const _fasiExtra = Array.isArray(data.fasiValideBbcExtra) ? data.fasiValideBbcExtra : FASI_VALIDE_BBC_EXTRA_SEED.slice();
+      FASI_VALIDE_BBC = [...FASI_VALIDE, ..._fasiExtra.filter(f => !FASI_VALIDE.includes(f))];
+      COLORI_STATO = (data.coloriStato && typeof data.coloriStato === 'object' && !Array.isArray(data.coloriStato))
+        ? Object.assign({}, data.coloriStato) : Object.assign({}, COLORI_STATO_SEED);
+      /* Seed una-tantum: se i campi non esistono ancora nel documento, li scrive ora */
+      if (!_statiCaricati || !_fasiCaricati) {
+        CF_DOC_PATH().update({
+          statiValidi:        STATI_VALIDI,
+          fasiValide:         FASI_VALIDE,
+          fasiValideBbcExtra: _fasiExtra,
+          coloriStato:        COLORI_STATO
+        }).catch(e => console.warn('[CF] Seed liste dinamiche:', e));
+      }
 
       /* ---- Migrazione automatica dall'intervento precedente ----
          Se il documento principale ha ancora i campi "grandi" (datiGrezzi / overlay / eventiLog),
@@ -2423,7 +2491,7 @@ async function loadFromFirestore() {
          "Riattivato" né "In contatto con altro consulente" (es. "Da assegnare", "Assegnato",
          "In trattativa": valori ormai privi di una casella nel nuovo schema, ma conservati). */
       const MAPPA_VECCHIO_STATO_A_FASE = { 'Riattivato': 'Riattivato', 'In contatto con altro consulente': 'Gestito da un altro consulente' };
-      const daMigrareStatoFase = contatti.filter(c => c.stato && !STATI_VALIDI.includes(c.stato));
+      const daMigrareStatoFase = _listeDinamicheAttive ? [] : contatti.filter(c => c.stato && !STATI_VALIDI.includes(c.stato));
       if (daMigrareStatoFase.length) {
         const BATCH_SIZE_MIG2 = 500;
         for (let i = 0; i < daMigrareStatoFase.length; i += BATCH_SIZE_MIG2) {
@@ -2436,13 +2504,11 @@ async function loadFromFirestore() {
           await batchMig2.commit();
         }
         // Aggiorna in memoria senza ricaricare
-        contatti.forEach(c => {
-          if (c.stato && !STATI_VALIDI.includes(c.stato)) {
-            const nuovaFase = (!c.faseCliente && MAPPA_VECCHIO_STATO_A_FASE[c.stato]) ? MAPPA_VECCHIO_STATO_A_FASE[c.stato] : (c.faseCliente || '');
-            c.statoPrecedente = c.stato;
-            c.stato = '';
-            c.faseCliente = nuovaFase;
-          }
+        daMigrareStatoFase.forEach(c => {
+          const nuovaFase = (!c.faseCliente && MAPPA_VECCHIO_STATO_A_FASE[c.stato]) ? MAPPA_VECCHIO_STATO_A_FASE[c.stato] : (c.faseCliente || '');
+          c.statoPrecedente = c.stato;
+          c.stato = '';
+          c.faseCliente = nuovaFase;
         });
       }
 
@@ -2740,6 +2806,7 @@ function showPage(name) {
   if (name === 'organigramma') inizializzaPaginaOrganigramma();
   if (name === 'bbc-eventi') renderBbcEventi();
   if (name === 'bbc-soci') inizializzaPaginaBbcSoci();
+  if (name === 'impostazioni') renderGestioneListeDinamicheUI();
   if (name === 'mappa' && map) setTimeout(() => map.invalidateSize(), 150);
 }
 
@@ -3021,10 +3088,18 @@ function creaRigaHtml(c, mostraAzioni) {
     celleConsulente = `${escapeHtml(c.consulente) || '—'} ${warning}`;
   }
 
+  const fasiSezione = sezioneCorrente === 'bbc' ? FASI_VALIDE_BBC : FASI_VALIDE;
   const opzStato = ['<option value="">—</option>'].concat(
-    STATI_VALIDI.map(s => `<option value="${s}" ${c.stato === s ? 'selected' : ''}>${s}</option>`));
+    STATI_VALIDI.map(s => `<option value="${escapeHtml(s)}" ${c.stato === s ? 'selected' : ''}>${escapeHtml(s)}</option>`));
+  // Voce rimossa dal menu ma ancora presente sul contatto: resta visibile invece di mostrare "—"
+  if (c.stato && !STATI_VALIDI.includes(c.stato)) {
+    opzStato.push(`<option value="${escapeHtml(c.stato)}" selected>${escapeHtml(c.stato)}</option>`);
+  }
   const opzFase = ['<option value="">—</option>'].concat(
-    (sezioneCorrente === 'bbc' ? FASI_VALIDE_BBC : FASI_VALIDE).map(f => `<option value="${f}" ${c.faseCliente === f ? 'selected' : ''}>${f}</option>`));
+    fasiSezione.map(f => `<option value="${escapeHtml(f)}" ${c.faseCliente === f ? 'selected' : ''}>${escapeHtml(f)}</option>`));
+  if (c.faseCliente && !fasiSezione.includes(c.faseCliente)) {
+    opzFase.push(`<option value="${escapeHtml(c.faseCliente)}" selected>${escapeHtml(c.faseCliente)}</option>`);
+  }
 
   const checkAttivo = `<label class="check-attivo-label">
       <input type="checkbox" ${c.clienteAttivo ? 'checked' : ''} onchange="aggiornaCampoRiga('${escapeJs(c._key)}','clienteAttivo',this.checked)">
@@ -3132,6 +3207,13 @@ function creaRigaSocioHtml(s) {
       STATI_VALIDI.map(st => '<option value="' + escapeHtml(st) + '"' + (s.stato === st ? ' selected' : '') + '>' + escapeHtml(st) + '</option>'));
     const opzFase = ['<option value="">—</option>'].concat(
       FASI_VALIDE_BBC.map(f => '<option value="' + escapeHtml(f) + '"' + (s.faseCliente === f ? ' selected' : '') + '>' + escapeHtml(f) + '</option>'));
+    // Voci rimosse dal menu ma ancora presenti sul socio: restano visibili invece di mostrare "—"
+    if (s.stato && !STATI_VALIDI.includes(s.stato)) {
+      opzStato.push('<option value="' + escapeHtml(s.stato) + '" selected>' + escapeHtml(s.stato) + '</option>');
+    }
+    if (s.faseCliente && !FASI_VALIDE_BBC.includes(s.faseCliente)) {
+      opzFase.push('<option value="' + escapeHtml(s.faseCliente) + '" selected>' + escapeHtml(s.faseCliente) + '</option>');
+    }
     cellStato = '<select class="td-select" onchange="aggiornaCampoSocio(\'' + escapeJs(s.id) + '\',\'stato\',this.value)">' + opzStato.join('') + '</select>';
     cellFase  = '<select class="td-select" onchange="aggiornaCampoSocio(\'' + escapeJs(s.id) + '\',\'faseCliente\',this.value)">' + opzFase.join('') + '</select>';
     cellData  = '<input type="text" class="td-date-input" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10"'
@@ -3895,7 +3977,7 @@ function renderMiniPieStato(s) {
 
     chartRegistry[idStato] = new Chart(document.getElementById(idStato), {
       type: 'doughnut',
-      data: { labels: STATI_VALIDI, datasets: [{ data: valoriStato, backgroundColor: STATI_VALIDI.map(st => COLORI_STATO[st]), borderColor: '#fff', borderWidth: 2 }] },
+      data: { labels: STATI_VALIDI, datasets: [{ data: valoriStato, backgroundColor: STATI_VALIDI.map(st => COLORI_STATO[st] || '#cccccc'), borderColor: '#fff', borderWidth: 2 }] },
       options: {
         responsive: true, maintainAspectRatio: false, cutout: '60%',
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: tooltipPct } } }
@@ -4054,29 +4136,45 @@ async function elaboraTestoCsv(testo) {
 
   impostaStatus(true, 'Salvataggio in corso... — ' + righeGrezze.length + ' righe');
 
-  /* Mappa overlay: legge i valori correnti da contatti (già in memoria da Firestore)
-     così i campi modificati manualmente non vengono sovrascritti dal nuovo CSV. */
+  /* Mappa overlay: conserva l'intero documento esistente (non solo 5 campi),
+     così tutti i dati inseriti manualmente nel portale (esiti, campagna marketing,
+     valore €, statoPrecedente, dataAssegnazione, ecc.) non vengono persi al re-import. */
   const overlayEsistente = {};
   contatti.forEach(c => {
-    overlayEsistente[c._key] = {
-      consulente:     c.consulente,
-      stato:          c.stato,
-      faseCliente:    c.faseCliente,
-      ultimoContatto: c.ultimoContatto,
-      clienteAttivo:  c.clienteAttivo   // preservato al re-import
-    };
+    overlayEsistente[c._key] = c; // documento completo, non solo i campi base
   });
 
-  /* Unisci dati grezzi con overlay esistente */
+  /* Unisci dati grezzi con overlay esistente.
+     Strategia: parte dal documento ESISTENTE (con tutti i campi), poi sovrascrive
+     SOLO i campi che provengono legittimamente dal CSV (anagrafica e geo-match).
+     I campi inseriti manualmente (consulente, stato, fase, data contatto, attivo,
+     esiti, campagna, valore, ecc.) restano intatti dall'existing. */
   const righeUnificate = righeGrezze.map(r => {
-    const mod = overlayEsistente[r._key];
-    if (!mod) return r;
-    return Object.assign({}, r, {
-      consulente:     mod.consulente     !== undefined ? mod.consulente     : r.consulente,
-      stato:          mod.stato          !== undefined ? mod.stato          : r.stato,
-      faseCliente:    mod.faseCliente    !== undefined ? mod.faseCliente    : r.faseCliente,
-      ultimoContatto: mod.ultimoContatto !== undefined ? mod.ultimoContatto : r.ultimoContatto,
-      clienteAttivo:  mod.clienteAttivo  !== undefined ? mod.clienteAttivo  : (r.clienteAttivo || false)
+    const existing = overlayEsistente[r._key];
+    if (!existing) return r; // contatto nuovo: usa i dati CSV as-is
+
+    return Object.assign({}, existing, {
+      // Campi aggiornati dal CSV (fonte di verità per l'anagrafica)
+      ragioneSociale:    r.ragioneSociale,
+      referente:         r.referente,
+      contatto:          r.contatto,
+      email:             r.email,
+      provincia:         r.provincia,
+      comune:            r.comune,
+      vecchioConsulente: r.vecchioConsulente,
+      _provinciaMatch:   r._provinciaMatch,
+      _comuneMatch:      r._comuneMatch,
+      _key:              r._key,
+      // Campi editabili manualmente: il valore del portale prevale su quello del CSV;
+      // il valore CSV è usato solo se il campo non è ancora stato impostato (undefined)
+      consulente:        existing.consulente     !== undefined ? existing.consulente     : r.consulente,
+      stato:             existing.stato          !== undefined ? existing.stato          : r.stato,
+      faseCliente:       existing.faseCliente    !== undefined ? existing.faseCliente    : r.faseCliente,
+      ultimoContatto:    existing.ultimoContatto !== undefined ? existing.ultimoContatto : r.ultimoContatto,
+      clienteAttivo:     existing.clienteAttivo  !== undefined ? existing.clienteAttivo  : (r.clienteAttivo || false)
+      // Nota: esiti, campagnaMarketing, valoreEuro, statoPrecedente, dataAssegnazione
+      // e qualsiasi altro campo presente nell'existing sono preservati automaticamente
+      // dalla base Object.assign({}, existing, ...) — non serve elencali esplicitamente.
     });
   });
 
@@ -4686,6 +4784,18 @@ function aggiornaNvbarPerSezione(sezione) {
   }
 }
 
+/* Aggiorna le select filtro Esito Contatto (Stato) con la lista dinamica corrente */
+function aggiornafiltroStati() {
+  ['dbFiltroStato', 'filtroStato'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Tutti</option>'
+      + STATI_VALIDI.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    if (STATI_VALIDI.includes(current)) sel.value = current;
+  });
+}
+
 /* Aggiorna le select filtro Fase Cliente per includere le fasi BBC extra quando si è in BBC mode */
 function aggiornafiltroFasiBbc() {
   const fasi = sezioneCorrente === 'bbc' ? FASI_VALIDE_BBC : FASI_VALIDE;
@@ -4699,10 +4809,16 @@ function aggiornafiltroFasiBbc() {
   });
 }
 
+/* Aggiorna tutti i filtri di stato e fase con le liste dinamiche correnti */
+function aggiornaTuttiFiltriListeDinamiche() {
+  aggiornafiltroStati();
+  aggiornafiltroFasiBbc();
+}
+
 async function selezionaSezione(sezione) {
   sezioneCorrente = sezione;
   aggiornaUIPerRuolo();
-  aggiornafiltroFasiBbc();
+  aggiornaTuttiFiltriListeDinamiche();
   showPage('mappa'); // rende page-mappa visibile (display:block) — da qui in avanti #map ha dimensioni reali
   if (!map) {
     // Prima volta: inizializza la mappa ora che il contenitore è visibile.
@@ -6159,10 +6275,237 @@ async function eliminaEsitoSocio(socioId, indice) {
   }
 }
 
+/* ===================== GESTIONE LISTE DINAMICHE (IMPOSTAZIONI — solo Super Admin) ===================== */
+
+function renderListaDinamicaStati() {
+  const wrap = document.getElementById('listaDinamicaStati');
+  if (!wrap) return;
+  if (!STATI_VALIDI.length) {
+    wrap.innerHTML = '<span style="color:var(--testo-muted);font-size:0.83rem;">Nessuno stato definito.</span>';
+    return;
+  }
+  wrap.innerHTML = STATI_VALIDI.map((s, i) => {
+    const col = COLORI_STATO[s] || '#8a8a8a';
+    const bg  = col + '22';
+    return `<span class="badge" style="background:${bg};color:${col};border:1px solid ${col};padding:5px 10px;font-size:0.8rem;">`
+      + `${escapeHtml(s)}`
+      + `<span style="cursor:pointer;margin-left:6px;opacity:0.65;font-size:0.9em;" title="Rimuovi" onclick="rimuoviStatoDinamico(${i})">✕</span>`
+      + `</span>`;
+  }).join('');
+}
+
+function renderListaDinamicaFasiCf() {
+  const wrap = document.getElementById('listaDinamicaFasiCf');
+  if (!wrap) return;
+  if (!FASI_VALIDE.length) {
+    wrap.innerHTML = '<span style="color:var(--testo-muted);font-size:0.83rem;">Nessuna fase definita.</span>';
+    return;
+  }
+  wrap.innerHTML = FASI_VALIDE.map((f, i) => {
+    return `<span class="badge" style="background:var(--fucsia-badge-bg);color:var(--fucsia-dark);border:1px solid var(--fucsia-border);padding:5px 10px;font-size:0.8rem;">`
+      + `${escapeHtml(f)}`
+      + `<span style="cursor:pointer;margin-left:6px;opacity:0.65;font-size:0.9em;" title="Rimuovi" onclick="rimuoviFaseDinamica('cf',${i})">✕</span>`
+      + `</span>`;
+  }).join('');
+}
+
+function renderListaDinamicaFasiBbc() {
+  const wrap = document.getElementById('listaDinamicaFasiBbc');
+  if (!wrap) return;
+  const fasiExtra = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+  if (!fasiExtra.length) {
+    wrap.innerHTML = '<span style="color:var(--testo-muted);font-size:0.83rem;">Nessuna fase BBC extra definita.</span>';
+    return;
+  }
+  wrap.innerHTML = fasiExtra.map((f, i) => {
+    return `<span class="badge" style="background:var(--blu-bg);color:var(--blu);border:1px solid var(--blu);padding:5px 10px;font-size:0.8rem;">`
+      + `${escapeHtml(f)}`
+      + `<span style="cursor:pointer;margin-left:6px;opacity:0.65;font-size:0.9em;" title="Rimuovi" onclick="rimuoviFaseDinamica('bbc',${i})">✕</span>`
+      + `</span>`;
+  }).join('');
+}
+
+function renderGestioneListeDinamicheUI() {
+  renderListaDinamicaStati();
+  renderListaDinamicaFasiCf();
+  renderListaDinamicaFasiBbc();
+}
+
+async function aggiungiStatoDinamico() {
+  if (!puoVedereImpostazioni()) return;
+  const inputEl  = document.getElementById('nuovoStatoInput');
+  const coloreEl = document.getElementById('nuovoStatoColore');
+  const val = (inputEl ? inputEl.value.trim() : '');
+  if (!val) { showToast('Inserisci il nome del nuovo stato.'); if (inputEl) inputEl.focus(); return; }
+  if (STATI_VALIDI.includes(val)) { showToast('Questo stato esiste già.'); return; }
+  const col = coloreEl ? coloreEl.value : '#8a8a8a';
+  const nuoviStati  = [...STATI_VALIDI, val];
+  const nuoviColori = Object.assign({}, COLORI_STATO, { [val]: col });
+  const statoPrec  = STATI_VALIDI;
+  const coloriPrec = Object.assign({}, COLORI_STATO);
+  STATI_VALIDI = nuoviStati;
+  COLORI_STATO = nuoviColori;
+  try {
+    await CF_DOC_PATH().update({ statiValidi: STATI_VALIDI, coloriStato: COLORI_STATO });
+    if (inputEl) inputEl.value = '';
+    aggiornaTuttiFiltriListeDinamiche();
+    renderGestioneListeDinamicheUI();
+    showToast('Stato "' + val + '" aggiunto.');
+  } catch(e) {
+    console.error('[CF] Errore aggiunta stato:', e);
+    showToast('Errore salvataggio. Riprova.');
+    STATI_VALIDI = statoPrec;
+    COLORI_STATO = coloriPrec;
+  }
+}
+
+async function rimuoviStatoDinamico(indice) {
+  if (!puoVedereImpostazioni()) return;
+  const val = STATI_VALIDI[indice];
+  if (!val) return;
+  const cfUso  = contatti.filter(c => c.stato === val).length;
+  const bbcUso = bbcContatti.filter(c => c.stato === val).length;
+  const totUso = cfUso + bbcUso;
+  let msg;
+  if (totUso > 0) {
+    msg = `Lo stato "${val}" è ancora usato da ${totUso} contatto${totUso > 1 ? 'i' : ''} (${cfUso} CF + ${bbcUso} BBC).\n\nRimuoverlo non cancella i dati: il valore resterà nel database dei contatti ma non sarà più selezionabile nei menu.\n\nProcedere?`;
+  } else {
+    msg = `Rimuovere lo stato "${val}"?`;
+  }
+  if (!confirm(msg)) return;
+  const nuoviStati  = STATI_VALIDI.filter((_, i) => i !== indice);
+  const nuoviColori = Object.assign({}, COLORI_STATO);
+  delete nuoviColori[val];
+  const statoPrec  = STATI_VALIDI;
+  const coloriPrec = Object.assign({}, COLORI_STATO);
+  STATI_VALIDI = nuoviStati;
+  COLORI_STATO = nuoviColori;
+  try {
+    await CF_DOC_PATH().update({ statiValidi: STATI_VALIDI, coloriStato: COLORI_STATO });
+    aggiornaTuttiFiltriListeDinamiche();
+    renderGestioneListeDinamicheUI();
+    showToast('Stato "' + val + '" rimosso.');
+  } catch(e) {
+    console.error('[CF] Errore rimozione stato:', e);
+    showToast('Errore salvataggio. Riprova.');
+    STATI_VALIDI = statoPrec;
+    COLORI_STATO = coloriPrec;
+  }
+}
+
+async function aggiungiFaseDinamica(sezione) {
+  if (!puoVedereImpostazioni()) return;
+  const inputId = sezione === 'bbc' ? 'nuovaFaseBbcInput' : 'nuovaFaseCfInput';
+  const inputEl = document.getElementById(inputId);
+  const val = (inputEl ? inputEl.value.trim() : '');
+  if (!val) { showToast('Inserisci il nome della nuova fase.'); if (inputEl) inputEl.focus(); return; }
+
+  if (sezione === 'cf') {
+    if (FASI_VALIDE.includes(val)) { showToast('Questa fase esiste già.'); return; }
+    const fasiExtra    = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+    const fasiPrecedenti = FASI_VALIDE.slice();
+    const bbcPrecedenti  = FASI_VALIDE_BBC.slice();
+    FASI_VALIDE     = [...FASI_VALIDE, val];
+    FASI_VALIDE_BBC = [...FASI_VALIDE, ...fasiExtra.filter(f => !FASI_VALIDE.includes(f))];
+    try {
+      await CF_DOC_PATH().update({ fasiValide: FASI_VALIDE });
+      if (inputEl) inputEl.value = '';
+      aggiornaTuttiFiltriListeDinamiche();
+      renderGestioneListeDinamicheUI();
+      showToast('Fase CF "' + val + '" aggiunta.');
+    } catch(e) {
+      console.error('[CF] Errore aggiunta fase CF:', e);
+      showToast('Errore salvataggio. Riprova.');
+      FASI_VALIDE     = fasiPrecedenti;
+      FASI_VALIDE_BBC = bbcPrecedenti;
+    }
+  } else {
+    const fasiExtra = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+    if (fasiExtra.includes(val) || FASI_VALIDE.includes(val)) { showToast('Questa fase esiste già.'); return; }
+    const bbcPrecedenti = FASI_VALIDE_BBC.slice();
+    const nuoveFasiExtra = [...fasiExtra, val];
+    FASI_VALIDE_BBC = [...FASI_VALIDE, ...nuoveFasiExtra];
+    try {
+      await CF_DOC_PATH().update({ fasiValideBbcExtra: nuoveFasiExtra });
+      if (inputEl) inputEl.value = '';
+      aggiornaTuttiFiltriListeDinamiche();
+      renderGestioneListeDinamicheUI();
+      showToast('Fase BBC "' + val + '" aggiunta.');
+    } catch(e) {
+      console.error('[CF] Errore aggiunta fase BBC:', e);
+      showToast('Errore salvataggio. Riprova.');
+      FASI_VALIDE_BBC = bbcPrecedenti;
+    }
+  }
+}
+
+async function rimuoviFaseDinamica(sezione, indice) {
+  if (!puoVedereImpostazioni()) return;
+  let val;
+  if (sezione === 'cf') {
+    val = FASI_VALIDE[indice];
+  } else {
+    const fasiExtra = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+    val = fasiExtra[indice];
+  }
+  if (!val) return;
+
+  let cfUso = 0, bbcUso = 0;
+  if (sezione === 'cf') {
+    cfUso  = contatti.filter(c => c.faseCliente === val).length;
+    bbcUso = bbcContatti.filter(c => c.faseCliente === val).length;
+  } else {
+    bbcUso = bbcContatti.filter(c => c.faseCliente === val).length;
+  }
+  const totUso = cfUso + bbcUso;
+  let msg;
+  if (totUso > 0) {
+    msg = `La fase "${val}" è ancora usata da ${totUso} contatto${totUso > 1 ? 'i' : ''} (${cfUso} CF + ${bbcUso} BBC).\n\nRimuoverla non cancella i dati: il valore resterà nel database dei contatti ma non sarà più selezionabile nei menu.\n\nProcedere?`;
+  } else {
+    msg = `Rimuovere la fase "${val}"?`;
+  }
+  if (!confirm(msg)) return;
+
+  if (sezione === 'cf') {
+    const fasiExtra      = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+    const fasiPrecedenti = FASI_VALIDE.slice();
+    const bbcPrecedenti  = FASI_VALIDE_BBC.slice();
+    FASI_VALIDE     = FASI_VALIDE.filter(f => f !== val);
+    FASI_VALIDE_BBC = [...FASI_VALIDE, ...fasiExtra.filter(f => !FASI_VALIDE.includes(f))];
+    try {
+      await CF_DOC_PATH().update({ fasiValide: FASI_VALIDE });
+      aggiornaTuttiFiltriListeDinamiche();
+      renderGestioneListeDinamicheUI();
+      showToast('Fase CF "' + val + '" rimossa.');
+    } catch(e) {
+      console.error('[CF] Errore rimozione fase CF:', e);
+      showToast('Errore salvataggio. Riprova.');
+      FASI_VALIDE     = fasiPrecedenti;
+      FASI_VALIDE_BBC = bbcPrecedenti;
+    }
+  } else {
+    const fasiExtra     = FASI_VALIDE_BBC.filter(f => !FASI_VALIDE.includes(f));
+    const bbcPrecedenti = FASI_VALIDE_BBC.slice();
+    const nuoveFasiExtra = fasiExtra.filter(f => f !== val);
+    FASI_VALIDE_BBC = [...FASI_VALIDE, ...nuoveFasiExtra];
+    try {
+      await CF_DOC_PATH().update({ fasiValideBbcExtra: nuoveFasiExtra });
+      aggiornaTuttiFiltriListeDinamiche();
+      renderGestioneListeDinamicheUI();
+      showToast('Fase BBC "' + val + '" rimossa.');
+    } catch(e) {
+      console.error('[CF] Errore rimozione fase BBC:', e);
+      showToast('Errore salvataggio. Riprova.');
+      FASI_VALIDE_BBC = bbcPrecedenti;
+    }
+  }
+}
+
 /* ===================== AVVIO ===================== */
 async function avviaApp() {
   document.getElementById('navbar').style.display = 'flex';
   aggiornaUIPerRuolo();
+  aggiornaTuttiFiltriListeDinamiche();
   showPage('home');
   // initMappa() NON viene chiamata qui: la pagina mappa è display:none in questo momento
   // (la pagina attiva è 'home', il chooser). Se initMappa venisse eseguita ora, Leaflet
