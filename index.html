@@ -1253,7 +1253,7 @@
         <div>
           <div class="tutorial-step-title">Segui i tuoi contatti</div>
           <div class="tutorial-step-desc">
-            Usa le colonne <strong>Esito Contatto</strong> e <strong>Fase Cliente</strong> nel database per tenere traccia di come procede il rapporto con ogni contatto. Aggiorna la data di ultimo contatto ogni volta che li senti.
+            Usa le colonne <strong>Esito Contatto</strong> e <strong>Fase Cliente</strong> nel database per tenere traccia di come procede il rapporto con ogni contatto. Aggiorna la data di ultimo contatto ogni volta che li senti e segna in <strong>Da Ricontattare</strong> quando richiamarli: con "Ordina per → prima i più urgenti" hai subito l'elenco delle chiamate da fare.
           </div>
         </div>
       </div>
@@ -1819,6 +1819,10 @@
           </div>
           <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="eseguiLogin()">Entra</button>
           <div class="login-error" id="loginError">Email o password non corretti.</div>
+          <div style="margin-top:12px;text-align:center;font-size:0.82rem;">
+            <a href="#" onclick="inviaResetPasswordDaLogin(event)" style="color:var(--fucsia-dark);">Password dimenticata?</a>
+            <div id="loginResetMsg" style="margin-top:8px;color:var(--testo-muted);line-height:1.45;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -2190,6 +2194,19 @@
           </div>
         </div>
       </div>
+
+      <div class="tutorial-step">
+        <div class="tutorial-step-num">6</div>
+        <div>
+          <div class="tutorial-step-title">⏰ Segna quando ricontattarlo</div>
+          <div class="tutorial-step-text">
+            Nella colonna <b>Da Ricontattare</b> scrivi il giorno in cui devi richiamare il cliente (gg/mm/aaaa).
+            La data diventa <b style="color:var(--arancio);">arancione</b> il giorno stesso e <b style="color:var(--rosso);">rossa</b>
+            se la chiamata è in ritardo. Nel menu <b>Ordina per</b> scegli "Da ricontattare: prima i più urgenti"
+            e in cima alla tabella trovi le persone da chiamare per prime.
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="section-header" style="margin-top:8px;">
@@ -2220,8 +2237,8 @@
       <div class="tutorial-tip-icon">💡</div>
       <div class="tutorial-tip-text">
         <b>Consiglio:</b> ogni volta che chiami o incontri un cliente fermo, apri la sua riga nel Database,
-        aggiorna Stato e Fase se sono cambiati, e imposta la data di oggi come Ultimo Contatto. In due minuti
-        il portale resta sempre aggiornato per tutto il team.
+        aggiorna Stato e Fase se sono cambiati, imposta la data di oggi come Ultimo Contatto e, se serve,
+        la data in cui richiamarlo in Da Ricontattare. In due minuti il portale resta sempre aggiornato per tutto il team.
       </div>
     </div>
   </div>
@@ -4405,6 +4422,22 @@ async function migraUtenteAdAuth(id) {
     showToast('Account migrato: ' + u.nome + ' può continuare ad accedere con la stessa password di prima');
   } catch(e) {
     showToast(messaggioErroreAuth(e));
+  }
+}
+
+/* "Password dimenticata?" nella schermata di accesso: Firebase invia l'email per sceglierne una nuova.
+   La password è quella dell'accesso unico OSM, quindi vale per tutti i portali. */
+async function inviaResetPasswordDaLogin(ev) {
+  if (ev) ev.preventDefault();
+  const email = (document.getElementById('loginEmailInput').value || '').trim().toLowerCase();
+  const msg = document.getElementById('loginResetMsg');
+  if (!email) { msg.textContent = 'Scrivi prima la tua email nel campo qui sopra.'; return; }
+  msg.textContent = 'Invio in corso...';
+  try {
+    await _fbAuth.sendPasswordResetEmail(email);
+    msg.textContent = 'Se ' + email + ' è registrata, riceverai a breve un\'email con il link per scegliere una nuova password (controlla anche lo spam). Varrà per tutti i portali OSM.';
+  } catch (e) {
+    msg.textContent = messaggioErroreAuth(e);
   }
 }
 
