@@ -432,6 +432,11 @@
   }
   .td-date-input:focus { border-color: var(--fucsia); }
   .td-date-empty { color: var(--testo-muted); font-size: 0.7rem; font-style: italic; }
+  /* Data "Da ricontattare": rossa se già passata, arancione se è oggi */
+  .td-date-input.ricontatto-scaduto { border-color: var(--rosso); color: var(--rosso); background: var(--rosso-bg); }
+  .td-date-input.ricontatto-oggi { border-color: var(--arancio); color: var(--arancio); background: #fdf3e6; }
+  .td-ricontatto-testo.ricontatto-scaduto { color: var(--rosso); font-weight: 700; }
+  .td-ricontatto-testo.ricontatto-oggi { color: var(--arancio); font-weight: 700; }
 
   .file-import-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .file-import-label {
@@ -1898,6 +1903,14 @@
           Mostra solo clienti attivi
         </label>
       </div>
+      <div class="filter-group">
+        <label class="filter-label">Ordina per</label>
+        <select class="filter-select" id="filtroOrdina" onchange="renderTabellaProvincia()">
+          <option value="">Ordine predefinito</option>
+          <option value="ricontatto-asc">Da ricontattare: prima i più urgenti</option>
+          <option value="ricontatto-desc">Da ricontattare: prima i più lontani</option>
+        </select>
+      </div>
       <div class="filter-group" style="flex:1;">
         <label class="filter-label">Cerca azienda / referente</label>
         <input type="text" class="filter-input" id="filtroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderTabellaProvincia()">
@@ -1920,6 +1933,7 @@
               <th>Stato</th>
               <th>Fase Cliente</th>
               <th>Ultimo Contatto</th>
+              <th>Da Ricontattare</th>
               <th>Esiti</th>
             </tr>
           </thead>
@@ -2036,6 +2050,14 @@
           Mostra solo clienti attivi
         </label>
       </div>
+      <div class="filter-group">
+        <label class="filter-label">Ordina per</label>
+        <select class="filter-select" id="dbOrdina" onchange="renderDatabase()">
+          <option value="">Ordine predefinito</option>
+          <option value="ricontatto-asc">Da ricontattare: prima i più urgenti</option>
+          <option value="ricontatto-desc">Da ricontattare: prima i più lontani</option>
+        </select>
+      </div>
       <div class="filter-group" style="flex:1;">
         <label class="filter-label">Cerca azienda / referente</label>
         <input type="text" class="filter-input" id="dbFiltroTesto" placeholder="Digita per filtrare..." style="width:100%;" oninput="renderDatabase()">
@@ -2059,6 +2081,7 @@
               <th>Stato</th>
               <th>Fase Cliente</th>
               <th>Ultimo Contatto</th>
+              <th>Da Ricontattare</th>
               <th>Esiti</th>
               <th class="th-bbc-mkt-only" id="thCampagnaMarketing" style="display:none;">Campagna Mktg</th>
               <th class="th-bbc-mkt-only" id="thValoreEuro" style="display:none;">Valore €</th>
@@ -3149,7 +3172,8 @@ async function saveField(campo, valore) {
    sono in chiaro, modificabili). Serve a evitare modifiche per errore da parte
    dell'account sbagliato, non a proteggere dati sensibili. */
 const SUPERADMIN_EMAIL = 'l.gorgo@osmpartnerbologna.it';
-const SUPERADMIN_PASSWORD_DEFAULT = 'OsmBologna2026!';
+// Vecchia password di default rimossa dal codice: l'accesso passa solo da Firebase Authentication
+const SUPERADMIN_PASSWORD_DEFAULT = '';
 
 function getSuperAdminPassword() {
   return cfState.superadminPassword || SUPERADMIN_PASSWORD_DEFAULT;
@@ -3662,7 +3686,72 @@ function renderTabellaProvincia() {
   }
   emptyState.style.display = 'none';
 
+  const ordine = document.getElementById('filtroOrdina') ? document.getElementById('filtroOrdina').value : '';
+  if (ordine) righe = ordinaPerRicontatto(righe, c => c.dataRicontatto, ordine);
   body.innerHTML = righe.map(c => creaRigaHtml(c)).join('');
+}
+
+/* ===================== DATA DA RICONTATTARE ===================== */
+/* Ordina per data di ricontatto (ISO aaaa-mm-gg, confrontabile come testo).
+   I contatti senza data finiscono sempre in fondo, in entrambe le direzioni. */
+function ordinaPerRicontatto(lista, getData, ordine) {
+  const verso = ordine === 'ricontatto-desc' ? -1 : 1;
+  return lista.slice().sort((a, b) => {
+    const da = getData(a) || '', dbb = getData(b) || '';
+    if (!da && !dbb) return 0;
+    if (!da) return 1;
+    if (!dbb) return -1;
+    return da < dbb ? -verso : da > dbb ? verso : 0;
+  });
+}
+
+/* Classe colore della data di ricontatto: scaduta (già passata) o oggi */
+function classeRicontatto(dataIso) {
+  const g = giorniDaData(dataIso);
+  if (g === null) return '';
+  if (g > 0) return 'ricontatto-scaduto';
+  if (g === 0) return 'ricontatto-oggi';
+  return '';
+}
+
+function titoloRicontatto(dataIso) {
+  const g = giorniDaData(dataIso);
+  if (g === null) return 'Data in cui ricontattare questa persona';
+  if (g > 0) return 'Ricontatto scaduto da ' + g + (g === 1 ? ' giorno' : ' giorni');
+  if (g === 0) return 'Da ricontattare oggi';
+  return 'Da ricontattare tra ' + (-g) + (g === -1 ? ' giorno' : ' giorni');
+}
+
+/* Legge una data gg/mm/aaaa digitata: restituisce '' se vuota, l'ISO se valida, null se non valida (con avviso) */
+function leggiDataItaliana(el) {
+  const testo = el.value.trim();
+  if (!testo) return '';
+  const m = testo.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) {
+    showToast('Data non valida: usa il formato gg/mm/aaaa (es. 21/08/2026).');
+    return null;
+  }
+  const gg = parseInt(m[1], 10), mm = parseInt(m[2], 10), aaaa = parseInt(m[3], 10);
+  const d = new Date(aaaa, mm - 1, gg);
+  if (d.getFullYear() !== aaaa || d.getMonth() !== mm - 1 || d.getDate() !== gg) {
+    showToast('Data non valida: controlla giorno e mese.');
+    return null;
+  }
+  return aaaa + '-' + String(mm).padStart(2, '0') + '-' + String(gg).padStart(2, '0');
+}
+
+function salvaDataRicontatto(el, key) {
+  const iso = leggiDataItaliana(el);
+  if (iso === null) return;
+  aggiornaCampoRiga(key, 'dataRicontatto', iso);
+}
+
+function salvaDataRicontattoSocio(el, socioId) {
+  const iso = leggiDataItaliana(el);
+  if (iso === null) return;
+  aggiornaCampoSocio(socioId, 'dataRicontatto', iso);
+  // I soci non passano da un re-render automatico: aggiorna subito colore e ordinamento
+  if (document.getElementById('page-database').classList.contains('active')) renderDatabase();
 }
 
 function elencoConsulentiPerSelect() {
@@ -3733,6 +3822,7 @@ function creaRigaHtml(c, mostraAzioni) {
       <td><select class="td-select ${statoClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','stato', this.value)">${opzStato.join('')}</select></td>
       <td><select class="td-select ${faseClass}" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','faseCliente', this.value)">${opzFase.join('')}</select>${checkAttivo}</td>
       <td><input type="text" class="td-date-input" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10" value="${escapeHtml(formattaDataItaliana(c.ultimoContatto) || '')}" oninput="mascheraDataInput(this)" onchange="salvaDataContatto(this,'${escapeJs(c._key)}')"></td>
+      <td><input type="text" class="td-date-input ${classeRicontatto(c.dataRicontatto)}" title="${escapeHtml(titoloRicontatto(c.dataRicontatto))}" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10" value="${escapeHtml(formattaDataItaliana(c.dataRicontatto) || '')}" oninput="mascheraDataInput(this)" onchange="salvaDataRicontatto(this,'${escapeJs(c._key)}')"></td>
       <td><button class="btn-esiti" id="esiti-btn-${hid}" onclick="toggleEsitiPanel('${escapeJs(c._key)}')">${nEsiti > 0 ? 'Esiti (' + nEsiti + ')' : 'Esiti'}</button></td>
       ${mostraAzioni && puoVedereCampiMarketing() ? `<td>
         <select class="td-campagna-select" onchange="aggiornaCampoRiga('${escapeJs(c._key)}','campagnaMarketing',this.value)">
@@ -3750,7 +3840,7 @@ function creaRigaHtml(c, mostraAzioni) {
       </td>` : ''}
     </tr>
     <tr id="esiti-row-${hid}" style="display:none;">
-      <td colspan="${mostraAzioni ? (13 + (puoVedereCampiMarketing() ? 2 : 0)) : 12}" class="esiti-panel-td">
+      <td colspan="${mostraAzioni ? (14 + (puoVedereCampiMarketing() ? 2 : 0)) : 13}" class="esiti-panel-td">
         <div class="esiti-panel">
           <div>
             <div class="esiti-panel-label">Storico esiti</div>
@@ -3806,7 +3896,8 @@ function creaRigaSocioHtml(s) {
   const socioHid = 'socio_' + s.id;
   const storicoHtml = renderStoricoEsitiSocioHtml(esiti, s.id, puoModificare);
 
-  let cellStato, cellFase, cellData, cellEsiti;
+  let cellStato, cellFase, cellData, cellRicontatto, cellEsiti;
+  const classeRic = classeRicontatto(s.dataRicontatto);
 
   if (puoModificare) {
     const opzStato = ['<option value="">—</option>'].concat(
@@ -3825,12 +3916,19 @@ function creaRigaSocioHtml(s) {
     cellData  = '<input type="text" class="td-date-input" placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10"'
       + ' value="' + escapeHtml(formattaDataItaliana(s.ultimoContatto) || '') + '"'
       + ' oninput="mascheraDataInput(this)" onchange="salvaDataContattoSocio(this,\'' + escapeJs(s.id) + '\')">';
+    cellRicontatto = '<input type="text" class="td-date-input ' + classeRic + '" title="' + escapeHtml(titoloRicontatto(s.dataRicontatto)) + '"'
+      + ' placeholder="gg/mm/aaaa" inputmode="numeric" maxlength="10"'
+      + ' value="' + escapeHtml(formattaDataItaliana(s.dataRicontatto) || '') + '"'
+      + ' oninput="mascheraDataInput(this)" onchange="salvaDataRicontattoSocio(this,\'' + escapeJs(s.id) + '\')">';
     cellEsiti = '<button class="btn-esiti" id="esiti-socio-btn-' + socioHid + '" onclick="toggleEsitiPanelSocio(\'' + escapeJs(s.id) + '\')">'
       + (nEsiti > 0 ? 'Esiti (' + nEsiti + ')' : 'Esiti') + '</button>';
   } else {
     cellStato = escapeHtml(s.stato) || '—';
     cellFase  = escapeHtml(s.faseCliente) || '—';
     cellData  = escapeHtml(formattaDataItaliana(s.ultimoContatto)) || '—';
+    cellRicontatto = s.dataRicontatto
+      ? '<span class="td-ricontatto-testo ' + classeRic + '" title="' + escapeHtml(titoloRicontatto(s.dataRicontatto)) + '">' + escapeHtml(formattaDataItaliana(s.dataRicontatto)) + '</span>'
+      : '—';
     /* Storico in sola lettura se ci sono esiti (bottone toggle, niente form salva) */
     cellEsiti = nEsiti > 0
       ? '<button class="btn-esiti" id="esiti-socio-btn-' + socioHid + '" onclick="toggleEsitiPanelSocio(\'' + escapeJs(s.id) + '\')">Esiti (' + nEsiti + ')</button>'
@@ -3852,7 +3950,7 @@ function creaRigaSocioHtml(s) {
   }
 
   /* Colspan identico a quello usato per i Contatti in BBC mode */
-  const colspan = 13 + (puoVedereCampiMarketing() ? 2 : 0);
+  const colspan = 14 + (puoVedereCampiMarketing() ? 2 : 0);
 
   /* Riga pannello esiti (sempre presente per permettere toggle) */
   const esitiPanel = '<tr id="esiti-row-socio-' + escapeHtml(s.id) + '" style="display:none;">'
@@ -3886,6 +3984,7 @@ function creaRigaSocioHtml(s) {
     + '<td>' + cellStato + '</td>'
     + '<td>' + cellFase + '</td>'
     + '<td>' + cellData + '</td>'
+    + '<td>' + cellRicontatto + '</td>'
     + '<td>' + cellEsiti + '</td>'
     + mktCols
     + '<td>' + btnModifica + '</td>'
@@ -4034,8 +4133,10 @@ function renderDatabase() {
   const body = document.getElementById('databaseBody');
   const emptyState = document.getElementById('databaseEmptyState');
   // In BBC mode: mostra anche i Soci BBC come righe aggiuntive read-only (Point 3)
+  const ordine = document.getElementById('dbOrdina') ? document.getElementById('dbOrdina').value : '';
   let sociDbHtml = '';
   let sociDbCount = 0;
+  let sociDbOrdinabili = [];
   if (sezioneCorrente === 'bbc') {
     const sociVisibili = puoVedereTuttiSociEdEventiBbc()
       ? bbcSoci
@@ -4051,7 +4152,8 @@ function renderDatabase() {
     // I Soci non hanno provincia/comune né la spunta "cliente attivo": con quei filtri attivi non vanno mostrati
     if (filtroProvincia || filtroComune || filtroSoloAttiviDb) sociDb = [];
     sociDbCount = sociDb.length;
-    if (sociDbCount) {
+    sociDbOrdinabili = sociDb;
+    if (sociDbCount && !ordine) {
       sociDbHtml = sociDb.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '')).map(s => creaRigaSocioHtml(s)).join('');
     }
     const totaleBbc = righe.length + sociDbCount;
@@ -4065,7 +4167,14 @@ function renderDatabase() {
     return;
   }
   emptyState.style.display = 'none';
-  body.innerHTML = righe.map(c => creaRigaHtml(c, sezioneCorrente === 'bbc')).join('') + sociDbHtml;
+  if (ordine) {
+    // Con un ordinamento attivo contatti e soci vengono mescolati secondo la data di ricontatto
+    const elementi = righe.map(c => ({ data: c.dataRicontatto, html: () => creaRigaHtml(c, sezioneCorrente === 'bbc') }))
+      .concat(sociDbOrdinabili.map(s => ({ data: s.dataRicontatto, html: () => creaRigaSocioHtml(s) })));
+    body.innerHTML = ordinaPerRicontatto(elementi, e => e.data, ordine).map(e => e.html()).join('');
+  } else {
+    body.innerHTML = righe.map(c => creaRigaHtml(c, sezioneCorrente === 'bbc')).join('') + sociDbHtml;
+  }
   aggiornaDbScrollSlider();
 }
 
@@ -4233,6 +4342,7 @@ async function aggiungiUtente() {
     return;
   }
   await _fbSecondaryAuth.signOut();
+  await abilitaAccessoOsm(email);
 
   // In Firestore si salva solo il ruolo/nome/uid: la password NON viene più scritta qui.
   const nuovo = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), uid: cred.user.uid, nome, email, ruolo, dvAssegnato };
@@ -4287,6 +4397,7 @@ async function migraUtenteAdAuth(id) {
   try {
     const cred = await _fbSecondaryAuth.createUserWithEmailAndPassword(u.email, u.password);
     await _fbSecondaryAuth.signOut();
+    await abilitaAccessoOsm(u.email);
     u.uid = cred.user.uid;
     delete u.password;
     await salvaUtenti(utenti);
@@ -4294,6 +4405,17 @@ async function migraUtenteAdAuth(id) {
     showToast('Account migrato: ' + u.nome + ' può continuare ad accedere con la stessa password di prima');
   } catch(e) {
     showToast(messaggioErroreAuth(e));
+  }
+}
+
+/* Elenco delle email autorizzate a usare i dati dei portali OSM (accesso-osm/elenco), condiviso
+   con tutti gli altri portali: le regole di sicurezza del database fanno entrare solo chi è
+   in questo elenco (avere un account Firebase non basta, chiunque può crearsene uno). */
+async function abilitaAccessoOsm(email) {
+  try {
+    await db.collection('accesso-osm').doc('elenco').set({ utenti: { [(email || '').toLowerCase()]: true } }, { merge: true });
+  } catch (e) {
+    console.error('[Clienti Fermi] Errore aggiornamento elenco accessi OSM:', e);
   }
 }
 
@@ -4977,7 +5099,7 @@ async function elaboraTestoCsv(testo) {
   const nuoviDocIds = new Set(righeGrezze.map(r => sanitizeDocId(r._key)));
   const obsoleti = Object.keys(esistentiPerId).filter(id => !nuoviDocIds.has(id));
   const haDatiDelPortale = d => (Array.isArray(d.esiti) && d.esiti.length > 0) || !!d.consulente || !!d.stato
-    || !!d.faseCliente || !!d.ultimoContatto || d.clienteAttivo === true || !!d.campagnaMarketing || !!d.valoreEuro;
+    || !!d.faseCliente || !!d.ultimoContatto || !!d.dataRicontatto || d.clienteAttivo === true || !!d.campagnaMarketing || !!d.valoreEuro;
 
   // Punto 3: abbina i clienti "nuovi" ai vecchi documenti con dati del portale che stanno per sparire
   const obsoletiConDati = obsoleti.filter(id => haDatiDelPortale(esistentiPerId[id]));
@@ -5944,16 +6066,16 @@ function esportaTuttiSociBbc() {
 
 /* Export tutti (soci + contatti) nella Database BBC */
 function esportaTuttiBbcDatabase() {
-  const header = ['Nome / Referente', 'Azienda / Rag.Soc.', 'Telefono', 'Email', 'Tipo', 'Consulente Assegnato'];
+  const header = ['Nome / Referente', 'Azienda / Rag.Soc.', 'Telefono', 'Email', 'Tipo', 'Consulente Assegnato', 'Da Ricontattare'];
   const righe = [];
   /* Contatti */
   const contattiVis = applicaVisibilitaRuolo(bbcContatti);
   contattiVis.forEach(c => {
-    righe.push([c.referente || '', c.ragioneSociale || '', c.contatto || '', c.email || '', 'Lead/Contatto', c.consulente || '']);
+    righe.push([c.referente || '', c.ragioneSociale || '', c.contatto || '', c.email || '', 'Lead/Contatto', c.consulente || '', formattaDataItaliana(c.dataRicontatto) || '']);
   });
   /* Soci */
   vediTuttiSociBbcPerExport().forEach(s => {
-    righe.push([s.nome || '', s.azienda || '', s.telefono || '', s.email || '', 'Socio', s.consulente || '']);
+    righe.push([s.nome || '', s.azienda || '', s.telefono || '', s.email || '', 'Socio', s.consulente || '', formattaDataItaliana(s.dataRicontatto) || '']);
   });
   if (!righe.length) { showToast('Nessun record da esportare.'); return; }
   righe.sort((a, b) => (a[0] || '').localeCompare(b[0] || ''));
